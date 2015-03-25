@@ -82,7 +82,7 @@ Parses the command according to the following rules:
         sphere: adds a sphere to the edge matrix -
             takes 5 parameters (x, y, z, radius, step size)
         torus: adds a torus to the edge matrix -
-            takes 6 parameters (x, y, z, circleRadius, torusRadius, step size)
+            takes 6 parameters (x, y, z, circle_radius, torus_radius, step size)
         p: print the transformation matrix to stdout
         pp: print the point matrix to stdout
         cartesian: set plotting mode to Cartesian
