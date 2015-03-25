@@ -1,10 +1,26 @@
 #include "display.h"
 
 screen new_screen() {
-    screen s = (struct point_t **) malloc(sizeof(struct point_t *) * XRES);
+    void *ptr;
+    screen s;
     int i;
+    ptr = malloc(sizeof(struct point_t *) * XRES);
+    if (ptr != NULL) {
+        s = (struct point_t **) ptr;
+    }
+    else {
+        print_error("Memory allocation error.");
+        exit(EXIT_FAILURE);
+    }
     for (i = 0; i < XRES; ++i) {
-        s[i] = (struct point_t *) calloc(YRES, sizeof(struct point_t));
+        ptr = calloc(YRES, sizeof(struct point_t));
+        if (ptr != NULL) {
+            s[i] = (struct point_t *) ptr;
+        }
+        else {
+            print_error("Memory allocation error.");
+            exit(EXIT_FAILURE);
+        }
     }
     return s;
 }
@@ -76,7 +92,7 @@ void save_ppm(screen s, char *file) {
     f = fopen(file, "w");
     if (f == NULL) {
         print_error("Could not open file for writing.");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     fprintf(f, "P3\n%d %d\n%d\n", XRES, YRES, MAX_COLOR);
     for (y=0; y < YRES; ++y) {
@@ -101,7 +117,7 @@ void save_extension(screen s, char *file) {
     f = popen(line, "w");
     if (f == NULL) {
         print_error("Could not open file for writing.");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     fprintf(f, "P3\n%d %d\n%d\n", XRES, YRES, MAX_COLOR);
     for (y=0; y < YRES; ++y) {
@@ -122,7 +138,7 @@ void display(screen s) {
     f = popen("display", "w");
     if (f == NULL) {
         print_error("Could not open file for writing.");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     fprintf(f, "P3\n%d %d\n%d\n", XRES, YRES, MAX_COLOR);

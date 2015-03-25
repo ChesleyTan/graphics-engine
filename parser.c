@@ -16,7 +16,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 6) {
             print_error("Invalid arguments for line command: \"%s\"", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -37,7 +37,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 3) {
             print_error("Invalid arguments for scale command: %s", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -301,7 +301,6 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         #endif
         double x, y, z, radius, step;
         int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf", &x, &y, &z, &radius, &step);
-        printf("x: %lf; y: %lf; z: %lf\n", x, y, z);
         if (retVal != 5) {
             print_error("Invalid arguments for draw sphere command: \"%s\"", line_buf);
             if (error_is_fatal) {
