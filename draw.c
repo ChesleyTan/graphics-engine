@@ -188,6 +188,116 @@ void add_bezier_curve(struct matrix *points,
     free_matrix(y_coeff);
 }
 
+void add_prism(struct matrix *points,
+               double x,
+               double y,
+               double z,
+               double width,
+               double height,
+               double depth) {
+    /* x, y, and z are the coordinates of the upper-left corner of the
+     * front face of the rectangular prism, with width, height, and depth
+     * corresponding to the x, y, and z coordinates respectively.
+     */
+    add_edge(points, x, y, z, x, y, z);
+    add_edge(points, x + width, y, z, x + width, y, z);
+    add_edge(points, x + width, y - height, z, x + width, y - height, z);
+    add_edge(points, x, y - height, z, x, y - height, z);
+    add_edge(points, x, y, z - depth, x, y, z - depth);
+    add_edge(points, x + width, y, z - depth, x + width, y, z - depth);
+    add_edge(points, x + width, y - height, z - depth, x + width, y - height, z - depth);
+    add_edge(points, x, y - height, z - depth, x, y - height, z - depth);
+}
+
+void add_sphere(struct matrix *points,
+                double step,
+                double x,
+                double y,
+                double z,
+                double radius) {
+    /*
+    | 1     0    0     1 || rcos(Θ) |   |    rcos(Θ)    |
+    | 1 cos(φ) -sin(φ) 0 || rsin(Θ) |   | rsin(Θ)cos(φ) |
+    | 0 sin(φ)  cos(φ) 0 ||    0    | = | rsin(Θ)sin(φ) |
+    | 0    0     0     1 ||    1    |   |       1       |
+          x-rotation     Circle points    Sphere points
+    where:
+        Θ is the angle for generating the circle
+        φ is the angle for generating the sphere
+        r is the radius of the sphere
+    */
+    // Ensure that step size is greater than the minimum step size
+    if (step < MIN_STEP_SIZE) {
+        step = MIN_STEP_SIZE;
+    }
+    double old_x = x + radius; // rcos(0) = r
+    double old_y = y;          // rsin(0)cos(0) = 0
+    double old_z = z;          // rsin(0)sin(0) = 0
+    double t, s;
+    for (t = 0; t < 2 + step; t += step) {
+        double theta_rad = M_PI * (t + step);
+        double r_cos_theta = radius * cos(theta_rad);
+        double r_sin_theta = radius * sin(theta_rad);
+        for (s = 0; s < 1 + step; s += step) {
+            double phi_rad = M_PI * (s + step);
+            double new_x = x + r_cos_theta;
+            double new_y = y + r_sin_theta * cos(phi_rad);
+            double new_z = z + r_sin_theta * sin(phi_rad);
+            //add_edge(points, old_x, old_y, old_z, new_x, new_y, new_z);
+            add_edge(points, old_x, old_y, old_z, old_x, old_y, old_z);
+            old_x = new_x;
+            old_y = new_y;
+            old_z = new_z;
+        }
+    }
+}
+
+void add_torus(struct matrix *points,
+               double step,
+               double x,
+               double y,
+               double z,
+               double circle_radius,
+               double torus_radius) {
+    /*
+    | cos(φ) 0 -sin(φ) 0 || rcos(Θ) + R |   | cos(φ) * (rcos(Θ) + R) |
+    | 0    1     0     0 ||   rsin(Θ)   |   |         rsin(Θ)        |
+    | sin(φ) 0 cos(φ)  0 ||      0      | = |  -sin(φ)(rcos(Θ) + R)  |
+    | 0    0     0     1 ||      1      |   |            1           |
+          y-rotation       Circle points           Sphere points
+                           + translation
+    where:
+        Θ is the angle for generating the circle
+        φ is the angle for generating the torus
+        r is the radius of the circle
+        R is the radius of the torus
+    */
+    // Ensure that step size is greater than the minimum step size
+    if (step < MIN_STEP_SIZE) {
+        step = MIN_STEP_SIZE;
+    }
+    double old_x = x + circle_radius + torus_radius; // cos(0) * (rcos(0) + R) = r + R
+    double old_y = y;                                // rsin(0) = 0
+    double old_z = z;                                // -sin(0)(rcos(0) + R) = 0
+    double t, s;
+    for (t = 0; t < 2 + step; t += step) {
+        double theta_rad = M_PI * (t + step);
+        double circle_radius_cos_theta = circle_radius * cos(theta_rad);
+        double circle_radius_sin_theta = circle_radius * sin(theta_rad);
+        for (s = 0; s < 2 + step; s += step) {
+            double phi_rad = M_PI * (s + step);
+            double new_x = x + cos(phi_rad) * (circle_radius_cos_theta + torus_radius);
+            double new_y = y + circle_radius_sin_theta;
+            double new_z = z - sin(phi_rad) * (circle_radius_cos_theta + torus_radius);
+            //add_edge(points, old_x, old_y, old_z, new_x, new_y, new_z);
+            add_edge(points, old_x, old_y, old_z, old_x, old_y, old_z);
+            old_x = new_x;
+            old_y = new_y;
+            old_z = new_z;
+        }
+    }
+}
+
 void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
                plotting_mode plot_mode) {
     // Ensure that x values are increasing (or equal), for simplification
@@ -372,116 +482,6 @@ void draw_axes(screen s, color c) {
     }
     for (i = -1 * YRES_CARTESIAN; i < YRES_CARTESIAN; ++i) {
         plot_cartesian(s, c, 0, i);
-    }
-}
-
-void add_prism(struct matrix *points,
-               double x,
-               double y,
-               double z,
-               double width,
-               double height,
-               double depth) {
-    /* x, y, and z are the coordinates of the upper-left corner of the
-     * front face of the rectangular prism, with width, height, and depth
-     * corresponding to the x, y, and z coordinates respectively.
-     */
-    add_edge(points, x, y, z, x, y, z);
-    add_edge(points, x + width, y, z, x + width, y, z);
-    add_edge(points, x + width, y - height, z, x + width, y - height, z);
-    add_edge(points, x, y - height, z, x, y - height, z);
-    add_edge(points, x, y, z - depth, x, y, z - depth);
-    add_edge(points, x + width, y, z - depth, x + width, y, z - depth);
-    add_edge(points, x + width, y - height, z - depth, x + width, y - height, z - depth);
-    add_edge(points, x, y - height, z - depth, x, y - height, z - depth);
-}
-
-void add_sphere(struct matrix *points,
-                double step,
-                double x,
-                double y,
-                double z,
-                double radius) {
-    /*
-    | 1     0    0     1 || rcos(Θ) |   |    rcos(Θ)    |
-    | 1 cos(φ) -sin(φ) 0 || rsin(Θ) |   | rsin(Θ)cos(φ) |
-    | 0 sin(φ)  cos(φ) 0 ||    0    | = | rsin(Θ)sin(φ) |
-    | 0    0     0     1 ||    1    |   |       1       |
-          x-rotation     Circle points    Sphere points
-    where:
-        Θ is the angle for generating the circle
-        φ is the angle for generating the sphere
-        r is the radius of the sphere
-    */
-    // Ensure that step size is greater than the minimum step size
-    if (step < MIN_STEP_SIZE) {
-        step = MIN_STEP_SIZE;
-    }
-    double old_x = x + radius; // rcos(0) = r
-    double old_y = y;          // rsin(0)cos(0) = 0
-    double old_z = z;          // rsin(0)sin(0) = 0
-    double t, s;
-    for (t = 0; t < 2 + step; t += step) {
-        double theta_rad = M_PI * (t + step);
-        double r_cos_theta = radius * cos(theta_rad);
-        double r_sin_theta = radius * sin(theta_rad);
-        for (s = 0; s < 1 + step; s += step) {
-            double phi_rad = M_PI * (s + step);
-            double new_x = x + r_cos_theta;
-            double new_y = y + r_sin_theta * cos(phi_rad);
-            double new_z = z + r_sin_theta * sin(phi_rad);
-            //add_edge(points, old_x, old_y, old_z, new_x, new_y, new_z);
-            add_edge(points, old_x, old_y, old_z, old_x, old_y, old_z);
-            old_x = new_x;
-            old_y = new_y;
-            old_z = new_z;
-        }
-    }
-}
-
-void add_torus(struct matrix *points,
-               double step,
-               double x,
-               double y,
-               double z,
-               double circle_radius,
-               double torus_radius) {
-    /*
-    | cos(φ) 0 -sin(φ) 0 || rcos(Θ) + R |   | cos(φ) * (rcos(Θ) + R) |
-    | 0    1     0     0 ||   rsin(Θ)   |   |         rsin(Θ)        |
-    | sin(φ) 0 cos(φ)  0 ||      0      | = |  -sin(φ)(rcos(Θ) + R)  |
-    | 0    0     0     1 ||      1      |   |            1           |
-          y-rotation       Circle points           Sphere points     
-                           + translation
-    where: 
-        Θ is the angle for generating the circle
-        φ is the angle for generating the torus
-        r is the radius of the circle
-        R is the radius of the torus
-    */
-    // Ensure that step size is greater than the minimum step size
-    if (step < MIN_STEP_SIZE) {
-        step = MIN_STEP_SIZE;
-    }
-    double old_x = x + circle_radius + torus_radius; // cos(0) * (rcos(0) + R) = r + R
-    double old_y = y;                                // rsin(0) = 0
-    double old_z = z;                                // -sin(0)(rcos(0) + R) = 0
-    double t, s;
-    for (t = 0; t < 2 + step; t += step) {
-        double theta_rad = M_PI * (t + step);
-        double circle_radius_cos_theta = circle_radius * cos(theta_rad);
-        double circle_radius_sin_theta = circle_radius * sin(theta_rad);
-        for (s = 0; s < 2 + step; s += step) {
-            double phi_rad = M_PI * (s + step);
-            double new_x = x + cos(phi_rad) * (circle_radius_cos_theta + torus_radius);
-            double new_y = y + circle_radius_sin_theta;
-            double new_z = z - sin(phi_rad) * (circle_radius_cos_theta + torus_radius);
-            //add_edge(points, old_x, old_y, old_z, new_x, new_y, new_z);
-            add_edge(points, old_x, old_y, old_z, old_x, old_y, old_z);
-            old_x = new_x;
-            old_y = new_y;
-            old_z = new_z;
-        }
     }
 }
 

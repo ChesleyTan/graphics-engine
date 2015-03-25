@@ -77,13 +77,6 @@ Parses the command according to the following rules:
             takes 8 arguments (x0, y0, x1, y1, x2, y2, x3, y3)
         b: add a bezier curve to the edge matrix -
             takes 8 arguments (x0, y0, x1, y1, x2, y2, x3, y3)
-        v: draw the lines of the edge matrix to the screen display the screen
-        f: save the screen to a file -
-            takes 1 argument (file name)
-        g: draw the lines of the edge matrix to the screen,
-            save the screen to a file -
-            takes 1 argument (file name)
-        clear: clears the edge matrix of all points
         prism: adds a rectangular prism to the edge matrix -
             takes 6 parameters (x, y, z, width, height, depth)
         sphere: adds a sphere to the edge matrix -
@@ -94,6 +87,13 @@ Parses the command according to the following rules:
         pp: print the point matrix to stdout
         cartesian: set plotting mode to Cartesian
         absolute: set plotting mode to absolute
+        clear: clears the edge matrix of all points
+        v: draw the lines of the edge matrix to the screen display the screen
+        f: save the screen to a file -
+            takes 1 argument (file name)
+        g: draw the lines of the edge matrix to the screen,
+            save the screen to a file -
+            takes 1 argument (file name)
         q: end parsing (from script file only)
 
 The value of the error_is_fatal argument determines if the program should exit on error.

@@ -125,43 +125,6 @@ void add_bezier_curve(struct matrix *points,
                       double x2, double y2,
                       double x3, double y3);
 
-/*======== void draw_line() ==========
-Inputs:     screen s
-            color c
-            double x0
-            double y0
-            double x1
-            double y1
-            plotting_mode plot_mode
-Returns:
-Plots all the points necessary to draw line (x0, y0) - (x1, y1) onto
-screen c using color c.
-The plotting mode determines the coordinate system to be used when plotting points.
-====================================*/
-void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
-               plotting_mode plot_mode);
-
-/*======== void draw_lines() ==========
-Inputs:     screen s
-            color c
-            struct matrix * points
-            plotting_mode plot_mode
-Returns:
-Iterates through points 2 at a time and calls draw_line() to add that line
-to the screen.
-The plotting mode determines the coordinate system to be used when plotting points.
-=====================================*/
-void draw_lines(screen s, color c, struct matrix * points, plotting_mode plot_mode);
-
-/*======== void draw_axes() ==========
-Inputs:     screen s
-            color c
-Returns:
-Plots all the points necessary to draw the x- and y-axes in
-the Cartesian coordinate plane
-====================================*/
-void draw_axes(screen s, color c);
-
 /*======== void add_prism() ==========
 Inputs:     struct matrix *points,
             double x,
@@ -221,6 +184,43 @@ void add_torus(struct matrix *points,
                double z,
                double circle_radius,
                double torus_radius);
+
+/*======== void draw_line() ==========
+Inputs:     screen s
+            color c
+            double x0
+            double y0
+            double x1
+            double y1
+            plotting_mode plot_mode
+Returns:
+Plots all the points necessary to draw line (x0, y0) - (x1, y1) onto
+screen c using color c.
+The plotting mode determines the coordinate system to be used when plotting points.
+====================================*/
+void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
+               plotting_mode plot_mode);
+
+/*======== void draw_lines() ==========
+Inputs:     screen s
+            color c
+            struct matrix * points
+            plotting_mode plot_mode
+Returns:
+Iterates through points 2 at a time and calls draw_line() to add that line
+to the screen.
+The plotting mode determines the coordinate system to be used when plotting points.
+=====================================*/
+void draw_lines(screen s, color c, struct matrix * points, plotting_mode plot_mode);
+
+/*======== void draw_axes() ==========
+Inputs:     screen s
+            color c
+Returns:
+Plots all the points necessary to draw the x- and y-axes in
+the Cartesian coordinate plane
+====================================*/
+void draw_axes(screen s, color c);
 
 #endif
 // vim: ts=4:et:sts:sw=4:sr
