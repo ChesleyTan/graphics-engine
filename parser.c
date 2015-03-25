@@ -135,16 +135,16 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         #ifdef DEBUG
         print_debug("Got circle command");
         #endif
-        double cx, cy, r;
-        int retVal = sscanf(line_buf, "%*s %lf %lf %lf", &cx, &cy, &r);
-        if (retVal != 3) {
+        double cx, cy, cz, r;
+        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf", &cx, &cy, &cz, &r);
+        if (retVal != 4) {
             print_error("Invalid arguments for circle command: \"%s\"", line_buf);
             if (error_is_fatal) {
                 exit(1);
             }
             return;
         }
-        add_circle(global_pts, cx, cy, r, STEP_SIZE);
+        add_circle(global_pts, cx, cy, cz, r, STEP_SIZE);
     }
     else if (strcmp(cmd, HERMITE_CURVE_CMD) == 0) {
         #ifdef DEBUG

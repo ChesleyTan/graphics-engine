@@ -54,14 +54,15 @@ void add_edge(struct matrix * points,
 
 /*======== void add_circle() ==========
 Inputs:     struct matrix *points
-            double cx, double cy, double r, double step
+            double cx, double cy, double cz, double r, double step
 Returns:
-Add the circle centered at (cx, cy) with radius r to points, using a step size
-defined by the step parameter.
+Add the circle centered at (cx, cy, cz) with radius r to points, using the step
+size defined by the step parameter.
 ===================================*/
 void add_circle(struct matrix *points,
                 double cx,
                 double cy,
+                double cz,
                 double r,
                 double step);
 

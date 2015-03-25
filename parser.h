@@ -72,7 +72,7 @@ Parses the command according to the following rules:
             takes 1 argument (theta)
         a: apply the current transformation matrix to the edge matrix
         c: add a circle to the edge matrix -
-            takes 3 arguments (cx, cy, r)
+            takes 4 arguments (cx, cy, cz, r)
         h: add a hermite curve to the edge matrix -
             takes 8 arguments (x0, y0, x1, y1, x2, y2, x3, y3)
         b: add a bezier curve to the edge matrix -

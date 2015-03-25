@@ -23,6 +23,7 @@ void add_edge(struct matrix * points,
 void add_circle(struct matrix *points,
                 double cx,
                 double cy,
+                double cz,
                 double r,
                 double step) {
     double t;
@@ -34,7 +35,7 @@ void add_circle(struct matrix *points,
         double rad = M_PI * (t + step);
         new_x = cx + r * cos(rad);
         new_y = cy + r * sin(rad);
-        add_edge(points, old_x, old_y, 0, new_x, new_y, 0);
+        add_edge(points, old_x, old_y, cz, new_x, new_y, cz);
         old_x = new_x;
         old_y = new_y;
     }
@@ -389,10 +390,10 @@ void add_prism(struct matrix *points,
     add_edge(points, x + width, y, z, x + width, y, z);
     add_edge(points, x + width, y - height, z, x + width, y - height, z);
     add_edge(points, x, y - height, z, x, y - height, z);
-    add_edge(points, x, y, z + depth, x, y, z + depth);
-    add_edge(points, x + width, y, z + depth, x + width, y, z + depth);
-    add_edge(points, x + width, y - height, z + depth, x + width, y - height, z + depth);
-    add_edge(points, x, y - height, z + depth, x, y - height, z + depth);
+    add_edge(points, x, y, z - depth, x, y, z - depth);
+    add_edge(points, x + width, y, z - depth, x + width, y, z - depth);
+    add_edge(points, x + width, y - height, z - depth, x + width, y - height, z - depth);
+    add_edge(points, x, y - height, z - depth, x, y - height, z - depth);
 }
 
 void add_sphere(struct matrix *points,
