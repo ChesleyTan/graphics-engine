@@ -45,7 +45,6 @@ void free_matrix(struct matrix *m) {
         }
         free(m->m);
         free(m);
-        m = NULL;
     }
 }
 

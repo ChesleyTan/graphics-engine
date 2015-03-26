@@ -29,12 +29,10 @@ void add_circle(struct matrix *points,
     double t;
     double old_x = cx + r; // r*cos(0) is r
     double old_y = cy + 0; // r*sin(0) is 0
-    double new_x;
-    double new_y;
     for (t = 0; t < 2 + step; t += step) {
         double rad = M_PI * (t + step);
-        new_x = cx + r * cos(rad);
-        new_y = cy + r * sin(rad);
+        double new_x = cx + r * cos(rad);
+        double new_y = cy + r * sin(rad);
         add_edge(points, old_x, old_y, cz, new_x, new_y, cz);
         old_x = new_x;
         old_y = new_y;
@@ -111,14 +109,12 @@ void add_hermite_curve(struct matrix *points,
     double t;
     double old_x = x0;
     double old_y = y0;
-    double new_x;
-    double new_y;
     for (t = 0; t < 1 + step; t += step) {
         double t_squared = t * t;
         double t_cubed = t_squared * t;
         // Calculate new x and y coordinates using at^3 + bt^2 + ct + d
-        new_x = x_a * t_cubed + x_b * t_squared + x_c * t + x_d;
-        new_y = y_a * t_cubed + y_b * t_squared + y_c * t + y_d;
+        double new_x = x_a * t_cubed + x_b * t_squared + x_c * t + x_d;
+        double new_y = y_a * t_cubed + y_b * t_squared + y_c * t + y_d;
         add_edge(points, old_x, old_y, 0, new_x, new_y, 0);
         old_x = new_x;
         old_y = new_y;
@@ -172,14 +168,12 @@ void add_bezier_curve(struct matrix *points,
     double t;
     double old_x = x0;
     double old_y = y0;
-    double new_x;
-    double new_y;
     for (t = 0; t < 1 + step; t += step) {
         double t_squared = t * t;
         double t_cubed = t_squared * t;
         // Calculate new x and y coordinates using at^3 + bt^2 + ct + d
-        new_x = x_a * t_cubed + x_b * t_squared + x_c * t + x_d;
-        new_y = y_a * t_cubed + y_b * t_squared + y_c * t + y_d;
+        double new_x = x_a * t_cubed + x_b * t_squared + x_c * t + x_d;
+        double new_y = y_a * t_cubed + y_b * t_squared + y_c * t + y_d;
         add_edge(points, old_x, old_y, 0, new_x, new_y, 0);
         old_x = new_x;
         old_y = new_y;
@@ -301,9 +295,9 @@ void add_torus(struct matrix *points,
 void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
                plotting_mode plot_mode) {
     // Ensure that x values are increasing (or equal), for simplification
-    double tmp;
     if (x0 > x1) {
         // Swap points if necessary
+        double tmp;
         tmp = x0;
         x0 = x1;
         x1 = tmp;

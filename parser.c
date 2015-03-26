@@ -365,7 +365,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         print_error("Invalid command on line %d: \"%s\"", line_no, cmd);
         // Skip next line by consuming it with fgetc() up to the next
         // newline
-        char c;
+        int c;
         do {
             c = fgetc(global_file);
         }

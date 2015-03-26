@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
             close(pipes[1]);
             close(history_pipes[1]);
             // Read user input for adding to history
-            int bytes = read(history_pipes[0], input, INPUT_BUF_SIZE);
+            read(history_pipes[0], input, INPUT_BUF_SIZE);
             close(history_pipes[0]);
             // Add the input to readline's history
             add_history(input);

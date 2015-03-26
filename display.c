@@ -47,7 +47,6 @@ void free_screen(screen s) {
             free(s[i]);
         }
         free(s);
-        s = NULL;
     }
 }
 
