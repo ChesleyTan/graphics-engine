@@ -15,19 +15,19 @@ struct matrix *new_matrix(int rows, int cols) {
     tmp = (double **) malloc(rows * sizeof(double *));
     if (tmp == NULL) {
         print_error("Memory allocation error.");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     for (i = 0; i < rows; ++i) {
         tmp[i] = (double *) calloc(cols, sizeof(double));
         if (tmp[i] == NULL) {
             print_error("Memory allocation error.");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
     }
     m = (struct matrix *) malloc(sizeof(struct matrix));
     if (m == NULL) {
         print_error("Memory allocation error.");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     m->m = tmp;
     m->rows = rows;
@@ -58,7 +58,7 @@ void grow_matrix(struct matrix *m, int newcols) {
         }
         else {
             print_error("Memory reallocation error.");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
     }
     m->cols = newcols;
@@ -118,7 +118,7 @@ struct matrix *matrix_mult(struct matrix *a, struct matrix *b) {
         print_error("Column-row number mismatch in matrix multiplication: "
                     "(%d x %d) * (%d x %d)",
                     a->rows, a->lastcol, b->rows, b->lastcol);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     struct matrix *m = new_matrix(a->rows, b->cols);
     m->lastcol = b->lastcol;

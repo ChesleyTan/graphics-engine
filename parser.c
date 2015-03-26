@@ -56,7 +56,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 3) {
             print_error("Invalid arguments for translate command: \"%s\"", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -75,7 +75,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 1) {
             print_error("Invalid arguments for x rotate command: %s", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -94,7 +94,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 1) {
             print_error("Invalid arguments for y rotate command: \"%s\"", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -113,7 +113,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 1) {
             print_error("Invalid arguments for z rotate command: \"%s\"", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -140,7 +140,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 4) {
             print_error("Invalid arguments for circle command: \"%s\"", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -155,7 +155,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 8) {
             print_error("Invalid arguments for Hermite curve command: \"%s\"", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -170,7 +170,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 8) {
             print_error("Invalid arguments for Bezier curve command: \"%s\"", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -228,7 +228,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         else {
             print_error("No filename was given to save the image to.");
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -265,7 +265,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         else {
             print_error("No filename was given to save the image to.");
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -288,7 +288,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 6) {
             print_error("Invalid arguments for draw prism command: \"%s\"", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -304,7 +304,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 5) {
             print_error("Invalid arguments for draw sphere command: \"%s\"", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -321,7 +321,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         if (retVal != 6) {
             print_error("Invalid arguments for draw torus command: \"%s\"", line_buf);
             if (error_is_fatal) {
-                exit(1);
+                exit(EXIT_FAILURE);
             }
             return;
         }
@@ -359,7 +359,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         free_matrix(global_trans_mat);
         free_screen(global_s);
         fclose(global_file);
-        exit(0);
+        exit(EXIT_SUCCESS);
     }
     else {
         print_error("Invalid command on line %d: \"%s\"", line_no, cmd);
@@ -415,7 +415,7 @@ void synchronize_variables(FILE *file,
                         "Given: (%d x %d); Required: (4 x 4)",
                         trans_mat->rows,
                         trans_mat->cols);
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         global_trans_mat = trans_mat;
         ident(global_trans_mat);

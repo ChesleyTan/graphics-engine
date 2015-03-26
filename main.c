@@ -3,7 +3,7 @@
 static void sighandler(int signo) {
     if (signo == SIGINT) {
         free_variables();
-        exit(0);
+        exit(EXIT_SUCCESS);
     }
 }
 
@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
         FILE *file = fopen(argv[1], "r");
         if (file == NULL) {
             print_error("Could not open file for reading: %s", argv[1]);
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         struct matrix *mat = new_matrix(4, 1);
         screen s = new_screen();
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
         synchronize_variables(file, trans_mat, mat, s);
         parse_file(1);
         free_variables();
-        exit(0);
+        exit(EXIT_SUCCESS);
     }
 
     printf("Usage: ./main [script-file]\n");

@@ -36,11 +36,11 @@ int main(int argc, char *argv[]) {
     while(keep_alive) {
         if (pipe(pipes) < 0) {
             print_error("Could not open pipe for REPL.");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         if (pipe(history_pipes) < 0) {
             print_error("Could not open pipe for command history.");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         // Fork process for readline
         rl_child_pid = fork();
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
             // Close pipes before exiting
             close(pipes[1]);
             close(history_pipes[1]);
-            exit(0);
+            exit(EXIT_SUCCESS);
         }
         else {
             int status;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
                     clear_history();
                     // Free dynamically allocated memory
                     free_variables();
-                    exit(0);
+                    exit(EXIT_SUCCESS);
                 }
                 // Prepare for re-displaying prompt after Ctrl-c
                 else if (status == SIGINT_EXIT_CODE) {
