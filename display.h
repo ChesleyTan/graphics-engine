@@ -14,8 +14,8 @@
 
 #include "utils.h"
 
-#define XRES 1000
-#define YRES 1000
+#define XRES 1500
+#define YRES 1500
 #define XRES_CARTESIAN XRES / 2
 #define YRES_CARTESIAN YRES / 2
 #define MAX_COLOR 255
