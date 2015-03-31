@@ -258,7 +258,7 @@ void add_torus(struct matrix *points,
     | 0    1     0     0 ||   rsin(Θ)   |   |         rsin(Θ)        |
     | sin(φ) 0 cos(φ)  0 ||      0      | = |  -sin(φ)(rcos(Θ) + R)  |
     | 0    0     0     1 ||      1      |   |            1           |
-          y-rotation       Circle points           Sphere points
+          y-rotation       Circle points           Torus points
                            + translation
     where:
         Θ is the angle for generating the circle
