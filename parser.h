@@ -39,8 +39,12 @@ static const char *SPHERE_CMD = "sphere";
 static const char *TORUS_CMD = "torus";
 static const char *PRINT_TRANSFORMATION_MATRIX_CMD = "p";
 static const char *PRINT_POINT_MATRIX_CMD = "pp";
-static const char *USE_CARTESIAN_CMD = "cartesian";
-static const char *USE_ABSOLUTE_CMD = "absolute";
+static const char *PLOT_MODE_CMD = "plot-mode";
+static const char *CARTESIAN = "cartesian";
+static const char *ABSOLUTE = "absolute";
+static const char *DRAW_MODE_CMD = "draw-mode";
+static const char *LINE = "line";
+static const char *POLYGON = "polygon";
 static const char *QUIT_CMD = "q";
 
 /*======== void parse_input() ==========
@@ -85,9 +89,11 @@ Parses the command according to the following rules:
             takes 6 parameters (x, y, z, circle_radius, torus_radius, step size)
         p: print the transformation matrix to stdout
         pp: print the point matrix to stdout
-        cartesian: set plotting mode to Cartesian
-        absolute: set plotting mode to absolute
-        clear: clears the edge matrix of all points
+        plot-mode: set the plotting mode
+            takes 1 parameter (either "cartesian" or "absolute")
+        draw-mode: set the drawing mode
+            takes 1 parameter (either "line" or "absolute")
+        clear: clears the point matrix of all points
         v: draw the lines of the edge matrix to the screen display the screen
         f: save the screen to a file -
             takes 1 argument (file name)
@@ -136,4 +142,29 @@ This function is to be called after parsing is completed.
 =========================================*/
 void free_variables();
 
+/*======== void draw_axes_if_cartesian_mode() ==========
+Inputs:
+Returns:
+Draws the Cartesian axes if the global plotting mode (global_plot_mode) is set
+to Cartesian.
+=========================================*/
+void draw_axes_if_cartesian_mode();
+
+/*======== void draw() ==========
+Inputs:
+Returns:
+Draws the point matrix to the screen using the global drawing mode
+(global_draw_mode).
+===============================*/
+void draw();
+
+/*======== void save() ==========
+Inputs:     char *line_buf
+            int error_is_fatal
+Returns:
+Saves the generated image to the file specified in the arguments of line_buf.
+Returns -1 if no filename was found.
+Returns 0 otherwise.
+===============================*/
+int save(char *line_buf, int error_is_fatal);
 #endif

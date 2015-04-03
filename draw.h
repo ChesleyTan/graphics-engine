@@ -21,6 +21,12 @@ typedef enum {
     PLOT_ABSOLUTE
 } plotting_mode;
 
+/* enum for drawing mode for use in functions defined in draw.c */
+typedef enum {
+    DRAW_LINE,
+    DRAW_POLYGON
+} drawing_mode;
+
 /* enum for curve types passed into add_curve() */
 typedef enum {
     HERMITE_CURVE,
@@ -30,6 +36,10 @@ typedef enum {
 /* Plotting mode to be used by default globally.
  * This value may be set programmatically. */
 static plotting_mode global_plot_mode = PLOT_CARTESIAN;
+
+/* Plotting mode to be used by default globally.
+ * This value may be set programmatically. */
+static drawing_mode global_draw_mode = DRAW_LINE;
 
 /*======== void add_point() ==========
 Inputs:     struct matrix *points

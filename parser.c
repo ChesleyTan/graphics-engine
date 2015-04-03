@@ -181,22 +181,9 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         print_debug("Got view command");
         #endif
         // Draw image
-        color c;
         // First, draw the axes if plotting in Cartesian plane
-        if (global_plot_mode == PLOT_CARTESIAN) {
-            clear_screen(global_s);
-            c.red = 255;
-            c.blue = 0;
-            c.green = 0;
-            draw_axes(global_s, c);
-        }
-
-        c.red = 30;
-        c.blue = 100;
-        c.green = 155;
-        // TODO add switch for line-wise or polygon-wise drawing mode
-        //draw_lines(global_s, c, global_pts, global_plot_mode);
-        draw_polygons(global_s, c, global_pts, global_plot_mode);
+        draw_axes_if_cartesian_mode();
+        draw();
         // Display image
         display(global_s);
     }
@@ -205,77 +192,29 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         print_debug("Got save command");
         #endif
         // Draw image
-        color c;
         // First, draw the axes if plotting in Cartesian plane
-        if (global_plot_mode == PLOT_CARTESIAN) {
-            clear_screen(global_s);
-            c.red = 255;
-            c.blue = 0;
-            c.green = 0;
-            draw_axes(global_s, c);
-        }
-
-        c.red = 30;
-        c.blue = 100;
-        c.green = 155;
-        draw_lines(global_s, c, global_pts, global_plot_mode);
+        draw_axes_if_cartesian_mode();
+        draw();
         // Save image to file with given filename
-        int retVal;
-        char filename[101];
-        retVal = sscanf(line_buf, "%*s %100s", filename);
-        if (retVal == 1) {
-            save_ppm(global_s, filename);
-            save_extension(global_s, filename);
-        }
-        else {
-            print_error("No filename was given to save the image to.");
-            if (error_is_fatal) {
-                exit(EXIT_FAILURE);
-            }
-            return;
-        }
+        save(line_buf, error_is_fatal);
     }
     else if (strcmp(cmd, VIEW_AND_SAVE_CMD) == 0) {
         #ifdef DEBUG
         print_debug("Got view and save command");
         #endif
         // Draw image
-        color c;
         // First, draw the axes if plotting in Cartesian plane
-        if (global_plot_mode == PLOT_CARTESIAN) {
-            clear_screen(global_s);
-            c.red = 255;
-            c.blue = 0;
-            c.green = 0;
-            draw_axes(global_s, c);
-        }
-
-        c.red = 30;
-        c.blue = 100;
-        c.green = 155;
-        draw_lines(global_s, c, global_pts, global_plot_mode);
+        draw_axes_if_cartesian_mode();
+        draw();
         // Display image
         display(global_s);
         // Save image to file with given filename
-        int retVal;
-        char filename[101];
-        retVal = sscanf(line_buf, "%*s %100s", filename);
-        if (retVal == 1) {
-            save_ppm(global_s, filename);
-            save_extension(global_s, filename);
-        }
-        else {
-            print_error("No filename was given to save the image to.");
-            if (error_is_fatal) {
-                exit(EXIT_FAILURE);
-            }
-            return;
-        }
+        save(line_buf, error_is_fatal);
     }
     else if (strcmp(cmd, CLEAR_EDGE_MATRIX_CMD) == 0) {
-        // Clear the edge matrix
+        // Clear the point matrix
         #ifdef DEBUG
-        print_debug("Got clear edge matrix command");
+        print_debug("Got clear point matrix command");
         #endif
         free_matrix(global_pts);
         global_pts = new_matrix(4, 1);
@@ -341,17 +280,31 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         #endif
         print_matrix(global_pts);
     }
-    else if (strcmp(cmd, USE_CARTESIAN_CMD) == 0) {
+    else if (strcmp(cmd, PLOT_MODE_CMD) == 0) {
         #ifdef DEBUG
-        print_debug("Got use cartesian axes command");
+        print_debug("Got plot mode command");
         #endif
-        global_plot_mode = PLOT_CARTESIAN;
+        char mode[10];
+        int retVal = sscanf(line_buf, "%*s %9s", mode);
+        if (strcmp(mode, CARTESIAN) == 0) {
+            global_plot_mode = PLOT_CARTESIAN;
+        }
+        else if (strcmp(mode, ABSOLUTE) == 0) {
+            global_plot_mode = PLOT_ABSOLUTE;
+        }
     }
-    else if (strcmp(cmd, USE_ABSOLUTE_CMD) == 0) {
+    else if (strcmp(cmd, DRAW_MODE_CMD) == 0) {
         #ifdef DEBUG
-        print_debug("Got use absolute axes command");
+        print_debug("Got draw mode command");
         #endif
-        global_plot_mode = PLOT_ABSOLUTE;
+        char mode[10];
+        int retVal = sscanf(line_buf, "%*s %9s", mode);
+        if (strcmp(mode, LINE) == 0) {
+            global_draw_mode = DRAW_LINE;
+        }
+        else if (strcmp(mode, POLYGON) == 0) {
+            global_draw_mode = DRAW_POLYGON;
+        }
     }
     else if (strcmp(cmd, QUIT_CMD) == 0) {
         #ifdef DEBUG
@@ -365,14 +318,6 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
     }
     else {
         print_error("Invalid command on line %d: \"%s\"", line_no, cmd);
-        // Skip next line by consuming it with fgetc() up to the next
-        // newline
-        int c;
-        do {
-            c = fgetc(global_file);
-        }
-        while (c != EOF && c != '\n');
-        ++line_no;
     }
 }
 
@@ -441,4 +386,50 @@ void free_variables() {
     global_trans_mat = NULL;
     global_pts = NULL;
     global_s = NULL;
+}
+
+void draw_axes_if_cartesian_mode() {
+    // Draw the axes if plotting in Cartesian plane
+    color c;
+    if (global_plot_mode == PLOT_CARTESIAN) {
+        clear_screen(global_s);
+        c.red = 255;
+        c.blue = 0;
+        c.green = 0;
+        draw_axes(global_s, c);
+    }
+}
+
+void draw() {
+    // Draw the points matrix to the screen using the current drawing mode
+    color c;
+    c.red = 30;
+    c.blue = 100;
+    c.green = 155;
+    switch (global_draw_mode) {
+        case DRAW_LINE:
+            draw_lines(global_s, c, global_pts, global_plot_mode);
+            break;
+        case DRAW_POLYGON:
+            draw_polygons(global_s, c, global_pts, global_plot_mode);
+            break;
+    }
+}
+
+int save(char *line_buf, int error_is_fatal) {
+    int retVal;
+    char filename[101];
+    retVal = sscanf(line_buf, "%*s %100s", filename);
+    if (retVal == 1) {
+        save_ppm(global_s, filename);
+        save_extension(global_s, filename);
+    }
+    else {
+        print_error("No filename was given to save the image to.");
+        if (error_is_fatal) {
+            exit(EXIT_FAILURE);
+        }
+        return -1;
+    }
+    return 0;
 }
