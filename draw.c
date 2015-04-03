@@ -248,28 +248,62 @@ void add_sphere(struct matrix *points,
     struct matrix *tmp = new_matrix(4, 1);
     generate_sphere(tmp, step, x, y, z, radius);
     double **m = tmp->m;
-    int num_steps = round(1 / step);
-    print_matrix(tmp);
+    int num_steps = round(1.0 / step);
+    // TODO remove me
+    m[0][tmp->lastcol] = 0;
+    m[1][tmp->lastcol] = 300;
+    m[2][tmp->lastcol] = 0;
     printf("num_steps: %d\n", num_steps);
-    for (latitude = 0; latitude < tmp->lastcol; ++latitude) {
-        printf("(%lf,%lf,%lf)\n", m[0][latitude], m[1][latitude], m[2][latitude]);
-    }
     for (latitude = 0; latitude < num_steps; ++latitude) {
+        int lat_start = num_steps * latitude;
+        int next_lat_start = (lat_start + num_steps) % tmp->lastcol;
         for (longitude = 0; longitude < num_steps; ++longitude) {
-            int index = num_steps * latitude + longitude;
-            // This ensures that the last point plotted is connected back to the
-            // starting point.
-            int index_plus_one = index + 1;
-            if (index_plus_one == tmp->lastcol) {
-                index_plus_one = 0;
-            }
-            // TODO refactor index_plus_num_steps to index_next_longitude
-            // This ensures that the last point plotted is connected back to the
+            // TODO optimize indices calculation
+            int index = lat_start + longitude;
+            // These checks ensures that the last point plotted is connected back to the
             // correct starting point to close the loop/arc of the circle
-            int index_plus_num_steps = index + num_steps;
-            if (index_plus_num_steps > tmp->lastcol) {
-                index_plus_num_steps = num_steps - (index_plus_num_steps - tmp->lastcol);
+            //int index_plus_one = index + 1;
+            int index_plus_one = lat_start + ((longitude + 1) % num_steps);
+            //if (index_plus_one == tmp->lastcol) {
+            //    index_plus_one = 0;
+            //}
+            // TODO refactor index_plus_num_steps to index_next_longitude
+            int index_plus_num_steps = next_lat_start + longitude;
+            // Invert the index when wrapping back around the sphere
+            if (lat_start + num_steps >= tmp->lastcol) {
+                index_plus_num_steps = num_steps - index_plus_num_steps;
             }
+            //int index_plus_num_steps = index + num_steps;
+            //if (index_plus_num_steps >= tmp->lastcol) {
+            //    index_plus_num_steps = num_steps - (index_plus_num_steps - tmp->lastcol);
+            //}
+            int index_plus_num_steps_plus_one = num_steps * (latitude + 1) + ((longitude + 1) % num_steps);
+            //if (index_plus_num_steps_plus_one >= num_steps*(latitude+2)) {
+            //    print_debug("TICK");
+            //    index_plus_num_steps_plus_one -= num_steps;
+            //}
+            //if (index_plus_num_steps_plus_one >= tmp->lastcol) {
+            //    print_debug("TOCK");
+            //    //index_plus_num_steps_plus_one %= tmp->lastcol;
+            //    //index_plus_num_steps_plus_one = num_steps - index_plus_num_steps_plus_one;
+            //    //index_plus_num_steps_plus_one %= num_steps;
+            //    //if (index_plus_num_steps_plus_one == 1
+            //    //    || index_plus_num_steps_plus_one == 2
+            //    //    || index_plus_num_steps_plus_one == 3
+            //    //    || index_plus_num_steps_plus_one == 4
+            //    //    || index_plus_num_steps_plus_one == 7
+            //    //    || index_plus_num_steps_plus_one == 8
+            //    //    || index_plus_num_steps_plus_one == 9
+            //    //    || index_plus_num_steps_plus_one == 0
+            //    //    )
+            //    //    index_plus_num_steps_plus_one = index;
+            //    print_debug("%d", index_plus_num_steps_plus_one);
+            //}
+            //if (index_plus_num_steps_plus_one >= tmp->lastcol) {
+                //index_plus_num_steps_plus_one -= tmp->lastcol;
+                //index_plus_num_steps_plus_one = num_steps - (index_plus_num_steps_plus_one - tmp->lastcol);
+                //index_plus_num_steps_plus_one = 100;
+            //}
             printf("lat: %d, long: %d => %d\n", latitude, longitude, index);
             printf("lastcol: %d\n", tmp->lastcol);
             
@@ -280,33 +314,42 @@ void add_sphere(struct matrix *points,
             // Polygon-wise version
             // TODO prevent out of bounds
             printf("index:%d\n", index);
+            printf("index_plus_one:%d\n", index_plus_one);
             printf("index_plus_num_steps:%d\n", index_plus_num_steps);
+            printf("index_plus_num_steps_plus_one:%d\n", index_plus_num_steps_plus_one);
             printf("(%lf,%lf,%lf)\n", m[0][index], m[1][index], m[2][index]);
             printf("(%lf,%lf,%lf)\n", m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps]);
+            printf("(%lf,%lf,%lf)\n", m[0][index_plus_num_steps_plus_one], m[1][index_plus_num_steps_plus_one], m[2][index_plus_num_steps_plus_one]);
             //add_polygon(points,
             //            m[0][index], m[1][index], m[2][index],
-            //            m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one],
-            //            m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]
-            //            );
-            //add_polygon(points,
             //            m[0][index], m[1][index], m[2][index],
-            //            m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps],
-            //            m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps]
+            //            m[0][index], m[1][index], m[2][index]
             //            );
             add_polygon(points,
                         m[0][index], m[1][index], m[2][index],
-                        m[0][index_plus_num_steps+1], m[1][index_plus_num_steps+1], m[2][index_plus_num_steps+1],
-                        m[0][index_plus_num_steps+1], m[1][index_plus_num_steps+1], m[2][index_plus_num_steps+1]
+                        m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one],
+                        m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]
                         );
+            add_polygon(points,
+                        m[0][index], m[1][index], m[2][index],
+                        m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps],
+                        m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps]
+                        );
+            //add_polygon(points,
+            //            m[0][index], m[1][index], m[2][index],
+            //            m[0][index_plus_num_steps_plus_one], m[1][index_plus_num_steps_plus_one], m[2][index_plus_num_steps_plus_one],
+            //            m[0][index_plus_num_steps_plus_one], m[1][index_plus_num_steps_plus_one], m[2][index_plus_num_steps_plus_one]
+            //            );
 
             //add_polygon(points,
             //            m[0][index], m[1][index], m[2][index],
             //            m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps],
-            //            m[0][index_plus_num_steps+1], m[1][index_plus_num_steps+1], m[2][index_plus_num_steps+1]
+            //            m[0][index_plus_num_steps_plus_one], m[1][index_plus_num_steps_plus_one], m[2][index_plus_num_steps_plus_one]
             //            );
+            // FIXME
             //add_polygon(points,
             //            m[0][index], m[1][index], m[2][index],
-            //            m[0][index_plus_num_steps+1], m[1][index_plus_num_steps+1], m[2][index_plus_num_steps+1],
+            //            m[0][index_plus_num_steps_plus_one], m[1][index_plus_num_steps_plus_one], m[2][index_plus_num_steps_plus_one],
             //            m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]
             //            );
         }
@@ -334,16 +377,29 @@ void generate_sphere(struct matrix *points,
     double curr_x;
     double curr_y;
     double curr_z;
+    /*
+    double circle,rotation;
+    double rotStart = step * 0;
+    double rotStop = 1;
+    for ( rotation = rotStart; rotation <= rotStop; rotation += step ) {
+        for ( circle = 0; circle <= 1; circle+= step ) {
+            curr_x = radius * cos( M_PI * circle ) + x;
+            curr_y = radius * sin( M_PI * circle ) * cos( 2 * M_PI * rotation ) + y;
+            curr_z = radius * sin( M_PI * circle ) * sin( 2 * M_PI * rotation ) + z;
+            add_point( points, curr_x, curr_y, curr_z );
+        }
+    }
+    */
     int t, s;
-    int circle_steps = round(1 / step);
+    int circle_steps = round(1.0 / step);
     int rotate_steps = circle_steps;
     int numpts = 0;
     for (s = 0; s < rotate_steps; ++s) {
-        double phi_rad = M_PI * (s * step);
+        double phi_rad = M_PI * (1.0 * s / rotate_steps);
         double r_cos_phi = radius * cos(phi_rad);
         double r_sin_phi = radius * sin(phi_rad);
         for (t = 0; t < circle_steps; ++t) {
-            double theta_rad = M_PI * (2 * t * step);
+            double theta_rad = M_PI * (2.0 * t / circle_steps);
             double sin_theta = sin(theta_rad);
             curr_x = x + radius * cos(theta_rad);
             curr_y = y + sin_theta * r_cos_phi;
@@ -616,17 +672,17 @@ void draw_polygons(screen s, color c, struct matrix *polygons, plotting_mode plo
         draw_line(s, c, m[0][i+2], m[1][i+2],
                         m[0][i], m[1][i],
                         PLOT_CARTESIAN);
-        /* DEBUG
-        printf("drawing (%lf,%lf,%lf)\n"
-               "to      (%lf, %lf, %lf)\n"
-               "and     (%lf, %lf, %lf)\n", 
-               m[0][i], m[1][i], m[2][i],
-               m[0][i+1], m[1][i+1], m[2][i+1],
-               m[0][i+2], m[1][i+2], m[2][i+2]);
-        if (i > polygons->lastcol - 30) {
-            display(s);
-        }
-        */
+        // DEBUG
+        //printf("drawing (%lf,%lf,%lf)\n"
+        //       "to      (%lf, %lf, %lf)\n"
+        //       "and     (%lf, %lf, %lf)\n",
+        //       m[0][i], m[1][i], m[2][i],
+        //       m[0][i+1], m[1][i+1], m[2][i+1],
+        //       m[0][i+2], m[1][i+2], m[2][i+2]);
+        //display(s);
+        //if (i > polygons->lastcol - 30) {
+        //    display(s);
+        //}
     }
 }
 
