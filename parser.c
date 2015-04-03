@@ -194,7 +194,9 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         c.red = 30;
         c.blue = 100;
         c.green = 155;
-        draw_lines(global_s, c, global_pts, global_plot_mode);
+        // TODO add switch for line-wise or polygon-wise drawing mode
+        //draw_lines(global_s, c, global_pts, global_plot_mode);
+        draw_polygons(global_s, c, global_pts, global_plot_mode);
         // Display image
         display(global_s);
     }

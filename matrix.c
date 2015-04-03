@@ -76,15 +76,15 @@ void copy_matrix(struct matrix *a, struct matrix *b) {
 void print_matrix(struct matrix *m) {
     double **pts = m->m;
     int i,u;
-    for (u = 0; u < m->rows; ++u) {
-        printf("|");
-        for (i = 0; i < m->lastcol; ++i) {
-            printf("%.3lf", pts[u][i]);
-            if (i < m->lastcol - 1) {
-                printf("\t");
+    for (u = 0; u < m->lastcol; ++u) {
+        printf("(");
+        for (i = 0; i < m->rows; ++i) {
+            printf("%lf", pts[i][u]);
+            if (i < m->rows - 1) {
+                printf(",");
             }
         }
-        printf("|\n");
+        printf(")\n");
     }
 }
 

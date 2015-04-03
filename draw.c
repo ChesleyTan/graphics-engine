@@ -193,14 +193,45 @@ void add_prism(struct matrix *points,
      * front face of the rectangular prism, with width, height, and depth
      * corresponding to the x, y, and z coordinates respectively.
      */
+    double x1 = x + width;
+    double y1 = y - height;
+    double z1 = z - depth;
+    // Front side
+    add_polygon(points, x, y, z, x, y1, z, x1, y1, z);
+    add_polygon(points, x, y, z, x1, y1, z, x1, y, z);
+
+    // Back side
+    add_polygon(points, x, y, z1, x, y1, z1, x1, y1, z1);
+    add_polygon(points, x, y, z, x1, y1, z1, x1, y, z1);
+
+    // Top side
+    add_polygon(points, x, y, z1, x, y, z, x1, y, z);
+    add_polygon(points, x, y, z1, x1, y, z, x1, y, z1);
+
+    // Bottom side
+    add_polygon(points, x, y1, z1, x, y1, z, x1, y1, z);
+    add_polygon(points, x, y1, z1, x1, y1, z, x1, y1, z1);
+
+    // Left side
+    add_polygon(points, x, y, z1, x, y1, z1, x, y1, z);
+    add_polygon(points, x, y, z1, x, y1, z, x, y, z);
+
+    // Left side
+    add_polygon(points, x1, y, z1, x1, y1, z1, x1, y1, z);
+    add_polygon(points, x1, y, z1, x1, y1, z, x1, y, z);
+
+    /*
+    // Use for linewise drawing mode
+    // TODO make this draw lines between edges
     add_edge(points, x, y, z, x, y, z);
-    add_edge(points, x + width, y, z, x + width, y, z);
-    add_edge(points, x + width, y - height, z, x + width, y - height, z);
-    add_edge(points, x, y - height, z, x, y - height, z);
-    add_edge(points, x, y, z - depth, x, y, z - depth);
-    add_edge(points, x + width, y, z - depth, x + width, y, z - depth);
-    add_edge(points, x + width, y - height, z - depth, x + width, y - height, z - depth);
-    add_edge(points, x, y - height, z - depth, x, y - height, z - depth);
+    add_edge(points, x1, y, z, x1, y, z);
+    add_edge(points, x1, y1, z, x1, y1, z);
+    add_edge(points, x, y1, z, x, y1, z);
+    add_edge(points, x, y, z1, x, y, z1);
+    add_edge(points, x1, y, z1, x1, y, z1);
+    add_edge(points, x1, y1, z1, x1, y1, z1);
+    add_edge(points, x, y1, z1, x, y1, z1);
+    */
 }
 
 void add_sphere(struct matrix *points,
@@ -209,6 +240,86 @@ void add_sphere(struct matrix *points,
                 double y,
                 double z,
                 double radius) {
+    int latitude, longitude;
+    // Ensure that step size is greater than the minimum step size
+    if (step < MIN_STEP_SIZE) {
+        step = MIN_STEP_SIZE;
+    }
+    struct matrix *tmp = new_matrix(4, 1);
+    generate_sphere(tmp, step, x, y, z, radius);
+    double **m = tmp->m;
+    int num_steps = round(1 / step);
+    print_matrix(tmp);
+    printf("num_steps: %d\n", num_steps);
+    for (latitude = 0; latitude < tmp->lastcol; ++latitude) {
+        printf("(%lf,%lf,%lf)\n", m[0][latitude], m[1][latitude], m[2][latitude]);
+    }
+    for (latitude = 0; latitude < num_steps; ++latitude) {
+        for (longitude = 0; longitude < num_steps; ++longitude) {
+            int index = num_steps * latitude + longitude;
+            // This ensures that the last point plotted is connected back to the
+            // starting point.
+            int index_plus_one = index + 1;
+            if (index_plus_one == tmp->lastcol) {
+                index_plus_one = 0;
+            }
+            // TODO refactor index_plus_num_steps to index_next_longitude
+            // This ensures that the last point plotted is connected back to the
+            // correct starting point to close the loop/arc of the circle
+            int index_plus_num_steps = index + num_steps;
+            if (index_plus_num_steps > tmp->lastcol) {
+                index_plus_num_steps = num_steps - (index_plus_num_steps - tmp->lastcol);
+            }
+            printf("lat: %d, long: %d => %d\n", latitude, longitude, index);
+            printf("lastcol: %d\n", tmp->lastcol);
+            
+            // Line-wise version
+            //add_edge(points, m[0][index], m[1][index], m[2][index],
+            //         m[0][index], m[1][index], m[2][index]);
+
+            // Polygon-wise version
+            // TODO prevent out of bounds
+            printf("index:%d\n", index);
+            printf("index_plus_num_steps:%d\n", index_plus_num_steps);
+            printf("(%lf,%lf,%lf)\n", m[0][index], m[1][index], m[2][index]);
+            printf("(%lf,%lf,%lf)\n", m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps]);
+            //add_polygon(points,
+            //            m[0][index], m[1][index], m[2][index],
+            //            m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one],
+            //            m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]
+            //            );
+            //add_polygon(points,
+            //            m[0][index], m[1][index], m[2][index],
+            //            m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps],
+            //            m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps]
+            //            );
+            add_polygon(points,
+                        m[0][index], m[1][index], m[2][index],
+                        m[0][index_plus_num_steps+1], m[1][index_plus_num_steps+1], m[2][index_plus_num_steps+1],
+                        m[0][index_plus_num_steps+1], m[1][index_plus_num_steps+1], m[2][index_plus_num_steps+1]
+                        );
+
+            //add_polygon(points,
+            //            m[0][index], m[1][index], m[2][index],
+            //            m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps],
+            //            m[0][index_plus_num_steps+1], m[1][index_plus_num_steps+1], m[2][index_plus_num_steps+1]
+            //            );
+            //add_polygon(points,
+            //            m[0][index], m[1][index], m[2][index],
+            //            m[0][index_plus_num_steps+1], m[1][index_plus_num_steps+1], m[2][index_plus_num_steps+1],
+            //            m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]
+            //            );
+        }
+    }
+    free_matrix(tmp);
+}
+
+void generate_sphere(struct matrix *points,
+                     double step,
+                     double x,
+                     double y,
+                     double z,
+                     double radius) {
     /*
     | 1     0    0     1 || rcos(Θ) |   |    rcos(Θ)    |
     | 1 cos(φ) -sin(φ) 0 || rsin(Θ) |   | rsin(Θ)cos(φ) |
@@ -220,30 +331,29 @@ void add_sphere(struct matrix *points,
         φ is the angle for generating the sphere
         r is the radius of the sphere
     */
-    // Ensure that step size is greater than the minimum step size
-    if (step < MIN_STEP_SIZE) {
-        step = MIN_STEP_SIZE;
-    }
-    double old_x = x + radius; // rcos(0) = r
-    double old_y = y;          // rsin(0)cos(0) = 0
-    double old_z = z;          // rsin(0)sin(0) = 0
-    double t, s;
-    for (t = 0; t < 2 + step; t += step) {
-        double theta_rad = M_PI * (t + step);
-        double r_cos_theta = radius * cos(theta_rad);
-        double r_sin_theta = radius * sin(theta_rad);
-        for (s = 0; s < 1 + step; s += step) {
-            double phi_rad = M_PI * (s + step);
-            double new_x = x + r_cos_theta;
-            double new_y = y + r_sin_theta * cos(phi_rad);
-            double new_z = z + r_sin_theta * sin(phi_rad);
-            //add_edge(points, old_x, old_y, old_z, new_x, new_y, new_z);
-            add_edge(points, old_x, old_y, old_z, old_x, old_y, old_z);
-            old_x = new_x;
-            old_y = new_y;
-            old_z = new_z;
+    double curr_x;
+    double curr_y;
+    double curr_z;
+    int t, s;
+    int circle_steps = round(1 / step);
+    int rotate_steps = circle_steps;
+    int numpts = 0;
+    for (s = 0; s < rotate_steps; ++s) {
+        double phi_rad = M_PI * (s * step);
+        double r_cos_phi = radius * cos(phi_rad);
+        double r_sin_phi = radius * sin(phi_rad);
+        for (t = 0; t < circle_steps; ++t) {
+            double theta_rad = M_PI * (2 * t * step);
+            double sin_theta = sin(theta_rad);
+            curr_x = x + radius * cos(theta_rad);
+            curr_y = y + sin_theta * r_cos_phi;
+            curr_z = z + sin_theta * r_sin_phi;
+            ++numpts;
+            //printf("adding (%lf,%lf,%lf)\n", curr_x, curr_y, curr_z);
+            add_point(points, curr_x, curr_y, curr_z);
         }
     }
+    printf("Generated numpts: %d\n", numpts);
 }
 
 void add_torus(struct matrix *points,
@@ -476,6 +586,47 @@ void draw_axes(screen s, color c) {
     }
     for (i = -1 * YRES_CARTESIAN; i < YRES_CARTESIAN; ++i) {
         plot_cartesian(s, c, 0, i);
+    }
+}
+
+void add_polygon(struct matrix *polygons,
+                 double x0, double y0, double z0,
+                 double x1, double y1, double z1,
+                 double x2, double y2, double z2 ) {
+    add_point(polygons, x0, y0, z0);
+    add_point(polygons, x1, y1, z1);
+    add_point(polygons, x2, y2, z2);
+}
+
+void draw_polygons(screen s, color c, struct matrix *polygons, plotting_mode plot_mode) {
+    if (polygons->lastcol < 3) {
+        print_error("Polygon matrix has a length of less than 3.");
+        return;
+    }
+    int i;
+    for (i = 0; i < polygons->lastcol - 2; i+=3) {
+        double **m = polygons->m;
+        // TODO take plotting_mode as an argument
+        draw_line(s, c, m[0][i], m[1][i],
+                        m[0][i+1], m[1][i+1],
+                        PLOT_CARTESIAN);
+        draw_line(s, c, m[0][i+1], m[1][i+1],
+                        m[0][i+2], m[1][i+2],
+                        PLOT_CARTESIAN);
+        draw_line(s, c, m[0][i+2], m[1][i+2],
+                        m[0][i], m[1][i],
+                        PLOT_CARTESIAN);
+        /* DEBUG
+        printf("drawing (%lf,%lf,%lf)\n"
+               "to      (%lf, %lf, %lf)\n"
+               "and     (%lf, %lf, %lf)\n", 
+               m[0][i], m[1][i], m[2][i],
+               m[0][i+1], m[1][i+1], m[2][i+1],
+               m[0][i+2], m[1][i+2], m[2][i+2]);
+        if (i > polygons->lastcol - 30) {
+            display(s);
+        }
+        */
     }
 }
 

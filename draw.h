@@ -146,7 +146,15 @@ void add_prism(struct matrix *points,
                double height,
                double depth);
 
-/*======== void add_sphere() ==========
+void add_sphere(struct matrix *points,
+                double step,
+                double x,
+                double y,
+                double z,
+                double radius);
+
+// TODO update documentation
+/*======== void generate_sphere() ==========
 Inputs:     struct matrix *points,
             double step,
             double x,
@@ -157,12 +165,12 @@ Returns:
 Adds the points of a sphere centered at (x, y, z) with a radius equal to the one
 given to the edge matrix 'points' using the given step size (0 < step < 2).
 ====================================*/
-void add_sphere(struct matrix *points,
-                double step,
-                double x,
-                double y,
-                double z,
-                double radius);
+void generate_sphere(struct matrix *points,
+                     double step,
+                     double x,
+                     double y,
+                     double z,
+                     double radius);
 
 /*======== void add_torus() ==========
 Inputs:     struct matrix *points,
@@ -222,5 +230,44 @@ the Cartesian coordinate plane
 ====================================*/
 void draw_axes(screen s, color c);
 
+/*======== void add_polygon() ==========
+Inputs:   struct matrix *surfaces
+         double x0
+         double y0
+         double z0
+         double x1
+         double y1
+         double z1
+         double x2
+         double y2
+         double z2
+Returns:
+Adds the vertices (x0, y0, z0), (x1, y1, z1)
+and (x2, y2, z2) to the polygon matrix. They
+define a single triangle surface.
+
+04/16/13 13:05:59
+jdyrlandweaver
+====================*/
+void add_polygon(struct matrix *polygons,
+                 double x0, double y0, double z0,
+                 double x1, double y1, double z1,
+                 double x2, double y2, double z2);
+
+// TODO update documentation
+/*======== void draw_polygons() ==========
+Inputs:     screen s
+            color c
+            struct matrix *polygons
+            plotting_mode plot_mode
+Returns:
+Goes through polygons 3 points at a time, drawing
+lines connecting each points to create bounding
+triangles
+
+04/16/13 13:13:27
+jdyrlandweaver
+====================*/
+void draw_polygons(screen s, color c, struct matrix *polygons, plotting_mode plot_mode);
 #endif
 // vim: ts=4:et:sts:sw=4:sr
