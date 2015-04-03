@@ -258,7 +258,8 @@ void add_sphere(struct matrix *points,
         int lat_start = num_steps * latitude;
         int next_lat_start = (lat_start + num_steps) % tmp->lastcol;
         for (longitude = 0; longitude < num_steps; ++longitude) {
-            // TODO optimize indices calculation
+            // TODO optimize indices calculation, use conditional in place of
+            // modulus where possible
             int index = lat_start + longitude;
             // These checks ensures that the last point plotted is connected back to the
             // correct starting point to close the loop/arc of the circle
@@ -271,13 +272,17 @@ void add_sphere(struct matrix *points,
             int index_plus_num_steps = next_lat_start + longitude;
             // Invert the index when wrapping back around the sphere
             if (lat_start + num_steps >= tmp->lastcol) {
-                index_plus_num_steps = num_steps - index_plus_num_steps;
+                index_plus_num_steps = (num_steps - index_plus_num_steps) % num_steps;
             }
             //int index_plus_num_steps = index + num_steps;
             //if (index_plus_num_steps >= tmp->lastcol) {
             //    index_plus_num_steps = num_steps - (index_plus_num_steps - tmp->lastcol);
             //}
-            int index_plus_num_steps_plus_one = num_steps * (latitude + 1) + ((longitude + 1) % num_steps);
+            //int index_plus_num_steps_plus_one = next_lat_start + ((longitude + 1) % num_steps);
+            int index_plus_num_steps_plus_one = (index_plus_num_steps + 1) % tmp->lastcol;
+            //if (lat_start + num_steps >= tmp->lastcol) {
+            //    index_plus_num_steps_plus_one = num_steps - index_plus_num_steps_plus_one;
+            //}
             //if (index_plus_num_steps_plus_one >= num_steps*(latitude+2)) {
             //    print_debug("TICK");
             //    index_plus_num_steps_plus_one -= num_steps;
@@ -335,11 +340,11 @@ void add_sphere(struct matrix *points,
                         m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps],
                         m[0][index_plus_num_steps], m[1][index_plus_num_steps], m[2][index_plus_num_steps]
                         );
-            //add_polygon(points,
-            //            m[0][index], m[1][index], m[2][index],
-            //            m[0][index_plus_num_steps_plus_one], m[1][index_plus_num_steps_plus_one], m[2][index_plus_num_steps_plus_one],
-            //            m[0][index_plus_num_steps_plus_one], m[1][index_plus_num_steps_plus_one], m[2][index_plus_num_steps_plus_one]
-            //            );
+            add_polygon(points,
+                        m[0][index], m[1][index], m[2][index],
+                        m[0][index_plus_num_steps_plus_one], m[1][index_plus_num_steps_plus_one], m[2][index_plus_num_steps_plus_one],
+                        m[0][index_plus_num_steps_plus_one], m[1][index_plus_num_steps_plus_one], m[2][index_plus_num_steps_plus_one]
+                        );
 
             //add_polygon(points,
             //            m[0][index], m[1][index], m[2][index],
