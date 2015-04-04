@@ -8,6 +8,7 @@ int line_no = 0;
 
 void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
     if (strcmp(cmd, LINE_CMD) == 0) {
+        // Add line to point matrix
         #ifdef DEBUG
         print_debug("Got line command");
         #endif
@@ -24,12 +25,14 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         add_edge(global_pts, x1, y1, z1, x2, y2, z2);
     }
     else if (strcmp(cmd, IDENTITY_CMD) == 0) {
+        // Make the transformation matrix the identity matrix
         #ifdef DEBUG
         print_debug("Got identity command");
         #endif
         ident(global_trans_mat);
     }
     else if (strcmp(cmd, SCALE_CMD) == 0) {
+        // Apply scale to transformation matrix
         #ifdef DEBUG
         print_debug("Got scale command");
         #endif
@@ -49,6 +52,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         global_trans_mat = tmp;
     }
     else if (strcmp(cmd, TRANSLATE_CMD) == 0) {
+        // Apply translation to transformation matrix
         #ifdef DEBUG
         print_debug("Got translate command");
         #endif
@@ -68,6 +72,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         global_trans_mat = tmp;
     }
     else if (strcmp(cmd, XROT_CMD) == 0) {
+        // Apply x-axis rotation to transformation matrix
         #ifdef DEBUG
         print_debug("Got x rotate command");
         #endif
@@ -87,6 +92,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         global_trans_mat = tmp;
     }
     else if (strcmp(cmd, YROT_CMD) == 0) {
+        // Apply y-axis rotation to transformation matrix
         #ifdef DEBUG
         print_debug("Got y rotate command");
         #endif
@@ -106,6 +112,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         global_trans_mat = tmp;
     }
     else if (strcmp(cmd, ZROT_CMD) == 0) {
+        // Apply z-axis rotation to transformation matrix
         #ifdef DEBUG
         print_debug("Got z rotate command");
         #endif
@@ -125,6 +132,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         global_trans_mat = tmp;
     }
     else if (strcmp(cmd, APPLY_CMD) == 0) {
+        // Apply transformations in transformation matrix 'trans_mat'
         #ifdef DEBUG
         print_debug("Got apply command");
         #endif
@@ -133,6 +141,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         global_pts = tmp;
     }
     else if (strcmp(cmd, CIRCLE_CMD) == 0) {
+        // Add circle to point matrix
         #ifdef DEBUG
         print_debug("Got circle command");
         #endif
@@ -148,6 +157,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         add_circle(global_pts, cx, cy, cz, r, STEP_SIZE);
     }
     else if (strcmp(cmd, HERMITE_CURVE_CMD) == 0) {
+        // Add hermite curve to point matrix
         #ifdef DEBUG
         print_debug("Got Hermite curve command");
         #endif
@@ -165,6 +175,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
                   x0, y0, x1, y1, x2, y2, x3, y3);
     }
     else if (strcmp(cmd, BEZIER_CURVE_CMD) == 0) {
+        // Add bezier curve to point matrix
         #ifdef DEBUG
         print_debug("Got Bezier curve command");
         #endif
@@ -182,10 +193,10 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
                   x0, y0, x1, y1, x2, y2, x3, y3);
     }
     else if (strcmp(cmd, VIEW_CMD) == 0) {
+        // View image
         #ifdef DEBUG
         print_debug("Got view command");
         #endif
-        // Draw image
         // First, draw the axes if plotting in Cartesian plane
         draw_axes_if_cartesian_mode();
         draw();
@@ -193,10 +204,10 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         display(global_s);
     }
     else if (strcmp(cmd, SAVE_CMD) == 0) {
+        // Save image
         #ifdef DEBUG
         print_debug("Got save command");
         #endif
-        // Draw image
         // First, draw the axes if plotting in Cartesian plane
         draw_axes_if_cartesian_mode();
         draw();
@@ -204,10 +215,10 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         save(line_buf, error_is_fatal);
     }
     else if (strcmp(cmd, VIEW_AND_SAVE_CMD) == 0) {
+        // View and save image
         #ifdef DEBUG
         print_debug("Got view and save command");
         #endif
-        // Draw image
         // First, draw the axes if plotting in Cartesian plane
         draw_axes_if_cartesian_mode();
         draw();
@@ -216,7 +227,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         // Save image to file with given filename
         save(line_buf, error_is_fatal);
     }
-    else if (strcmp(cmd, CLEAR_EDGE_MATRIX_CMD) == 0) {
+    else if (strcmp(cmd, CLEAR_POINT_MATRIX_CMD) == 0) {
         // Clear the point matrix
         #ifdef DEBUG
         print_debug("Got clear point matrix command");
@@ -224,8 +235,26 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         free_matrix(global_pts);
         global_pts = new_matrix(4, 1);
     }
+    else if (strcmp(cmd, SCREEN_RESIZE_CMD) == 0) {
+        // Clear the screen and resize it
+        #ifdef DEBUG
+        print_debug("Got screen resize command");
+        #endif
+        int xres, yres;
+        int retVal = sscanf(line_buf, "%*s %d %d", &xres, &yres);
+        if (retVal != 2) {
+            print_error("Invalid arguments for screen resize command: \"%s\"", line_buf);
+            if (error_is_fatal) {
+                exit(EXIT_FAILURE);
+            }
+            return;
+        }
+        free_screen(global_s);
+        resize_screen(xres, yres);
+        global_s = new_screen();
+    }
     else if (strcmp(cmd, PRISM_CMD) == 0) {
-        // Add rectangular prism to edge matrix
+        // Add rectangular prism to point matrix
         #ifdef DEBUG
         print_debug("Got draw prism command");
         #endif
@@ -242,7 +271,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         add_prism(global_pts, x, y, z, width, height, depth, global_draw_mode);
     }
     else if (strcmp(cmd, SPHERE_CMD) == 0) {
-        // Add sphere to edge matrix
+        // Add sphere to point matrix
         #ifdef DEBUG
         print_debug("Got draw sphere command");
         #endif
@@ -259,7 +288,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         add_sphere(global_pts, step, x, y, z, radius, global_draw_mode);
     }
     else if (strcmp(cmd, TORUS_CMD) == 0) {
-        // Add torus to edge matrix
+        // Add torus to point matrix
         #ifdef DEBUG
         print_debug("Got draw torus command");
         #endif
@@ -277,18 +306,21 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
                   circleRadius, torusRadius, global_draw_mode);
     }
     else if (strcmp(cmd, PRINT_TRANSFORMATION_MATRIX_CMD) == 0) {
+        // Print the transformation matrix
         #ifdef DEBUG
         print_debug("Got print transformation matrix command");
         #endif
         print_matrix(global_trans_mat);
     }
     else if (strcmp(cmd, PRINT_POINT_MATRIX_CMD) == 0) {
+        // Print the point matrix
         #ifdef DEBUG
         print_debug("Got print point matrix command");
         #endif
         print_matrix(global_pts);
     }
     else if (strcmp(cmd, PLOT_MODE_CMD) == 0) {
+        // Set the global_plot_mode
         #ifdef DEBUG
         print_debug("Got plot mode command");
         #endif
@@ -309,6 +341,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         }
     }
     else if (strcmp(cmd, DRAW_MODE_CMD) == 0) {
+        // Set the global_draw_mode
         #ifdef DEBUG
         print_debug("Got draw mode command");
         #endif
@@ -329,6 +362,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         }
     }
     else if (strcmp(cmd, QUIT_CMD) == 0) {
+        // Quit parsing
         #ifdef DEBUG
         print_debug("Got quit command");
         #endif

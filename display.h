@@ -14,10 +14,12 @@
 
 #include "utils.h"
 
-#define XRES 1000
-#define YRES 1000
-#define XRES_CARTESIAN XRES / 2
-#define YRES_CARTESIAN YRES / 2
+static int XRES = 1000;
+static int YRES = 1000;
+// XRES_CARTESIAN and YRES_CARTESIAN should be half of XRES AND YRES
+// respectively.
+static int XRES_CARTESIAN = 500;
+static int YRES_CARTESIAN = 500;
 #define MAX_COLOR 255
 
 /*
@@ -49,6 +51,15 @@ typedef struct point_t color;
   s[0][0] = c;
 */
 typedef struct point_t **screen;
+
+/*======== screen resize_screen() ==========
+Inputs:     int x_res,
+            int y_res
+Returns:
+Sets the XRES and YRES variables to x_res and y_res respectively.
+XRES and YRES determines the screen size.
+==========================================*/
+void resize_screen(int x_res, int y_res);
 
 /*======== screen new_screen() ==========
 Inputs:

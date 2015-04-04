@@ -33,7 +33,8 @@ static const char *BEZIER_CURVE_CMD = "b";
 static const char *VIEW_CMD = "v";
 static const char *SAVE_CMD = "f";
 static const char *VIEW_AND_SAVE_CMD = "g";
-static const char *CLEAR_EDGE_MATRIX_CMD = "clear";
+static const char *CLEAR_POINT_MATRIX_CMD = "clear";
+static const char *SCREEN_RESIZE_CMD = "resize";
 static const char *PRISM_CMD = "prism";
 static const char *SPHERE_CMD = "sphere";
 static const char *TORUS_CMD = "torus";
@@ -56,36 +57,36 @@ Parses the command according to the following rules:
     Every command occupies its own line
     Any command that requires arguments must have those arguments in the same line.
     The commands are as follows:
-        l: add a line to the edge matrix -
+        l: add a line to the edge matrix
             takes 6 arguments (x1, y1, z1, x2, y2, z2)
         i: set the transformation matrix to the identity matrix
         s: create a scale matrix,
-            then multiply the transformation matrix by the scale matrix -
+            then multiply the transformation matrix by the scale matrix
             takes 3 arguments (sx, sy, sz)
         t: create a translation matrix,
-            then multiply the transformation matrix by the translation matrix -
+            then multiply the transformation matrix by the translation matrix
             takes 3 arguments (tx, ty, tz)
         x: create an x-axis rotation matrix,
-            then multiply the transformation matrix by the rotation matrix -
+            then multiply the transformation matrix by the rotation matrix
             takes 1 argument (theta)
         y: create an y-axis rotation matrix,
-            then multiply the transformation matrix by the rotation matrix -
+            then multiply the transformation matrix by the rotation matrix
             takes 1 argument (theta)
         z: create an z-axis rotation matrix,
-            then multiply the transformation matrix by the rotation matrix -
+            then multiply the transformation matrix by the rotation matrix
             takes 1 argument (theta)
         a: apply the current transformation matrix to the edge matrix
-        c: add a circle to the edge matrix -
+        c: add a circle to the edge matrix
             takes 4 arguments (cx, cy, cz, r)
-        h: add a hermite curve to the edge matrix -
+        h: add a hermite curve to the edge matrix
             takes 8 arguments (x0, y0, x1, y1, x2, y2, x3, y3)
-        b: add a bezier curve to the edge matrix -
+        b: add a bezier curve to the edge matrix
             takes 8 arguments (x0, y0, x1, y1, x2, y2, x3, y3)
-        prism: adds a rectangular prism to the edge matrix -
+        prism: adds a rectangular prism to the edge matrix
             takes 6 parameters (x, y, z, width, height, depth)
-        sphere: adds a sphere to the edge matrix -
+        sphere: adds a sphere to the edge matrix
             takes 5 parameters (x, y, z, radius, step size)
-        torus: adds a torus to the edge matrix -
+        torus: adds a torus to the edge matrix
             takes 6 parameters (x, y, z, circle_radius, torus_radius, step size)
         p: print the transformation matrix to stdout
         pp: print the point matrix to stdout
@@ -94,11 +95,13 @@ Parses the command according to the following rules:
         draw-mode: set the drawing mode
             takes 1 parameter (either "line" or "polygon")
         clear: clears the point matrix of all points
+        resize: resizes the image/screen and clears the screen
+            takes 2 parameters (xres, yres)
         v: draw the lines of the edge matrix to the screen display the screen
-        f: save the screen to a file -
+        f: save the screen to a file
             takes 1 argument (file name)
         g: draw the lines of the edge matrix to the screen,
-            save the screen to a file -
+            save the screen to a file
             takes 1 argument (file name)
         q: end parsing (from script file only)
 
