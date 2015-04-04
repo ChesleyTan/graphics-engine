@@ -182,7 +182,15 @@ void generate_sphere(struct matrix *points,
                      double z,
                      double radius);
 
-/*======== void add_torus() ==========
+void add_torus(struct matrix *points,
+               double step,
+               double x,
+               double y,
+               double z,
+               double circle_radius,
+               double torus_radius);
+
+/*======== void generate_torus() ==========
 Inputs:     struct matrix *points,
             double step,
             double x,
@@ -195,13 +203,13 @@ Adds the points of a torus centered at (x, y, z) with a circle radius of
 circle_radius and a torus radius of torus_radius using the given step size 
 (0 < step < 2).
 ====================================*/
-void add_torus(struct matrix *points,
-               double step,
-               double x,
-               double y,
-               double z,
-               double circle_radius,
-               double torus_radius);
+void generate_torus(struct matrix *points,
+                    double step,
+                    double x,
+                    double y,
+                    double z,
+                    double circle_radius,
+                    double torus_radius);
 
 /*======== void draw_line() ==========
 Inputs:     screen s

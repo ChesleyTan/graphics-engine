@@ -231,7 +231,6 @@ void add_sphere(struct matrix *points,
     if (step < MIN_STEP_SIZE) {
         step = MIN_STEP_SIZE;
     }
-    int latitude, longitude;
     struct matrix *tmp = new_matrix(4, 1);
     generate_sphere(tmp, step, x, y, z, radius);
     // The points in the sphere are ordered as follows (assuming num_steps = 10):
@@ -241,6 +240,7 @@ void add_sphere(struct matrix *points,
     // P20 P21 P22 P23 P24 ... P29
     // ...
     // P90 P91 P92 P93 P99 ... P99
+    int latitude, longitude;
     double **m = tmp->m;
     int num_pts = tmp->lastcol;
     int num_steps = round(1.0 / step);
@@ -357,6 +357,55 @@ void add_torus(struct matrix *points,
                double z,
                double circle_radius,
                double torus_radius) {
+    // Ensure that step size is greater than the minimum step size
+    if (step < MIN_STEP_SIZE) {
+        step = MIN_STEP_SIZE;
+    }
+    struct matrix *tmp = new_matrix(4, 1);
+    generate_torus(tmp, step, x, y, z, circle_radius, torus_radius);
+    // The points in the torus are ordered as follows (assuming num_steps = 10):
+    // P0  P1  P2  P3  P4  ... P9
+    // |A\B|                  
+    // P10 P11 P12 P13 P14 ... P19
+    // P20 P21 P22 P23 P24 ... P29
+    // ...
+    // P90 P91 P92 P93 P99 ... P99
+    int latitude, longitude;
+    double **m = tmp->m;
+    int num_pts = tmp->lastcol;
+    int num_steps = round(1.0 / step);
+    for (latitude = 0; latitude < num_steps; ++latitude) {
+        int lat_start = num_steps * latitude;
+        int next_lat_start = (lat_start + num_steps) % num_pts;
+        for (longitude = 0; longitude < num_steps; ++longitude) {
+            int index = lat_start + longitude;
+            // These checks ensures that the last point plotted is connected back to the
+            // correct starting point to close the loop/arc of the circle
+            int index_plus_one = lat_start + ((longitude + 1) % num_steps);
+            int index_next_lat = (next_lat_start + longitude) % num_pts;
+            int index_next_lat_plus_one = (index_next_lat + 1) % num_pts;
+            add_polygon(points,
+                        m[0][index], m[1][index], m[2][index],
+                        m[0][index_next_lat], m[1][index_next_lat], m[2][index_next_lat],
+                        m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one]
+                        );
+            add_polygon(points,
+                        m[0][index], m[1][index], m[2][index],
+                        m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one],
+                        m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]
+                        );
+        }
+    }
+    free_matrix(tmp);
+}
+
+void generate_torus(struct matrix *points,
+                    double step,
+                    double x,
+                    double y,
+                    double z,
+                    double circle_radius,
+                    double torus_radius) {
     /*
     | cos(φ) 0 -sin(φ) 0 || rcos(Θ) + R |   | cos(φ) * (rcos(Θ) + R) |
     | 0    1     0     0 ||   rsin(Θ)   |   |         rsin(Θ)        |
@@ -370,32 +419,19 @@ void add_torus(struct matrix *points,
         r is the radius of the circle
         R is the radius of the torus
     */
-    // Ensure that step size is greater than the minimum step size
-    if (step < MIN_STEP_SIZE) {
-        step = MIN_STEP_SIZE;
-    }
-    // TODO remove me, use for testing out of bounds
-    //m[0][tmp->lastcol] = 0;
-    //m[1][tmp->lastcol] = 300;
-    //m[2][tmp->lastcol] = 0;
-    double old_x = x + circle_radius + torus_radius; // cos(0) * (rcos(0) + R) = r + R
-    double old_y = y;                                // rsin(0) = 0
-    double old_z = z;                                // -sin(0)(rcos(0) + R) = 0
-    double t, s;
-    for (t = 0; t < 2 + step; t += step) {
-        double theta_rad = M_PI * (t + step);
+    int i, u;
+    int torus_steps, circle_steps;
+    torus_steps = circle_steps = round(1.0 / step);
+    for (i = 0; i < circle_steps; ++i) {
+        double theta_rad = M_PI * (2.0 * i / circle_steps);
         double circle_radius_cos_theta = circle_radius * cos(theta_rad);
         double circle_radius_sin_theta = circle_radius * sin(theta_rad);
-        for (s = 0; s < 2 + step; s += step) {
-            double phi_rad = M_PI * (s + step);
-            double new_x = x + cos(phi_rad) * (circle_radius_cos_theta + torus_radius);
-            double new_y = y + circle_radius_sin_theta;
-            double new_z = z - sin(phi_rad) * (circle_radius_cos_theta + torus_radius);
-            //add_edge(points, old_x, old_y, old_z, new_x, new_y, new_z);
-            add_edge(points, old_x, old_y, old_z, old_x, old_y, old_z);
-            old_x = new_x;
-            old_y = new_y;
-            old_z = new_z;
+        for (u = 0; u < torus_steps; ++u) {
+            double phi_rad = M_PI * (2.0 * u / torus_steps);
+            double curr_x = x + cos(phi_rad) * (circle_radius_cos_theta + torus_radius);
+            double curr_y = y + circle_radius_sin_theta;
+            double curr_z = z - sin(phi_rad) * (circle_radius_cos_theta + torus_radius);
+            add_point(points, curr_x, curr_y, curr_z);
         }
     }
 }
@@ -625,6 +661,9 @@ void draw_polygons(screen s, color c, struct matrix *polygons, plotting_mode plo
                m[0][i+1], m[1][i+1], m[2][i+1],
                m[0][i+2], m[1][i+2], m[2][i+2]);
         if (i > polygons->lastcol - 30) {
+            display(s);
+        }
+        if (i % 50 == 0) {
             display(s);
         }
         */

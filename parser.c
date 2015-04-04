@@ -292,6 +292,13 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         else if (strcmp(mode, ABSOLUTE) == 0) {
             global_plot_mode = PLOT_ABSOLUTE;
         }
+        else {
+            print_error("Invalid arguments for plot mode command: \"%s\"", line_buf);
+            if (error_is_fatal) {
+                exit(EXIT_FAILURE);
+            }
+            return;
+        }
     }
     else if (strcmp(cmd, DRAW_MODE_CMD) == 0) {
         #ifdef DEBUG
@@ -304,6 +311,13 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         }
         else if (strcmp(mode, POLYGON) == 0) {
             global_draw_mode = DRAW_POLYGON;
+        }
+        else {
+            print_error("Invalid arguments for plot mode command: \"%s\"", line_buf);
+            if (error_is_fatal) {
+                exit(EXIT_FAILURE);
+            }
+            return;
         }
     }
     else if (strcmp(cmd, QUIT_CMD) == 0) {
