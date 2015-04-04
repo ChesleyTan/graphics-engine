@@ -12,7 +12,8 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         print_debug("Got line command");
         #endif
         double x1, x2, y1, y2, z1, z2;
-        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf %lf", &x1, &y1, &z1, &x2, &y2, &z2);
+        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf %lf",
+                            &x1, &y1, &z1, &x2, &y2, &z2);
         if (retVal != 6) {
             print_error("Invalid arguments for line command: \"%s\"", line_buf);
             if (error_is_fatal) {
@@ -151,7 +152,8 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         print_debug("Got Hermite curve command");
         #endif
         double x0, y0, x1, y1, x2, y2, x3, y3;
-        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf %lf %lf %lf", &x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3);
+        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf %lf %lf %lf",
+                            &x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3);
         if (retVal != 8) {
             print_error("Invalid arguments for Hermite curve command: \"%s\"", line_buf);
             if (error_is_fatal) {
@@ -159,14 +161,16 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
             }
             return;
         }
-        add_curve(global_pts, STEP_SIZE, HERMITE_CURVE, x0, y0, x1, y1, x2, y2, x3, y3);
+        add_curve(global_pts, STEP_SIZE, HERMITE_CURVE,
+                  x0, y0, x1, y1, x2, y2, x3, y3);
     }
     else if (strcmp(cmd, BEZIER_CURVE_CMD) == 0) {
         #ifdef DEBUG
         print_debug("Got Bezier curve command");
         #endif
         double x0, y0, x1, y1, x2, y2, x3, y3;
-        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf %lf %lf %lf", &x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3);
+        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf %lf %lf %lf",
+                            &x0, &y0, &x1, &y1, &x2, &y2, &x3, &y3);
         if (retVal != 8) {
             print_error("Invalid arguments for Bezier curve command: \"%s\"", line_buf);
             if (error_is_fatal) {
@@ -174,7 +178,8 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
             }
             return;
         }
-        add_curve(global_pts, STEP_SIZE, BEZIER_CURVE, x0, y0, x1, y1, x2, y2, x3, y3);
+        add_curve(global_pts, STEP_SIZE, BEZIER_CURVE,
+                  x0, y0, x1, y1, x2, y2, x3, y3);
     }
     else if (strcmp(cmd, VIEW_CMD) == 0) {
         #ifdef DEBUG
@@ -225,7 +230,8 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         print_debug("Got draw prism command");
         #endif
         double x, y, z, width, height, depth;
-        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf %lf", &x, &y, &z, &width, &height, &depth);
+        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf %lf",
+                            &x, &y, &z, &width, &height, &depth);
         if (retVal != 6) {
             print_error("Invalid arguments for draw prism command: \"%s\"", line_buf);
             if (error_is_fatal) {
@@ -233,7 +239,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
             }
             return;
         }
-        add_prism(global_pts, x, y, z, width, height, depth);
+        add_prism(global_pts, x, y, z, width, height, depth, global_draw_mode);
     }
     else if (strcmp(cmd, SPHERE_CMD) == 0) {
         // Add sphere to edge matrix
@@ -241,7 +247,8 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         print_debug("Got draw sphere command");
         #endif
         double x, y, z, radius, step;
-        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf", &x, &y, &z, &radius, &step);
+        int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf",
+                            &x, &y, &z, &radius, &step);
         if (retVal != 5) {
             print_error("Invalid arguments for draw sphere command: \"%s\"", line_buf);
             if (error_is_fatal) {
@@ -249,7 +256,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
             }
             return;
         }
-        add_sphere(global_pts, step, x, y, z, radius);
+        add_sphere(global_pts, step, x, y, z, radius, global_draw_mode);
     }
     else if (strcmp(cmd, TORUS_CMD) == 0) {
         // Add torus to edge matrix
@@ -266,7 +273,8 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
             }
             return;
         }
-        add_torus(global_pts, step, x, y, z, circleRadius, torusRadius);
+        add_torus(global_pts, step, x, y, z,
+                  circleRadius, torusRadius, global_draw_mode);
     }
     else if (strcmp(cmd, PRINT_TRANSFORMATION_MATRIX_CMD) == 0) {
         #ifdef DEBUG
@@ -340,7 +348,8 @@ void parse_file(char error_is_fatal) {
         || global_trans_mat == NULL
         || global_pts == NULL
         || global_s == NULL) {
-        print_error("parse_file(): Global variables are not synchronized. Have you called synchronize_variables()?");
+        print_error("parse_file(): Global variables are not synchronized."
+                    " Have you called synchronize_variables()?");
         return;
     }
     char line_buf[LINE_BUF_SIZE];

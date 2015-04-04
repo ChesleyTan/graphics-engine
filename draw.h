@@ -15,13 +15,24 @@
 #define STEP_SIZE 0.001
 #define MIN_STEP_SIZE 0.0001
 
-/* enum for plotting mode for use in functions defined in draw.c */
+/* enum for plotting mode for use in functions defined in draw.c
+ * Its value can be one of PLOT_CARTESIAN or PLOT_ABSOLUTE.
+ * If PLOT_CARTESIAN is selected, the points are plotted on the Cartesian axes,
+ * with the origin at the center.
+ * If PLOT_ABSOLUTE is selected, the points are plotted with the origin at the
+ * bottom-left corner.
+ * */
 typedef enum {
     PLOT_CARTESIAN,
     PLOT_ABSOLUTE
 } plotting_mode;
 
-/* enum for drawing mode for use in functions defined in draw.c */
+/* enum for drawing mode for use in functions defined in draw.c
+ * Its value can be one of DRAW_LINE or DRAW_POLYGON.
+ * If DRAW_LINE is selected, points will be paired to form lines/edges.
+ * If DRAW_POLYGON is selected, points will be grouped in triples to form
+ * triangles.
+ * */
 typedef enum {
     DRAW_LINE,
     DRAW_POLYGON
@@ -37,7 +48,7 @@ typedef enum {
  * This value may be set programmatically. */
 static plotting_mode global_plot_mode = PLOT_CARTESIAN;
 
-/* Plotting mode to be used by default globally.
+/* Drawing mode to be used by default globally.
  * This value may be set programmatically. */
 static drawing_mode global_draw_mode = DRAW_LINE;
 
@@ -47,8 +58,8 @@ Inputs:     struct matrix *points
             double y
             double z
 Returns:
-Adds point (x, y, z) to points and increments points.lastcol.
-If points is full, points is automatically resized.
+Adds point (x, y, z) to 'points' and increments 'points.lastcol'.
+If 'points' is full, 'points' is automatically resized.
 ====================================*/
 void add_point(struct matrix * points, double x, double y, double z);
 
@@ -56,7 +67,7 @@ void add_point(struct matrix * points, double x, double y, double z);
 Inputs:     struct matrix *points
             double x0, double y0, double z0, double x1, double y1, double z1
 Returns:
-Add the line connecting (x0, y0, z0) to (x1, y1, z1) to points.
+Add the line connecting (x0, y0, z0) to (x1, y1, z1) to 'points'.
 ===================================*/
 void add_edge(struct matrix * points,
             double x0, double y0, double z0,
@@ -66,7 +77,7 @@ void add_edge(struct matrix * points,
 Inputs:     struct matrix *points
             double cx, double cy, double cz, double r, double step
 Returns:
-Add the circle centered at (cx, cy, cz) with radius r to points, using the step
+Add the circle centered at (cx, cy, cz) with radius r to 'points', using the step
 size defined by the step parameter.
 ===================================*/
 void add_circle(struct matrix *points,
@@ -85,7 +96,7 @@ Inputs:     struct matrix *points
             double x2, double y2,
             double x3, double y3
 Returns:
-Adds a curve of type defined by the type parameter to points, using a step size
+Adds a curve of type defined by the type parameter to 'points', using a step size
 defined by the step parameter, and control points (x0, y0), (x1, y1), (x2, y2),
 (x3, y3). The usage of these points differs based on the curve type chosen. For
 a list of curve types, see the curve_type enum.
@@ -106,7 +117,7 @@ Inputs:     struct matrix *points
             double dx0, double dy0,
             double dx1, double dy1
 Returns:
-Adds a cubic Hermite curve to points, using a step size defined by the
+Adds a cubic Hermite curve to 'points', using a step size defined by the
 step parameter, endpoints (x0, y0) and (x1, y1), and first
 derivatives at the endpoints (dx0, dy0) and (dx1, dy1).
 ====================================*/
@@ -125,7 +136,7 @@ Inputs:     struct matrix *points
             double x2, double y2,
             double x3, double y3
 Returns:
-Adds a cubic Bezier curve to points, using a step size defined by the
+Adds a cubic Bezier curve to 'points', using a step size defined by the
 step parameter and control points (x0, y0), (x1, y1), (x2, y2), and (x3, y3).
 ====================================*/
 void add_bezier_curve(struct matrix *points,
@@ -142,11 +153,13 @@ Inputs:     struct matrix *points,
             double z,
             double width,
             double height,
-            double depth
+            double depth,
+            drawing_mode draw_mode
 Returns:
 Adds the corners of a rectangular prism with upper-left corner of its front face
-at (x, y, z) and width, height, and depth equal to those given to the edge
-matrix 'points'.
+at (x, y, z) and width, height, and depth equal to those given to the
+matrix 'points'. The draw_mode parameter determines the method used for drawing
+the prism. See drawing_mode for more information.
 ====================================*/
 void add_prism(struct matrix *points,
                double x,
@@ -154,16 +167,32 @@ void add_prism(struct matrix *points,
                double z,
                double width,
                double height,
-               double depth);
+               double depth,
+               drawing_mode draw_mode);
 
+/*======== void add_sphere() ==========
+Inputs:     struct matrix *points,
+            double step,
+            double x,
+            double y,
+            double z,
+            double radius,
+            drawing_mode draw_mode
+Returns:
+Adds the edges/polygons of a sphere centered at (x, y, z) with a radius equal to
+the one given to the matrix 'points' using the given step size 
+(0 < step < 2).
+The draw_mode parameter determines the method used for drawing the prism. See
+drawing_mode for more information.
+====================================*/
 void add_sphere(struct matrix *points,
                 double step,
                 double x,
                 double y,
                 double z,
-                double radius);
+                double radius,
+                drawing_mode draw_mode);
 
-// TODO update documentation
 /*======== void generate_sphere() ==========
 Inputs:     struct matrix *points,
             double step,
@@ -173,7 +202,7 @@ Inputs:     struct matrix *points,
             double radius
 Returns:
 Adds the points of a sphere centered at (x, y, z) with a radius equal to the one
-given to the edge matrix 'points' using the given step size (0 < step < 2).
+given to the matrix 'points' using the given step size (0 < step < 2).
 ====================================*/
 void generate_sphere(struct matrix *points,
                      double step,
@@ -182,13 +211,30 @@ void generate_sphere(struct matrix *points,
                      double z,
                      double radius);
 
+/*======== void add_torus() ==========
+Inputs:     struct matrix *points,
+            double step,
+            double x,
+            double y,
+            double z,
+            double circle_radius,
+            double torus_radius,
+            drawing_mode draw_mode
+Returns:
+Adds the edges/polygons of a torus centered at (x, y, z) with a circle radius of
+circle_radius and a torus radius of torus_radius using the given step size 
+(0 < step < 2) to 'points'.
+The draw_mode parameter determines the method used for drawing the prism. See
+drawing_mode for more information.
+====================================*/
 void add_torus(struct matrix *points,
                double step,
                double x,
                double y,
                double z,
                double circle_radius,
-               double torus_radius);
+               double torus_radius,
+               drawing_mode draw_mode);
 
 /*======== void generate_torus() ==========
 Inputs:     struct matrix *points,
@@ -201,7 +247,7 @@ Inputs:     struct matrix *points,
 Returns:
 Adds the points of a torus centered at (x, y, z) with a circle radius of
 circle_radius and a torus radius of torus_radius using the given step size 
-(0 < step < 2).
+(0 < step < 2) to 'points'.
 ====================================*/
 void generate_torus(struct matrix *points,
                     double step,
@@ -233,9 +279,10 @@ Inputs:     screen s
             struct matrix * points
             plotting_mode plot_mode
 Returns:
-Iterates through points 2 at a time and calls draw_line() to add that line
+Iterates through 'points' 2 at a time and calls draw_line() to add that line
 to the screen.
 The plotting mode determines the coordinate system to be used when plotting points.
+See plotting_mode for more information.
 =====================================*/
 void draw_lines(screen s, color c, struct matrix * points, plotting_mode plot_mode);
 
@@ -243,49 +290,42 @@ void draw_lines(screen s, color c, struct matrix * points, plotting_mode plot_mo
 Inputs:     screen s
             color c
 Returns:
-Plots all the points necessary to draw the x- and y-axes in
-the Cartesian coordinate plane
+Plots all the points necessary to draw the x- and y-axes in the Cartesian
+coordinate plane.
 ====================================*/
 void draw_axes(screen s, color c);
 
 /*======== void add_polygon() ==========
-Inputs:   struct matrix *surfaces
-         double x0
-         double y0
-         double z0
-         double x1
-         double y1
-         double z1
-         double x2
-         double y2
-         double z2
+Inputs:     struct matrix *polygons
+            double x0
+            double y0
+            double z0
+            double x1
+            double y1
+            double z1
+            double x2
+            double y2
+            double z2
 Returns:
-Adds the vertices (x0, y0, z0), (x1, y1, z1)
-and (x2, y2, z2) to the polygon matrix. They
-define a single triangle surface.
-
-04/16/13 13:05:59
-jdyrlandweaver
-====================*/
+Adds the vertices (x0, y0, z0), (x1, y1, z1) and (x2, y2, z2) to the polygon
+matrix. They define a single triangle surface.
+======================================*/
 void add_polygon(struct matrix *polygons,
                  double x0, double y0, double z0,
                  double x1, double y1, double z1,
                  double x2, double y2, double z2);
 
-// TODO update documentation
 /*======== void draw_polygons() ==========
 Inputs:     screen s
             color c
             struct matrix *polygons
             plotting_mode plot_mode
 Returns:
-Goes through polygons 3 points at a time, drawing
-lines connecting each points to create bounding
-triangles
-
-04/16/13 13:13:27
-jdyrlandweaver
-====================*/
+Iterates through the points in 'polygons' 3 points at a time, connecting them
+to create triangles.
+The plotting mode determines the coordinate system to be used when plotting points.
+See plotting_mode for more information.
+=========================================*/
 void draw_polygons(screen s, color c, struct matrix *polygons, plotting_mode plot_mode);
 #endif
 // vim: ts=4:et:sts:sw=4:sr

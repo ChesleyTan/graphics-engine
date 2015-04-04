@@ -1,5 +1,11 @@
 plot-mode cartesian
 draw-mode polygon
+prism 0 0 0 100 100 100
+x 30
+y 30
+a
+i
+v
 torus 0 0 0 50 200 0.05
 v
 x 30
@@ -33,13 +39,6 @@ y 30
 a
 i
 v
-x 30
-y 30
-a
-i
-v
-q
-prism 0 0 0 100 100 100
 x 30
 y 30
 a

@@ -92,7 +92,7 @@ Parses the command according to the following rules:
         plot-mode: set the plotting mode
             takes 1 parameter (either "cartesian" or "absolute")
         draw-mode: set the drawing mode
-            takes 1 parameter (either "line" or "absolute")
+            takes 1 parameter (either "line" or "polygon")
         clear: clears the point matrix of all points
         v: draw the lines of the edge matrix to the screen display the screen
         f: save the screen to a file -

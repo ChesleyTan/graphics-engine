@@ -188,7 +188,8 @@ void add_prism(struct matrix *points,
                double z,
                double width,
                double height,
-               double depth) {
+               double depth,
+               drawing_mode draw_mode) {
     /* x, y, and z are the coordinates of the upper-left corner of the
      * front face of the rectangular prism, with width, height, and depth
      * corresponding to the x, y, and z coordinates respectively.
@@ -196,29 +197,70 @@ void add_prism(struct matrix *points,
     double x1 = x + width;
     double y1 = y - height;
     double z1 = z - depth;
-    // Front side
-    add_polygon(points, x, y, z, x, y1, z, x1, y1, z);
-    add_polygon(points, x, y, z, x1, y1, z, x1, y, z);
+    switch (draw_mode) {
+        case DRAW_POLYGON:
+            // Front side
+            add_polygon(points, x, y, z, x, y1, z, x1, y1, z);
+            add_polygon(points, x, y, z, x1, y1, z, x1, y, z);
 
-    // Back side
-    add_polygon(points, x, y, z1, x, y1, z1, x1, y1, z1);
-    add_polygon(points, x, y, z, x1, y1, z1, x1, y, z1);
+            // Back side
+            add_polygon(points, x, y, z1, x, y1, z1, x1, y1, z1);
+            add_polygon(points, x, y, z, x1, y1, z1, x1, y, z1);
 
-    // Top side
-    add_polygon(points, x, y, z1, x, y, z, x1, y, z);
-    add_polygon(points, x, y, z1, x1, y, z, x1, y, z1);
+            // Top side
+            add_polygon(points, x, y, z1, x, y, z, x1, y, z);
+            add_polygon(points, x, y, z1, x1, y, z, x1, y, z1);
 
-    // Bottom side
-    add_polygon(points, x, y1, z1, x, y1, z, x1, y1, z);
-    add_polygon(points, x, y1, z1, x1, y1, z, x1, y1, z1);
+            // Bottom side
+            add_polygon(points, x, y1, z1, x, y1, z, x1, y1, z);
+            add_polygon(points, x, y1, z1, x1, y1, z, x1, y1, z1);
 
-    // Left side
-    add_polygon(points, x, y, z1, x, y1, z1, x, y1, z);
-    add_polygon(points, x, y, z1, x, y1, z, x, y, z);
+            // Left side
+            add_polygon(points, x, y, z1, x, y1, z1, x, y1, z);
+            add_polygon(points, x, y, z1, x, y1, z, x, y, z);
 
-    // Left side
-    add_polygon(points, x1, y, z1, x1, y1, z1, x1, y1, z);
-    add_polygon(points, x1, y, z1, x1, y1, z, x1, y, z);
+            // Left side
+            add_polygon(points, x1, y, z1, x1, y1, z1, x1, y1, z);
+            add_polygon(points, x1, y, z1, x1, y1, z, x1, y, z);
+            break;
+        case DRAW_LINE:
+            // Front side
+            add_edge(points, x, y, z, x, y1, z);
+            add_edge(points, x, y1, z, x1, y1, z);
+            add_edge(points, x1, y1, z, x1, y, z);
+            add_edge(points, x1, y, z, x, y, z);
+
+            // Back side
+            add_edge(points, x, y, z1, x, y1, z1);
+            add_edge(points, x, y1, z1, x1, y1, z1);
+            add_edge(points, x1, y1, z1, x1, y, z1);
+            add_edge(points, x1, y, z1, x, y, z1);
+
+            // Top side
+            add_edge(points, x, y, z, x1, y, z);
+            add_edge(points, x1, y, z, x1, y, z1);
+            add_edge(points, x1, y, z1, x, y, z1);
+            add_edge(points, x, y, z1, x, y, z);
+
+            // Bottom side
+            add_edge(points, x, y1, z, x1, y1, z);
+            add_edge(points, x1, y1, z, x1, y1, z1);
+            add_edge(points, x1, y1, z1, x, y1, z1);
+            add_edge(points, x, y1, z1, x, y1, z);
+
+            // Left side
+            add_edge(points, x, y, z, x, y, z1);
+            add_edge(points, x, y, z1, x, y1, z1);
+            add_edge(points, x, y1, z1, x, y1, z);
+            add_edge(points, x, y1, z, x, y, z);
+
+            // Right side
+            add_edge(points, x1, y, z, x1, y, z1);
+            add_edge(points, x1, y, z1, x1, y1, z1);
+            add_edge(points, x1, y1, z1, x1, y1, z);
+            add_edge(points, x1, y1, z, x1, y, z);
+            break;
+    }
 }
 
 void add_sphere(struct matrix *points,
@@ -226,7 +268,8 @@ void add_sphere(struct matrix *points,
                 double x,
                 double y,
                 double z,
-                double radius) {
+                double radius,
+                drawing_mode draw_mode) {
     // Ensure that step size is greater than the minimum step size
     if (step < MIN_STEP_SIZE) {
         step = MIN_STEP_SIZE;
@@ -242,74 +285,71 @@ void add_sphere(struct matrix *points,
     // P90 P91 P92 P93 P99 ... P99
     int latitude, longitude;
     double **m = tmp->m;
-    int num_pts = tmp->lastcol;
     int num_steps = round(1.0 / step);
-    for (latitude = 0; latitude < num_steps; ++latitude) {
-        int lat_start = num_steps * latitude;
-        int next_lat_start = (lat_start + num_steps) % num_pts;
-        for (longitude = 0; longitude < num_steps; ++longitude) {
-            int index = lat_start + longitude;
-            // These checks ensures that the last point plotted is connected back to the
-            // correct starting point to close the loop/arc of the circle
-            int index_plus_one = lat_start + ((longitude + 1) % num_steps);
-            int index_next_lat = next_lat_start + longitude;
-            // Invert the index when wrapping back around the sphere
-            if (lat_start + num_steps >= num_pts) {
-                index_next_lat = (num_steps - index_next_lat) % num_steps;
+    switch (draw_mode) {
+        case DRAW_POLYGON: ; // Obligatory empty statement
+            int num_pts = tmp->lastcol;
+            for (latitude = 0; latitude < num_steps; ++latitude) {
+                int lat_start = num_steps * latitude;
+                int next_lat_start = (lat_start + num_steps) % num_pts;
+                for (longitude = 0; longitude < num_steps; ++longitude) {
+                    int index = lat_start + longitude;
+                    // These checks ensure that the last point plotted is
+                    // connected back to the correct starting point to close the
+                    // loop/arc of the circle.
+                    int index_plus_one = lat_start + ((longitude + 1) % num_steps);
+                    int index_next_lat = next_lat_start + longitude;
+                    // Invert the index when wrapping back around the sphere
+                    if (lat_start + num_steps >= num_pts) {
+                        index_next_lat = (num_steps - index_next_lat) % num_steps;
+                    }
+                    int index_next_lat_plus_one = (index_next_lat + 1) % num_pts;
+
+                    /* DEBUG
+                    print_debug("lat: %d, long: %d => %d", latitude, longitude, index);
+                    print_debug("lastcol: %d", num_pts);
+                    print_debug("index:%d", index);
+                    print_debug("index_plus_one:%d", index_plus_one);
+                    print_debug("index_next_lat:%d", index_next_lat);
+                    print_debug("index_next_lat_plus_one:%d", index_next_lat_plus_one);
+                    print_debug("index:\t\t\t\t(%lf,%lf,%lf)", m[0][index], m[1][index], m[2][index]);
+                    print_debug("index_plus_one:\t\t\t(%lf,%lf,%lf)", m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]);
+                    print_debug("index_next_lat:\t\t\t(%lf,%lf,%lf)", m[0][index_next_lat], m[1][index_next_lat], m[2][index_next_lat]);
+                    print_debug("index_next_lat_plus_one:\t(%lf,%lf,%lf)", m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one]);
+                    */
+
+                    // Polygon-wise version
+                    add_polygon(points,
+                                m[0][index], m[1][index], m[2][index],
+                                m[0][index_next_lat],
+                                m[1][index_next_lat],
+                                m[2][index_next_lat],
+                                m[0][index_next_lat_plus_one],
+                                m[1][index_next_lat_plus_one],
+                                m[2][index_next_lat_plus_one]
+                    );
+                    add_polygon(points,
+                                m[0][index], m[1][index], m[2][index],
+                                m[0][index_next_lat_plus_one],
+                                m[1][index_next_lat_plus_one],
+                                m[2][index_next_lat_plus_one],
+                                m[0][index_plus_one],
+                                m[1][index_plus_one],
+                                m[2][index_plus_one]
+                    );
+                }
             }
-            int index_next_lat_plus_one = (index_next_lat + 1) % num_pts;
-
+            break;
+        case DRAW_LINE:
             // Line-wise version
-            //add_edge(points, m[0][index], m[1][index], m[2][index],
-            //         m[0][index], m[1][index], m[2][index]);
-
-            /* DEBUG
-            print_debug("lat: %d, long: %d => %d", latitude, longitude, index);
-            print_debug("lastcol: %d", num_pts);
-            print_debug("index:%d", index);
-            print_debug("index_plus_one:%d", index_plus_one);
-            print_debug("index_next_lat:%d", index_next_lat);
-            print_debug("index_next_lat_plus_one:%d", index_next_lat_plus_one);
-            print_debug("index:\t\t\t\t(%lf,%lf,%lf)", m[0][index], m[1][index], m[2][index]);
-            print_debug("index_plus_one:\t\t\t(%lf,%lf,%lf)", m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]);
-            print_debug("index_next_lat:\t\t\t(%lf,%lf,%lf)", m[0][index_next_lat], m[1][index_next_lat], m[2][index_next_lat]);
-            print_debug("index_next_lat_plus_one:\t(%lf,%lf,%lf)", m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one]);
-            */
-
-            // TODO remove this
-            //add_polygon(points,
-            //            m[0][index], m[1][index], m[2][index],
-            //            m[0][index], m[1][index], m[2][index],
-            //            m[0][index], m[1][index], m[2][index]
-            //            );
-            //add_polygon(points,
-            //            m[0][index], m[1][index], m[2][index],
-            //            m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one],
-            //            m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]
-            //            );
-            //add_polygon(points,
-            //            m[0][index], m[1][index], m[2][index],
-            //            m[0][index_next_lat], m[1][index_next_lat], m[2][index_next_lat],
-            //            m[0][index_next_lat], m[1][index_next_lat], m[2][index_next_lat]
-            //            );
-            //add_polygon(points,
-            //            m[0][index], m[1][index], m[2][index],
-            //            m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one],
-            //            m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one]
-            //            );
-
-            // Polygon-wise version
-            add_polygon(points,
-                        m[0][index], m[1][index], m[2][index],
-                        m[0][index_next_lat], m[1][index_next_lat], m[2][index_next_lat],
-                        m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one]
-                        );
-            add_polygon(points,
-                        m[0][index], m[1][index], m[2][index],
-                        m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one],
-                        m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]
-                        );
-        }
+            for (latitude = 0; latitude < num_steps; ++latitude) {
+                for (longitude = 0; longitude < num_steps; ++longitude) {
+                    int index = latitude * num_steps + longitude;
+                    add_edge(points, m[0][index], m[1][index], m[2][index],
+                                     m[0][index], m[1][index], m[2][index]);
+                }
+            }
+            break;
     }
     free_matrix(tmp);
 }
@@ -356,7 +396,8 @@ void add_torus(struct matrix *points,
                double y,
                double z,
                double circle_radius,
-               double torus_radius) {
+               double torus_radius,
+               drawing_mode draw_mode) {
     // Ensure that step size is greater than the minimum step size
     if (step < MIN_STEP_SIZE) {
         step = MIN_STEP_SIZE;
@@ -372,29 +413,53 @@ void add_torus(struct matrix *points,
     // P90 P91 P92 P93 P99 ... P99
     int latitude, longitude;
     double **m = tmp->m;
-    int num_pts = tmp->lastcol;
     int num_steps = round(1.0 / step);
-    for (latitude = 0; latitude < num_steps; ++latitude) {
-        int lat_start = num_steps * latitude;
-        int next_lat_start = (lat_start + num_steps) % num_pts;
-        for (longitude = 0; longitude < num_steps; ++longitude) {
-            int index = lat_start + longitude;
-            // These checks ensures that the last point plotted is connected back to the
-            // correct starting point to close the loop/arc of the circle
-            int index_plus_one = lat_start + ((longitude + 1) % num_steps);
-            int index_next_lat = (next_lat_start + longitude) % num_pts;
-            int index_next_lat_plus_one = (index_next_lat + 1) % num_pts;
-            add_polygon(points,
-                        m[0][index], m[1][index], m[2][index],
-                        m[0][index_next_lat], m[1][index_next_lat], m[2][index_next_lat],
-                        m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one]
-                        );
-            add_polygon(points,
-                        m[0][index], m[1][index], m[2][index],
-                        m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one],
-                        m[0][index_plus_one], m[1][index_plus_one], m[2][index_plus_one]
-                        );
-        }
+    switch (draw_mode) {
+        case DRAW_POLYGON: ; // Obligatory empty statement
+            int num_pts = tmp->lastcol;
+            for (latitude = 0; latitude < num_steps; ++latitude) {
+                int lat_start = num_steps * latitude;
+                int next_lat_start = (lat_start + num_steps) % num_pts;
+                for (longitude = 0; longitude < num_steps; ++longitude) {
+                    int index = lat_start + longitude;
+                    // These checks ensure that the last point plotted is
+                    // connected back to the correct starting point to close the
+                    // loop/arc of the circle.
+                    int index_plus_one = lat_start + ((longitude + 1) % num_steps);
+                    int index_next_lat = (next_lat_start + longitude) % num_pts;
+                    int index_next_lat_plus_one = (index_next_lat + 1) % num_pts;
+                    add_polygon(points,
+                                m[0][index], m[1][index], m[2][index],
+                                m[0][index_next_lat],
+                                m[1][index_next_lat],
+                                m[2][index_next_lat],
+                                m[0][index_next_lat_plus_one],
+                                m[1][index_next_lat_plus_one],
+                                m[2][index_next_lat_plus_one]
+                    );
+                    add_polygon(points,
+                                m[0][index], m[1][index], m[2][index],
+                                m[0][index_next_lat_plus_one],
+                                m[1][index_next_lat_plus_one],
+                                m[2][index_next_lat_plus_one],
+                                m[0][index_plus_one],
+                                m[1][index_plus_one],
+                                m[2][index_plus_one]
+                    );
+                }
+            }
+            break;
+        case DRAW_LINE:
+            // Line-wise version
+            for (latitude = 0; latitude < num_steps; ++latitude) {
+                for (longitude = 0; longitude < num_steps; ++longitude) {
+                    int index = latitude * num_steps + longitude;
+                    add_edge(points, m[0][index], m[1][index], m[2][index],
+                                     m[0][index], m[1][index], m[2][index]);
+                }
+            }
+            break;
+            break;
     }
     free_matrix(tmp);
 }
@@ -605,7 +670,8 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
     }
 }
 
-void draw_lines(screen s, color c, struct matrix *edges, plotting_mode plot_mode) {
+void draw_lines(screen s, color c, struct matrix *edges,
+                plotting_mode plot_mode) {
     if (edges->lastcol < 2) {
         print_error("Edge matrix has a length of less than 2.");
         return;
@@ -636,7 +702,8 @@ void add_polygon(struct matrix *polygons,
     add_point(polygons, x2, y2, z2);
 }
 
-void draw_polygons(screen s, color c, struct matrix *polygons, plotting_mode plot_mode) {
+void draw_polygons(screen s, color c, struct matrix *polygons,
+                   plotting_mode plot_mode) {
     if (polygons->lastcol < 3) {
         print_error("Polygon matrix has a length of less than 3.");
         return;
@@ -660,9 +727,6 @@ void draw_polygons(screen s, color c, struct matrix *polygons, plotting_mode plo
                m[0][i], m[1][i], m[2][i],
                m[0][i+1], m[1][i+1], m[2][i+1],
                m[0][i+2], m[1][i+2], m[2][i+2]);
-        if (i > polygons->lastcol - 30) {
-            display(s);
-        }
         if (i % 50 == 0) {
             display(s);
         }
