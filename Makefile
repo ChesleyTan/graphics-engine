@@ -1,4 +1,4 @@
-OBJECTS= draw.o display.o matrix.o utils.o parser.o
+OBJECTS= draw.o display.o matrix.o utils.o parser.o gmath.o
 DEBUG= -DDEBUG -g
 WARNINGS_QUIET= -Wall -Wno-unused-variable -Wno-unused-function
 WARNINGS_ALL= -Wall -Wpadded
@@ -36,6 +36,9 @@ utils.o: utils.c utils.h
 
 parser.o: parser.c parser.h
 	$(CC) $(DEBUG) $(CFLAGS) -c parser.c
+
+gmath.o: gmath.c gmath.h
+	$(CC) $(DEBUG) $(CFLAGS) -c gmath.c
 
 clean:
 	rm -f *.o
