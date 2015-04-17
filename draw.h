@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "matrix.h"
 #include "display.h"
+#include "gmath.h"
 #include "matrix.h"
 #include "utils.h"
 

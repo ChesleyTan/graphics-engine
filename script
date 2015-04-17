@@ -7,7 +7,7 @@ y 30
 a
 i
 v
-resize 750 750
+resize 1000 1000
 torus 0 0 0 50 200 0.05
 v
 x 30

@@ -201,27 +201,27 @@ void add_prism(struct matrix *points,
         case DRAW_POLYGON:
             // Front side
             add_polygon(points, x, y, z, x, y1, z, x1, y1, z);
-            add_polygon(points, x, y, z, x1, y1, z, x1, y, z);
+            add_polygon(points, x1, y1, z, x1, y, z, x, y, z);
 
             // Back side
-            add_polygon(points, x, y, z1, x, y1, z1, x1, y1, z1);
-            add_polygon(points, x, y, z, x1, y1, z1, x1, y, z1);
+            add_polygon(points, x, y, z1, x1, y, z1, x1, y1, z1);
+            add_polygon(points, x1, y1, z1, x, y1, z1, x, y, z1);
 
             // Top side
             add_polygon(points, x, y, z1, x, y, z, x1, y, z);
-            add_polygon(points, x, y, z1, x1, y, z, x1, y, z1);
+            add_polygon(points, x1, y, z, x1, y, z1, x, y, z1);
 
             // Bottom side
-            add_polygon(points, x, y1, z1, x, y1, z, x1, y1, z);
-            add_polygon(points, x, y1, z1, x1, y1, z, x1, y1, z1);
+            add_polygon(points, x, y1, z, x, y1, z1, x1, y1, z1);
+            add_polygon(points, x1, y1, z1, x1, y1, z, x, y1, z);
 
             // Left side
-            add_polygon(points, x, y, z1, x, y1, z1, x, y1, z);
-            add_polygon(points, x, y, z1, x, y1, z, x, y, z);
+            add_polygon(points, x, y, z, x, y, z1, x, y1, z1);
+            add_polygon(points, x, y1, z1, x, y1, z, x, y, z);
 
-            // Left side
-            add_polygon(points, x1, y, z1, x1, y1, z1, x1, y1, z);
-            add_polygon(points, x1, y, z1, x1, y1, z, x1, y, z);
+            // Right side
+            add_polygon(points, x1, y, z, x1, y1, z, x1, y1, z1);
+            add_polygon(points, x1, y1, z1, x1, y, z1, x1, y, z);
             break;
         case DRAW_LINE:
             // Front side
@@ -702,35 +702,54 @@ void add_polygon(struct matrix *polygons,
     add_point(polygons, x2, y2, z2);
 }
 
+char is_visible(double **polygons, int index) {
+    double *normal = cross_prod(polygons[0][index+1] - polygons[0][index],
+                                polygons[1][index+1] - polygons[1][index],
+                                polygons[2][index+1] - polygons[2][index],
+                                polygons[0][index+2] - polygons[0][index],
+                                polygons[1][index+2] - polygons[1][index],
+                                polygons[2][index+2] - polygons[2][index]);
+    //printf("cross: (%lf, %lf, %lf)\n", normal[0], normal[1], normal[2]);
+    double view_vector[3] = {0.0, 0.0, -1.0};
+    char visible = (dot_prod(normal[0], normal[1], normal[2],
+                             view_vector[0], view_vector[1], view_vector[2]
+                           ) < 0) ? 1 : 0;
+    printf("%d\n", visible);
+    free(normal);
+    return visible;
+}
+
 void draw_polygons(screen s, color c, struct matrix *polygons,
                    plotting_mode plot_mode) {
     if (polygons->lastcol < 3) {
         print_error("Polygon matrix has a length of less than 3.");
         return;
     }
+    double **m = polygons->m;
     int i;
     for (i = 0; i < polygons->lastcol - 2; i+=3) {
-        double **m = polygons->m;
-        draw_line(s, c, m[0][i], m[1][i],
-                        m[0][i+1], m[1][i+1],
-                        plot_mode);
-        draw_line(s, c, m[0][i+1], m[1][i+1],
-                        m[0][i+2], m[1][i+2],
-                        plot_mode);
-        draw_line(s, c, m[0][i+2], m[1][i+2],
-                        m[0][i], m[1][i],
-                        plot_mode);
-        /* DEBUG
-        print_debug("drawing (%lf,%lf,%lf)\n"
-               "\tto      (%lf, %lf, %lf)\n"
-               "\tand     (%lf, %lf, %lf)",
-               m[0][i], m[1][i], m[2][i],
-               m[0][i+1], m[1][i+1], m[2][i+1],
-               m[0][i+2], m[1][i+2], m[2][i+2]);
-        if (i % 50 == 0) {
-            display(s);
+        if (is_visible(m, i)) {
+            draw_line(s, c, m[0][i], m[1][i],
+                            m[0][i+1], m[1][i+1],
+                            plot_mode);
+            draw_line(s, c, m[0][i+1], m[1][i+1],
+                            m[0][i+2], m[1][i+2],
+                            plot_mode);
+            draw_line(s, c, m[0][i+2], m[1][i+2],
+                            m[0][i], m[1][i],
+                            plot_mode);
+            /* DEBUG
+            print_debug("drawing (%lf,%lf,%lf)\n"
+                "\tto      (%lf, %lf, %lf)\n"
+                "\tand     (%lf, %lf, %lf)",
+                m[0][i], m[1][i], m[2][i],
+                m[0][i+1], m[1][i+1], m[2][i+1],
+                m[0][i+2], m[1][i+2], m[2][i+2]);
+            if (i % 50 == 0) {
+                display(s);
+            }
+            */
         }
-        */
     }
 }
 
