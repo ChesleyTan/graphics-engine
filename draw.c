@@ -276,34 +276,36 @@ void add_sphere(struct matrix *points,
     }
     struct matrix *tmp = new_matrix(4, 1);
     generate_sphere(tmp, step, x, y, z, radius);
-    // The points in the sphere are ordered as follows (assuming num_steps = 10):
-    // P0  P1  P2  P3  P4  ... P9
+    // The points in the sphere are ordered as follows (assuming num_steps = 11):
+    // TODO this is wrong now
+    // P0  P1  P2  P3  P4  ... P10
     // |A\B|                  
-    // P10 P11 P12 P13 P14 ... P19
-    // P20 P21 P22 P23 P24 ... P29
+    // P11 P12 P13 P14 P15 ... P21
+    // P22 P23 P24 P25 P26 ... P32
     // ...
-    // P90 P91 P92 P93 P99 ... P99
     int latitude, longitude;
     double **m = tmp->m;
-    int num_steps = round(1.0 / step);
+    int num_steps = round(1.0 / step) + 1;
     switch (draw_mode) {
         case DRAW_POLYGON: ; // Obligatory empty statement
             int num_pts = tmp->lastcol;
-            for (latitude = 0; latitude < num_steps; ++latitude) {
+            for (latitude = 0; latitude < num_steps - 1; ++latitude) {
                 int lat_start = num_steps * latitude;
                 int next_lat_start = (lat_start + num_steps) % num_pts;
-                for (longitude = 0; longitude < num_steps; ++longitude) {
+                //int next_lat_start = lat_start + num_steps;
+                for (longitude = 0; longitude < num_steps - 1; ++longitude) {
                     int index = lat_start + longitude;
                     // These checks ensure that the last point plotted is
                     // connected back to the correct starting point to close the
-                    // loop/arc of the circle.
-                    int index_plus_one = lat_start + ((longitude + 1) % num_steps);
+                    // loop/arc of the circle.  //int index_plus_one = lat_start + ((longitude + 1) % num_steps);
+		    int index_plus_one = lat_start + longitude + 1;
                     int index_next_lat = next_lat_start + longitude;
                     // Invert the index when wrapping back around the sphere
-                    if (lat_start + num_steps >= num_pts) {
-                        index_next_lat = (num_steps - index_next_lat) % num_steps;
-                    }
-                    int index_next_lat_plus_one = (index_next_lat + 1) % num_pts;
+                    //if (lat_start + num_steps >= num_pts) {
+                    //    index_next_lat = (num_steps - index_next_lat) % num_steps;
+                    //}
+                    //int index_next_lat_plus_one = (index_next_lat + 1) % num_pts;
+                    int index_next_lat_plus_one = next_lat_start + ((longitude + 1) % num_steps);
 
                     /* DEBUG
                     print_debug("lat: %d, long: %d => %d", latitude, longitude, index);
@@ -318,6 +320,15 @@ void add_sphere(struct matrix *points,
                     print_debug("index_next_lat_plus_one:\t(%lf,%lf,%lf)", m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one]);
                     */
 
+                    //add_polygon(points,
+                    //            m[0][index], m[1][index], m[2][index],
+                    //            m[0][index_next_lat],
+                    //            m[1][index_next_lat],
+                    //            m[2][index_next_lat],
+                    //            m[0][index_next_lat_plus_one],
+                    //            m[1][index_next_lat_plus_one],
+                    //            m[2][index_next_lat_plus_one]
+                    //);
                     // Polygon-wise version
                     add_polygon(points,
                                 m[0][index], m[1][index], m[2][index],
@@ -329,13 +340,13 @@ void add_sphere(struct matrix *points,
                                 m[2][index_next_lat_plus_one]
                     );
                     add_polygon(points,
-                                m[0][index], m[1][index], m[2][index],
                                 m[0][index_next_lat_plus_one],
                                 m[1][index_next_lat_plus_one],
                                 m[2][index_next_lat_plus_one],
                                 m[0][index_plus_one],
                                 m[1][index_plus_one],
-                                m[2][index_plus_one]
+                                m[2][index_plus_one],
+                                m[0][index], m[1][index], m[2][index]
                     );
                 }
             }
@@ -375,11 +386,11 @@ void generate_sphere(struct matrix *points,
     int circle_steps, rotate_steps;
     circle_steps = rotate_steps = round(1.0 / step);
     for (s = 0; s < rotate_steps; ++s) {
-        double phi_rad = M_PI * (1.0 * s / rotate_steps);
+        double phi_rad = M_PI * (2.0 * s / rotate_steps);
         double r_cos_phi = radius * cos(phi_rad);
         double r_sin_phi = radius * sin(phi_rad);
-        for (t = 0; t < circle_steps; ++t) {
-            double theta_rad = M_PI * (2.0 * t / circle_steps);
+        for (t = 0; t <= circle_steps; ++t) {
+            double theta_rad = M_PI * (1.0 * t / circle_steps);
             double sin_theta = sin(theta_rad);
             double cos_theta = cos(theta_rad);
             double curr_x = x + radius * cos_theta;
@@ -709,7 +720,6 @@ char is_visible(double **polygons, int index) {
                                 polygons[0][index+2] - polygons[0][index],
                                 polygons[1][index+2] - polygons[1][index],
                                 polygons[2][index+2] - polygons[2][index]);
-    //printf("cross: (%lf, %lf, %lf)\n", normal[0], normal[1], normal[2]);
     double view_vector[3] = {0.0, 0.0, -1.0};
     char visible = (dot_prod(normal[0], normal[1], normal[2],
                              view_vector[0], view_vector[1], view_vector[2]
@@ -745,7 +755,7 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
                 m[0][i], m[1][i], m[2][i],
                 m[0][i+1], m[1][i+1], m[2][i+1],
                 m[0][i+2], m[1][i+2], m[2][i+2]);
-            if (i % 50 == 0) {
+            if (i % 20 == 0) {
                 display(s);
             }
             */
