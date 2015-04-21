@@ -315,6 +315,17 @@ void add_polygon(struct matrix *polygons,
                  double x1, double y1, double z1,
                  double x2, double y2, double z2);
 
+
+/*======== void is_visible() ==========
+Inputs:     double **polygons
+            int index
+Returns:
+Determines whether a polygon at the given index in the polygon matrix is
+visible.  Uses the view vector and the normal vector to the polygon to calculate
+the viewer's angle. Returns 1 if a polygon is visible and 0 if not.
+======================================*/
+char is_visible(double **polygons, int index);
+
 /*======== void draw_polygons() ==========
 Inputs:     screen s
             color c

@@ -277,11 +277,10 @@ void add_sphere(struct matrix *points,
     struct matrix *tmp = new_matrix(4, 1);
     generate_sphere(tmp, step, x, y, z, radius);
     // The points in the sphere are ordered as follows (assuming num_steps = 11):
-    // TODO this is wrong now
-    // P0  P1  P2  P3  P4  ... P10
+    // P0  P1  P2  P3  P4  ... P10 P11
     // |A\B|                  
-    // P11 P12 P13 P14 P15 ... P21
-    // P22 P23 P24 P25 P26 ... P32
+    // P12 P13 P14 P14 P15 ... P21 P22
+    // P23 P24 P25 P26 P27 ... P32 P33
     // ...
     int latitude, longitude;
     double **m = tmp->m;
@@ -292,20 +291,11 @@ void add_sphere(struct matrix *points,
             for (latitude = 0; latitude < num_steps - 1; ++latitude) {
                 int lat_start = num_steps * latitude;
                 int next_lat_start = (lat_start + num_steps) % num_pts;
-                //int next_lat_start = lat_start + num_steps;
                 for (longitude = 0; longitude < num_steps - 1; ++longitude) {
                     int index = lat_start + longitude;
-                    // These checks ensure that the last point plotted is
-                    // connected back to the correct starting point to close the
-                    // loop/arc of the circle.  //int index_plus_one = lat_start + ((longitude + 1) % num_steps);
-		    int index_plus_one = lat_start + longitude + 1;
+                    int index_plus_one = lat_start + longitude + 1;
                     int index_next_lat = next_lat_start + longitude;
-                    // Invert the index when wrapping back around the sphere
-                    //if (lat_start + num_steps >= num_pts) {
-                    //    index_next_lat = (num_steps - index_next_lat) % num_steps;
-                    //}
-                    //int index_next_lat_plus_one = (index_next_lat + 1) % num_pts;
-                    int index_next_lat_plus_one = next_lat_start + ((longitude + 1) % num_steps);
+                    int index_next_lat_plus_one = next_lat_start + longitude + 1;
 
                     /* DEBUG
                     print_debug("lat: %d, long: %d => %d", latitude, longitude, index);
@@ -320,15 +310,6 @@ void add_sphere(struct matrix *points,
                     print_debug("index_next_lat_plus_one:\t(%lf,%lf,%lf)", m[0][index_next_lat_plus_one], m[1][index_next_lat_plus_one], m[2][index_next_lat_plus_one]);
                     */
 
-                    //add_polygon(points,
-                    //            m[0][index], m[1][index], m[2][index],
-                    //            m[0][index_next_lat],
-                    //            m[1][index_next_lat],
-                    //            m[2][index_next_lat],
-                    //            m[0][index_next_lat_plus_one],
-                    //            m[1][index_next_lat_plus_one],
-                    //            m[2][index_next_lat_plus_one]
-                    //);
                     // Polygon-wise version
                     add_polygon(points,
                                 m[0][index], m[1][index], m[2][index],
@@ -707,13 +688,16 @@ void draw_axes(screen s, color c) {
 void add_polygon(struct matrix *polygons,
                  double x0, double y0, double z0,
                  double x1, double y1, double z1,
-                 double x2, double y2, double z2 ) {
+                 double x2, double y2, double z2) {
     add_point(polygons, x0, y0, z0);
     add_point(polygons, x1, y1, z1);
     add_point(polygons, x2, y2, z2);
 }
 
 char is_visible(double **polygons, int index) {
+    // cos(Θ) = (N • V) / (|N| * |V|)
+    // If cos(Θ) < 0, then 90° < Θ < 270°
+    // Supplementary angle: 0° < Φ < 90°, so the surface is visible
     double *normal = cross_prod(polygons[0][index+1] - polygons[0][index],
                                 polygons[1][index+1] - polygons[1][index],
                                 polygons[2][index+1] - polygons[2][index],
@@ -724,7 +708,6 @@ char is_visible(double **polygons, int index) {
     char visible = (dot_prod(normal[0], normal[1], normal[2],
                              view_vector[0], view_vector[1], view_vector[2]
                            ) < 0) ? 1 : 0;
-    printf("%d\n", visible);
     free(normal);
     return visible;
 }
