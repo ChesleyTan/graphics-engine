@@ -316,7 +316,7 @@ void add_polygon(struct matrix *polygons,
                  double x2, double y2, double z2);
 
 
-/*======== void is_visible() ==========
+/*======== char is_visible() ==========
 Inputs:     double **polygons
             int index
 Returns:
