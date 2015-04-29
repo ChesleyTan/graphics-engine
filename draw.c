@@ -182,14 +182,14 @@ void add_bezier_curve(struct matrix *points,
     free_matrix(y_coeff);
 }
 
-void add_prism(struct matrix *points,
-               double x,
-               double y,
-               double z,
-               double width,
-               double height,
-               double depth,
-               drawing_mode draw_mode) {
+void add_box(struct matrix *points,
+             double x,
+             double y,
+             double z,
+             double width,
+             double height,
+             double depth,
+             drawing_mode draw_mode) {
     /* x, y, and z are the coordinates of the upper-left corner of the
      * front face of the rectangular prism, with width, height, and depth
      * corresponding to the x, y, and z coordinates respectively.
@@ -293,9 +293,9 @@ void add_sphere(struct matrix *points,
                 int next_lat_start = (lat_start + num_steps) % num_pts;
                 for (longitude = 0; longitude < num_steps - 1; ++longitude) {
                     int index = lat_start + longitude;
-                    int index_plus_one = lat_start + longitude + 1;
+                    int index_plus_one = index + 1;
                     int index_next_lat = next_lat_start + longitude;
-                    int index_next_lat_plus_one = next_lat_start + longitude + 1;
+                    int index_next_lat_plus_one = index_next_lat + 1;
 
                     /* DEBUG
                     print_debug("lat: %d, long: %d => %d", latitude, longitude, index);

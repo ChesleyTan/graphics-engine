@@ -1,60 +1,16 @@
-resize 500 500
+resize 1000 1000
 plot-mode cartesian
 draw-mode polygon
-prism 0 0 0 100 100 100
-x 30
-y 30
-a
-i
-v
-x 30
-y 10
-a
-v
-a
-v
-clear
-resize 1000 1000
-torus 0 0 0 50 200 0.05
+prism -350 75 0 50 50 50
+prism 320 125 0 50 50 50
+sphere 0 0 0 100 0.05
+sphere -200 100 0 40 0.06
+sphere 200 150 0 40 0.06
+torus 0 -300 0 30 120 0.05
 v
 x 40
-y 45
+y 15
 a
 i
 v
-x 80
-y 95
-a
-v
-clear
-sphere 0 0 0 100 0.05
-x 0
-y 0
-a
-i
-v
-x 0
-y 10
-a
-i
-v
-x 30
-y 10
-a
-i
-v
-x 30
-y 10
-a
-i
-v
-x 30
-y 30
-a
-i
-v
-x 30
-y 30
-a
-i
-v
+f pic.png

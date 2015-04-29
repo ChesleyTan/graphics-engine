@@ -146,7 +146,7 @@ void add_bezier_curve(struct matrix *points,
                       double x2, double y2,
                       double x3, double y3);
 
-/*======== void add_prism() ==========
+/*======== void add_box() ==========
 Inputs:     struct matrix *points,
             double x,
             double y,
@@ -160,15 +160,15 @@ Adds the corners of a rectangular prism with upper-left corner of its front face
 at (x, y, z) and width, height, and depth equal to those given to the
 matrix 'points'. The draw_mode parameter determines the method used for drawing
 the prism. See drawing_mode for more information.
-====================================*/
-void add_prism(struct matrix *points,
-               double x,
-               double y,
-               double z,
-               double width,
-               double height,
-               double depth,
-               drawing_mode draw_mode);
+==================================*/
+void add_box(struct matrix *points,
+             double x,
+             double y,
+             double z,
+             double width,
+             double height,
+             double depth,
+             drawing_mode draw_mode);
 
 /*======== void add_sphere() ==========
 Inputs:     struct matrix *points,

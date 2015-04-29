@@ -253,22 +253,22 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         resize_screen(xres, yres);
         global_s = new_screen();
     }
-    else if (strcmp(cmd, PRISM_CMD) == 0) {
+    else if (strcmp(cmd, BOX_CMD) == 0) {
         // Add rectangular prism to point matrix
         #ifdef DEBUG
-        print_debug("Got draw prism command");
+        print_debug("Got draw box command");
         #endif
         double x, y, z, width, height, depth;
         int retVal = sscanf(line_buf, "%*s %lf %lf %lf %lf %lf %lf",
                             &x, &y, &z, &width, &height, &depth);
         if (retVal != 6) {
-            print_error("Invalid arguments for draw prism command: \"%s\"", line_buf);
+            print_error("Invalid arguments for draw box command: \"%s\"", line_buf);
             if (error_is_fatal) {
                 exit(EXIT_FAILURE);
             }
             return;
         }
-        add_prism(global_pts, x, y, z, width, height, depth, global_draw_mode);
+        add_box(global_pts, x, y, z, width, height, depth, global_draw_mode);
     }
     else if (strcmp(cmd, SPHERE_CMD) == 0) {
         // Add sphere to point matrix
