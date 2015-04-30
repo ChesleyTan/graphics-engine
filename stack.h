@@ -9,9 +9,9 @@
 #define STACK_SIZE 2
 
 struct stack {
+    struct matrix **data;
     int size;
     int top;
-    struct matrix **data;
 };
 
 struct stack * new_stack();

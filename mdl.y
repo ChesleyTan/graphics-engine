@@ -30,10 +30,9 @@ extern int yylineno;
 
 /* =============== DEFINITIONS ============= */
 
-%union{
-  double val;
-  char string[255];
-
+%union {
+    double val;
+    char string[255];
 }
 
 %token COMMENT
