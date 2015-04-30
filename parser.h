@@ -116,8 +116,8 @@ struct command {
     } op;
 };
 
+// Extern variables for use in parser files
 extern int lastop;
 extern struct command op[MAX_COMMANDS];
 
-void print_pcode();
 #endif

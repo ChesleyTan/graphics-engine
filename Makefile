@@ -10,14 +10,14 @@ all: build clean
 
 cli: build-repl clean
 
-build: $(OBJECTS) main.o
+build: $(OBJECTS) lex.yy.c y.tab.c y.tab.h
+	$(CC) $(DEBUG) -o mdl $(OBJECTS) lex.yy.c y.tab.c y.tab.h $(LIBS)
+
+build-parser: $(OBJECTS) main.o
 	$(CC) $(DEBUG) -o main $(OBJECTS) main.o $(LIBS)
 
 build-repl: $(OBJECTS) repl.o
 	$(CC) $(DEBUG) -o cli $(OBJECTS) repl.o $(LIBS) -lreadline
-
-build-parser: $(OBJECTS) lex.yy.c y.tab.c y.tab.h
-	$(CC) $(DEBUG) -o mdl $(OBJECTS) lex.yy.c y.tab.c $(LIBS)
 
 main.o: main.c main.h
 	$(CC) $(DEBUG) $(CFLAGS) -c main.c
@@ -43,11 +43,14 @@ parser-old.o: parser-old.c parser-old.h
 gmath.o: gmath.c gmath.h
 	$(CC) $(DEBUG) $(CFLAGS) -c gmath.c
 
-symtab.o: symtab.c parser.h matrix.h
-	gcc -c $(CFLAGS) symtab.c
+symtab.o: symtab.c symtab.h
+	$(CC) $(CFLAGS) -c symtab.c
 
-stack.o: stack.c stack.h matrix.h
+stack.o: stack.c stack.h
 	$(CC) $(CFLAGS) -c stack.c 
+
+print_pcode.o: print_pcode.c print_pcode.h y.tab.h
+	$(CC) $(CFLAGS) -c print_pcode.c
 
 lex.yy.c: mdl.l y.tab.h 
 	flex -I mdl.l
@@ -57,9 +60,6 @@ y.tab.c: mdl.y symtab.h parser.h
 
 y.tab.h: mdl.y 
 	bison -d -y mdl.y
-
-print_pcode.o: print_pcode.c parser.h matrix.h symtab.h y.tab.h
-	gcc -c $(CFLAGS) print_pcode.c
 
 clean:
 	rm -f *.o
