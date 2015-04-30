@@ -1,4 +1,4 @@
-OBJECTS= draw.o display.o matrix.o utils.o parser.o gmath.o
+OBJECTS= draw.o display.o matrix.o utils.o parser-old.o gmath.o symtab.o print_pcode.o stack.o
 DEBUG= -DDEBUG -g
 WARNINGS_QUIET= -Wall -Wno-unused-variable -Wno-unused-function
 WARNINGS_ALL= -Wall -Wpadded
@@ -15,6 +15,9 @@ build: $(OBJECTS) main.o
 
 build-repl: $(OBJECTS) repl.o
 	$(CC) $(DEBUG) -o cli $(OBJECTS) repl.o $(LIBS) -lreadline
+
+build-parser: $(OBJECTS) lex.yy.c y.tab.c y.tab.h
+	$(CC) $(DEBUG) -o mdl $(OBJECTS) lex.yy.c y.tab.c $(LIBS)
 
 main.o: main.c main.h
 	$(CC) $(DEBUG) $(CFLAGS) -c main.c
@@ -34,11 +37,31 @@ matrix.o: matrix.c matrix.h
 utils.o: utils.c utils.h
 	$(CC) $(DEBUG) $(CFLAGS) -c utils.c
 
-parser.o: parser.c parser.h
-	$(CC) $(DEBUG) $(CFLAGS) -c parser.c
+parser-old.o: parser-old.c parser-old.h
+	$(CC) $(DEBUG) $(CFLAGS) -c parser-old.c
 
 gmath.o: gmath.c gmath.h
 	$(CC) $(DEBUG) $(CFLAGS) -c gmath.c
 
+symtab.o: symtab.c parser.h matrix.h
+	gcc -c $(CFLAGS) symtab.c
+
+stack.o: stack.c stack.h matrix.h
+	$(CC) $(CFLAGS) -c stack.c 
+
+lex.yy.c: mdl.l y.tab.h 
+	flex -I mdl.l
+
+y.tab.c: mdl.y symtab.h parser.h
+	bison -d -y mdl.y
+
+y.tab.h: mdl.y 
+	bison -d -y mdl.y
+
+print_pcode.o: print_pcode.c parser.h matrix.h symtab.h y.tab.h
+	gcc -c $(CFLAGS) print_pcode.c
+
 clean:
 	rm -f *.o
+	rm -f y.tab.c y.tab.h
+	rm -f lex.yy.c

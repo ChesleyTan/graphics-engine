@@ -9,7 +9,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#include "parser.h"
+#include "parser-old.h"
 
 #define INPUT_BUF_SIZE 512
 #define EOF_EXIT_CODE 10

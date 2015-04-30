@@ -8,7 +8,7 @@
 
 #include "display.h"
 #include "matrix.h"
-#include "parser.h"
+#include "parser-old.h"
 
 static void sighandler(int signo);
 #endif
