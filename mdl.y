@@ -8,8 +8,6 @@
 
 #define YYERROR_VERBOSE 1
 
-int global_argc;
-char **global_argv;
 SYMTAB *s;
 struct light *l;
 struct constants *c;
@@ -763,9 +761,8 @@ void yyerror(const char *s) {
     fprintf(stderr, "Error on line %d: %s\n", yylineno, s);
     // TODO uncomment when lib-readline is implemented
     //yyin = fdopen(pipes[0], "r");
-    yyin = fopen(global_argv[1],"r");
-    yyrestart(yyin);
-    yyparse();
+    //yyrestart(yyin);
+    //yyparse();
 }
 
 int yywrap() {
@@ -774,24 +771,15 @@ int yywrap() {
 
 int main(int argc, char *argv[]) {
     // TODO use lib-readline and pipes to run interactively or read from file
-    int i;
-    i = 1;
 
-    global_argc = argc;
-    global_argv = argv;
-    if (global_argc > 1) {
-        yyin = fopen(global_argv[1], "r");
+    if (argc > 1) {
+        yyin = fopen(argv[1], "r");
 
         if (yyin == NULL) {
             print_error("Unable to open input stream.");
             exit(EXIT_FAILURE);
         }
 
-        if (global_argc == 3 && strncmp(global_argv[2], "-l", 2) == 0) {
-            // TODO what does this do?
-            printf("lines");
-            i = 0;
-        }
     }
 
     yyparse();
