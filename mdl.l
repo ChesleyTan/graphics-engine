@@ -1,8 +1,13 @@
+%option stack
 %{
 #include "y.tab.h"
 #include "utils.h"
 %}
     /* =============== DEFINITIONS ============= */
+
+    /* Parse state for comments */
+%x COMMENT_STATE
+
 ID         [a-zA-Z][a-zA-Z0-9_]*
 WHITESPACE [ \t]
     /* ============= END DEFINITIONS ============= */
@@ -18,7 +23,16 @@ WHITESPACE [ \t]
     return DOUBLE;
 }
 
+    /* ============= Ignore comments ============= */
 "//".* { return COMMENT; }
+"/*"                                { yy_push_state(COMMENT_STATE); }
+    /* Non-greedy regex */
+<COMMENT_STATE>(("*"[^/])?|[^*])*   ;
+<COMMENT_STATE>"*/"                 {
+                                      yy_pop_state();
+                                      return COMMENT;
+                                    }
+    /* =========================================== */
 
 "light" { return LIGHT; }
 "constants" { return CONSTANTS; }

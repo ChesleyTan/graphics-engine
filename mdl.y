@@ -5,7 +5,6 @@
 #include "parser.h"
 #include "matrix.h"
 #include "misc_headers.h"
-
 #define YYERROR_VERBOSE 1
 
 SYMTAB *s;
