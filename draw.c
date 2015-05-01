@@ -291,7 +291,7 @@ void add_sphere(struct matrix *points,
             for (latitude = 0; latitude < num_steps - 1; ++latitude) {
                 int lat_start = num_steps * latitude;
                 int next_lat_start = (lat_start + num_steps) % num_pts;
-                for (longitude = 0; longitude < num_steps - 1; ++longitude) {
+                for (longitude = 0; longitude < num_steps - 2; ++longitude) {
                     int index = lat_start + longitude;
                     int index_plus_one = index + 1;
                     int index_next_lat = next_lat_start + longitude;
@@ -320,17 +320,15 @@ void add_sphere(struct matrix *points,
                                 m[1][index_next_lat_plus_one],
                                 m[2][index_next_lat_plus_one]
                     );
-                    if (longitude < num_steps - 2) {
-                        add_polygon(points,
-                                    m[0][index_next_lat_plus_one],
-                                    m[1][index_next_lat_plus_one],
-                                    m[2][index_next_lat_plus_one],
-                                    m[0][index_plus_one],
-                                    m[1][index_plus_one],
-                                    m[2][index_plus_one],
-                                    m[0][index], m[1][index], m[2][index]
-                        );
-                    }
+                    add_polygon(points,
+                                m[0][index_next_lat_plus_one],
+                                m[1][index_next_lat_plus_one],
+                                m[2][index_next_lat_plus_one],
+                                m[0][index_plus_one],
+                                m[1][index_plus_one],
+                                m[2][index_plus_one],
+                                m[0][index], m[1][index], m[2][index]
+                    );
                 }
             }
             break;
