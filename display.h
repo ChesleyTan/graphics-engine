@@ -14,12 +14,12 @@
 
 #include "utils.h"
 
-static int XRES = 1000;
-static int YRES = 1000;
+static int XRES = 500;
+static int YRES = 500;
 // XRES_CARTESIAN and YRES_CARTESIAN should be half of XRES AND YRES
 // respectively.
-static int XRES_CARTESIAN = 500;
-static int YRES_CARTESIAN = 500;
+static int XRES_CARTESIAN = 250;
+static int YRES_CARTESIAN = 250;
 #define MAX_COLOR 255
 
 /*

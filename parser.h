@@ -48,7 +48,7 @@ struct command {
         struct {
             SYMTAB *constants;
             double d[4];
-            double r0,r1;
+            double circle_radius, torus_radius;
             SYMTAB *cs;
         } torus;
         struct {
@@ -79,7 +79,7 @@ struct command {
             SYMTAB *p;
         } scale;
         struct {
-            double axis;
+            int axis;
             double degrees;
             SYMTAB *p;
         } rotate;
@@ -115,6 +115,10 @@ struct command {
         } focal;
     } op;
 };
+
+typedef enum {
+    X_AXIS, Y_AXIS, Z_AXIS
+} ROTATE_AXIS;
 
 // Extern variables for use in parser files
 extern int lastop;

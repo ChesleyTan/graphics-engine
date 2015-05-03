@@ -151,7 +151,7 @@ Returns:
 Draws the Cartesian axes if the global plotting mode (global_plot_mode) is set
 to Cartesian.
 =========================================*/
-void draw_axes_if_cartesian_mode();
+static void draw_axes_if_cartesian_mode();
 
 /*======== void draw() ==========
 Inputs:
@@ -159,7 +159,7 @@ Returns:
 Draws the point matrix to the screen using the global drawing mode
 (global_draw_mode).
 ===============================*/
-void draw();
+static void draw();
 
 /*======== void save() ==========
 Inputs:     char *line_buf
@@ -169,6 +169,6 @@ Saves the generated image to the file specified in the arguments of line_buf.
 Returns -1 if no filename was found.
 Returns 0 otherwise.
 ===============================*/
-int save(char *line_buf, int error_is_fatal);
+static int save(char *line_buf, int error_is_fatal);
 
 #endif

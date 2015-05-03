@@ -23,7 +23,7 @@ struct stack * new_stack() {
     s->size = STACK_SIZE;
     s->top = 0;
     s->data = m;
-    s->data[ s->top ] = i;
+    s->data[s->top] = i;
 
     return s;
 }
@@ -49,14 +49,13 @@ void push(struct stack *s) {
         s->size = s->size + STACK_SIZE;
     }
 
-    copy_matrix(s->data[ s->top ], m);
+    copy_matrix(s->data[s->top], m);
 
-    s->top++;
-    s->data[ s->top ] = m;  
+    s->data[++s->top] = m;  
 }
 
 /*======== void pop() ==========
-Inputs:   struct stack * s 
+Inputs:   struct stack *s 
 Returns: 
 
 Remove and free the matrix at the top
@@ -65,9 +64,9 @@ Note you do not need to return anything.
 04/19/12 11:33:12
 jdyrlandweaver
 ====================*/
-void pop(struct stack * s) {
+void pop(struct stack *s) {
     free_matrix(s->data[s->top]);
-    s->top--;
+    --(s->top);
 }
 
 /*======== void free_stack() ==========

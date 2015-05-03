@@ -18,7 +18,7 @@ struct stack * new_stack();
 void push(struct stack *s);
 void pop(struct stack *s);
 
-void free_stack(struct stack *);
-void print_stack(struct stack *);
+void free_stack(struct stack *s);
+void print_stack(struct stack *s);
 
 #endif

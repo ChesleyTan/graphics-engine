@@ -448,7 +448,7 @@ void free_variables() {
     global_s = NULL;
 }
 
-void draw_axes_if_cartesian_mode() {
+static void draw_axes_if_cartesian_mode() {
     // Draw the axes if plotting in Cartesian plane
     color c;
     if (global_plot_mode == PLOT_CARTESIAN) {
@@ -460,7 +460,7 @@ void draw_axes_if_cartesian_mode() {
     }
 }
 
-void draw() {
+static void draw() {
     // Draw the points matrix to the screen using the current drawing mode
     color c;
     c.red = 30;
@@ -476,7 +476,7 @@ void draw() {
     }
 }
 
-int save(char *line_buf, int error_is_fatal) {
+static int save(char *line_buf, int error_is_fatal) {
     int retVal;
     char filename[101];
     retVal = sscanf(line_buf, "%*s %100s", filename);

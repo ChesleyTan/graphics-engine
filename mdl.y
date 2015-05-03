@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "matrix.h"
 #include "misc_headers.h"
+#include "exec.h"
 #define YYERROR_VERBOSE 1
 
 SYMTAB *s;
@@ -256,8 +257,8 @@ command:
   op[lastop].op.torus.d[1] = $3;
   op[lastop].op.torus.d[2] = $4;
   op[lastop].op.torus.d[3] = 0;
-  op[lastop].op.torus.r0 = $5;
-  op[lastop].op.torus.r1 = $6;
+  op[lastop].op.torus.circle_radius = $5;
+  op[lastop].op.torus.torus_radius = $6;
   op[lastop].op.torus.constants = NULL;
   op[lastop].op.torus.cs = NULL;
 
@@ -271,8 +272,8 @@ command:
   op[lastop].op.torus.d[1] = $3;
   op[lastop].op.torus.d[2] = $4;
   op[lastop].op.torus.d[3] = 0;
-  op[lastop].op.torus.r0 = $5;
-  op[lastop].op.torus.r1 = $6;
+  op[lastop].op.torus.circle_radius = $5;
+  op[lastop].op.torus.torus_radius = $6;
   op[lastop].op.torus.constants = NULL;
   m = (struct matrix *)new_matrix(4,4);
   op[lastop].op.torus.cs = add_symbol($7,SYM_MATRIX,m);
@@ -286,8 +287,8 @@ command:
   op[lastop].op.torus.d[1] = $4;
   op[lastop].op.torus.d[2] = $5;
   op[lastop].op.torus.d[3] = 0;
-  op[lastop].op.torus.r0 = $6;
-  op[lastop].op.torus.r1 = $7;
+  op[lastop].op.torus.circle_radius = $6;
+  op[lastop].op.torus.torus_radius = $7;
   op[lastop].op.torus.cs = NULL;
   c = (struct constants *)malloc(sizeof(struct constants));
   op[lastop].op.torus.constants = add_symbol($2,SYM_CONSTANTS,c);
@@ -302,8 +303,8 @@ command:
   op[lastop].op.torus.d[1] = $4;
   op[lastop].op.torus.d[2] = $5;
   op[lastop].op.torus.d[3] = 0;
-  op[lastop].op.torus.r0 = $6;
-  op[lastop].op.torus.r1 = $7;
+  op[lastop].op.torus.circle_radius = $6;
+  op[lastop].op.torus.torus_radius = $7;
   c = (struct constants *)malloc(sizeof(struct constants));
   op[lastop].op.torus.constants = add_symbol($2,SYM_CONSTANTS,c);
   m = (struct matrix *)new_matrix(4,4);
@@ -597,19 +598,18 @@ command:
 | ROTATE STRING DOUBLE STRING {
   //++lineno;
   op[lastop].opcode = ROTATE;
-  switch (*$2)
-    {
+  switch (*$2) {
     case 'x':
     case 'X': 
-      op[lastop].op.rotate.axis = 0;
+      op[lastop].op.rotate.axis = X_AXIS;
       break;
     case 'y':
     case 'Y': 
-      op[lastop].op.rotate.axis = 1;
+      op[lastop].op.rotate.axis = Y_AXIS;
       break;
     case 'z':
     case 'Z': 
-      op[lastop].op.rotate.axis = 2;
+      op[lastop].op.rotate.axis = Z_AXIS;
       break;
     }
 
@@ -782,11 +782,15 @@ int main(int argc, char *argv[]) {
     }
 
     yyparse();
-    //COMMENT OUT PRINT_PCODE AND UNCOMMENT
-    //MY_MAIN IN ORDER TO RUN YOUR CODE
+    #ifdef DEBUG
     print_pcode();
-    //my_main();
+    #endif
+    exec();
 
     return 0;    
 }
+
+// TODO sighandler
+// TODO read plot mode and draw mode
+// TODO full code review
 /* ============= END SUBROUTINES ============= */

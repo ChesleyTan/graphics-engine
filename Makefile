@@ -1,4 +1,4 @@
-OBJECTS= draw.o display.o matrix.o utils.o parser-old.o gmath.o symtab.o print_pcode.o stack.o
+OBJECTS= draw.o display.o matrix.o utils.o parser-old.o gmath.o symtab.o print_pcode.o stack.o exec.o
 DEBUG= -DDEBUG -g
 WARNINGS_QUIET= -Wall -Wno-unused-variable -Wno-unused-function
 WARNINGS_ALL= -Wall -Wpadded
@@ -44,13 +44,16 @@ gmath.o: gmath.c gmath.h
 	$(CC) $(DEBUG) $(CFLAGS) -c gmath.c
 
 symtab.o: symtab.c symtab.h
-	$(CC) $(CFLAGS) -c symtab.c
+	$(CC) $(DEBUG) $(CFLAGS) -c symtab.c
 
 stack.o: stack.c stack.h
-	$(CC) $(CFLAGS) -c stack.c 
+	$(CC) $(DEBUG) $(CFLAGS) -c stack.c 
 
 print_pcode.o: print_pcode.c print_pcode.h y.tab.h
-	$(CC) $(CFLAGS) -c print_pcode.c
+	$(CC) $(DEBUG) $(CFLAGS) -c print_pcode.c
+
+exec.o: exec.c exec.h
+	$(CC) $(DEBUG) $(CFLAGS) -c exec.c
 
 lex.yy.c: mdl.l y.tab.h 
 	flex -I mdl.l

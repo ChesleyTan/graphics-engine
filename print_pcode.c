@@ -54,7 +54,8 @@ void print_pcode() {
                 printf("Torus: %6.2f %6.2f %6.2f r0=%6.2f r1=%6.2f",
                         op[i].op.torus.d[0],op[i].op.torus.d[1],
                         op[i].op.torus.d[2],
-                        op[i].op.torus.r0,op[i].op.torus.r1);
+                        op[i].op.torus.circle_radius,
+                        op[i].op.torus.torus_radius);
                 if (op[i].op.torus.constants != NULL)
                 {
                     printf("\tconstants: %s",op[i].op.torus.constants->name);
@@ -125,7 +126,7 @@ void print_pcode() {
                 }
                 break;
             case ROTATE:
-                printf("Rotate: axis: %6.2f degrees: %6.2f",
+                printf("Rotate: axis: %d degrees: %6.2f",
                         op[i].op.rotate.axis,
                         op[i].op.rotate.degrees);
                 if (op[i].op.rotate.p != NULL) {

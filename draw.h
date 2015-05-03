@@ -46,7 +46,7 @@ typedef enum {
 
 /* Plotting mode to be used by default globally.
  * This value may be set programmatically. */
-static plotting_mode global_plot_mode = PLOT_CARTESIAN;
+static plotting_mode global_plot_mode = PLOT_ABSOLUTE;
 
 /* Drawing mode to be used by default globally.
  * This value may be set programmatically. */
