@@ -5,7 +5,6 @@
 #include <signal.h>
 #include "parser.h"
 #include "matrix.h"
-#include "misc_headers.h"
 #include "exec.h"
 #define YYERROR_VERBOSE 1
 
@@ -955,7 +954,6 @@ int main(int argc, char *argv[]) {
     return 0;    
 }
 
-// TODO full code review
 // TODO dynamically allocated op array size
 // TODO use GNU readline and pipes to run interactively or read from file
 /* ============= END SUBROUTINES ============= */
