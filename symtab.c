@@ -1,5 +1,6 @@
 #include "symtab.h"
 
+// TODO use a hash table
 SYMTAB symtab[MAX_SYMBOLS];
 int lastsym = 0;
 
@@ -46,8 +47,8 @@ void print_symtab() {
                 printf("Type: SYM_VALUE\n");
                 printf("value: %6.2f\n", symtab[i].s.value);
                 break;
-            case SYM_FILE:
-                printf("Type: SYM_VALUE\n");
+            case SYM_STRING:
+                printf("Type: SYM_STRING\n");
                 printf("Name: %s\n",symtab[i].name);
         }
         printf("\n");
@@ -63,7 +64,7 @@ SYMTAB *add_symbol(char *name, int type, void *data) {
             return NULL;
         }
         t = (SYMTAB *)&(symtab[lastsym]);
-        lastsym++;
+        ++lastsym;
     }
     else {
         return t;
@@ -85,12 +86,11 @@ SYMTAB *add_symbol(char *name, int type, void *data) {
         case SYM_VALUE:
             t->s.value = *(double *)data;
             break;
-        case SYM_FILE:
+        case SYM_STRING:
             break;
     }
     return (SYMTAB *)&(symtab[lastsym-1]);
 }
-
 
 SYMTAB *lookup_symbol(char *name) {
     int i;
@@ -106,3 +106,13 @@ void set_value(SYMTAB *p, double value) {
     p->s.value = value;
 }
 
+void free_table() {
+    int i;
+    #ifdef DEBUG
+    print_debug("Freeing symbol table");
+    #endif
+    for (i = 0; i < lastsym; ++i) {
+        // TODO update free_table when implementing other commands
+        free(symtab[i].name);
+    }
+}

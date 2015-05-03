@@ -32,6 +32,15 @@ the format parameter.
 ========================================*/
 void print_error(const char *format, ...);
 
+/*======== void print_warning() ===========
+Inputs:     const char *format,
+            ...
+Returns:
+Prints a yellow warning message to stderr using a variable number of arguments and
+the format parameter.
+========================================*/
+void print_warning(const char *format, ...);
+
 /*======== void print_debug() ===========
 Inputs:     const char *format,
             ...

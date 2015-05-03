@@ -9,6 +9,15 @@ void print_error(const char *format, ...) {
     fprintf(stderr, "\n");
 }
 
+void print_warning(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    fprintf(stderr, "%s%s[WARNING] %s", bold_prefix, fg_yellow_220, reset);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fprintf(stderr, "\n");
+}
+
 void print_debug(const char *format, ...) {
     va_list args;
     va_start(args, format);

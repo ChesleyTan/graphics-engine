@@ -1,10 +1,12 @@
 #include "display.h"
 
-void resize_screen(int x_res, int y_res) {
+screen resize_screen(screen s, int x_res, int y_res) {
+    free_screen(s);
     XRES = x_res;
     YRES = y_res;
     XRES_CARTESIAN = x_res / 2;
     YRES_CARTESIAN = y_res / 2;
+    return new_screen();
 }
 
 screen new_screen() {

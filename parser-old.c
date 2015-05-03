@@ -252,9 +252,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
             }
             return;
         }
-        free_screen(global_s);
-        resize_screen(xres, yres);
-        global_s = new_screen();
+        global_s = resize_screen(global_s, xres, yres);
     }
     else if (strcmp(cmd, BOX_CMD) == 0) {
         // Add rectangular prism to point matrix

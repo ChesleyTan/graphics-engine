@@ -20,7 +20,7 @@ WHITESPACE [ \t]
 \-?[0-9]+\.[0-9]+ |
 \-?\.[0-9]+ {
     yylval.val = atof(yytext);
-    return DOUBLE;
+    return NUMBER;
 }
 
     /* ============= Ignore comments ============= */
@@ -34,6 +34,8 @@ WHITESPACE [ \t]
                                     }
     /* =========================================== */
 
+"draw-mode" { return DRAW_MODE; }
+"resize" { return RESIZE; }
 "light" { return LIGHT; }
 "constants" { return CONSTANTS; }
 "save_coord_system" { return SAVE_COORDS; }

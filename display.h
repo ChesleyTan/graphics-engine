@@ -53,13 +53,16 @@ typedef struct point_t color;
 typedef struct point_t **screen;
 
 /*======== screen resize_screen() ==========
-Inputs:     int x_res,
+Inputs:     screen s,
+            int x_res,
             int y_res
 Returns:
 Sets the XRES and YRES variables to x_res and y_res respectively.
 XRES and YRES determines the screen size.
+Takes a screen, frees it, and returns a new screen with the new dimensions.
+NOTE: All points already drawn in the screen will be lost!
 ==========================================*/
-void resize_screen(int x_res, int y_res);
+screen resize_screen(screen s, int x_res, int y_res);
 
 /*======== screen new_screen() ==========
 Inputs:

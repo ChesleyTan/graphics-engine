@@ -8,6 +8,8 @@
 #define Ka 0
 #define Kd 1
 #define Ks 2
+#define DEFAULT_SPHERE_STEP_SIZE 0.05
+#define DEFAULT_TORUS_STEP_SIZE 0.05
 
 struct command {
     int opcode;
@@ -34,6 +36,7 @@ struct command {
             SYMTAB *constants;
             double d[4];
             double r;
+            double step_size;
             SYMTAB *cs;
         } sphere;
         struct {
@@ -49,6 +52,7 @@ struct command {
             SYMTAB *constants;
             double d[4];
             double circle_radius, torus_radius;
+            double step_size;
             SYMTAB *cs;
         } torus;
         struct {
@@ -113,6 +117,13 @@ struct command {
         struct { 
             double value;
         } focal;
+        struct {
+            SYMTAB *p;
+        } drawmode;
+        struct {
+            int x;
+            int y;
+        } resize;
     } op;
 };
 

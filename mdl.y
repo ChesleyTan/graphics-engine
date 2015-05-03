@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include "parser.h"
 #include "matrix.h"
 #include "misc_headers.h"
@@ -14,15 +15,13 @@ struct constants *c;
 struct command op[MAX_COMMANDS];
 struct matrix *m;
 int lastop=0;
-// TODO remove this if not necessary....
-// int lineno=0;
+int lineno=1;
 
 // Bison headers and variables
 void yyerror(const char *);
 void yyrestart(FILE *);
 int yylex(void);
 extern FILE * yyin;
-extern int yylineno;
 
 %}
 
@@ -34,7 +33,8 @@ extern int yylineno;
 }
 
 %token COMMENT
-%token <val> DOUBLE
+%token <val> NUMBER
+%token <string> DRAW_MODE RESIZE
 %token <string> LIGHT AMBIENT
 %token <string> CONSTANTS SAVE_COORDS CAMERA 
 %token <string> SPHERE TORUS BOX LINE CS MESH TEXTURE
@@ -53,10 +53,27 @@ input:
 ;
 
 command: 
-  COMMENT {}
+  COMMENT {
+  ++lineno;
+  }
 
-| LIGHT STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| DRAW_MODE STRING {
+  ++lineno;
+  op[lastop].opcode=DRAW_MODE;
+  op[lastop].op.drawmode.p = add_symbol($2,SYM_STRING,NULL);
+  ++lastop;
+}
+
+| RESIZE NUMBER NUMBER {
+  ++lineno;
+  op[lastop].opcode=RESIZE;
+  op[lastop].op.resize.x = round($2);
+  op[lastop].op.resize.y = round($3);
+  ++lastop;
+}
+
+| LIGHT STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   l = (struct light *)malloc(sizeof(struct light));
   l->l[0]= $3;
   l->l[1]= $4;
@@ -74,8 +91,8 @@ command:
   ++lastop;
 }
 
-| MOVE DOUBLE DOUBLE DOUBLE STRING { 
-  //++lineno;
+| MOVE NUMBER NUMBER NUMBER STRING { 
+  ++lineno;
   op[lastop].opcode = MOVE;
   op[lastop].op.move.d[0] = $2;
   op[lastop].op.move.d[1] = $3;
@@ -85,8 +102,8 @@ command:
   ++lastop;
 }
 
-| MOVE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| MOVE NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = MOVE;
   op[lastop].op.move.d[0] = $2;
   op[lastop].op.move.d[1] = $3;
@@ -96,8 +113,8 @@ command:
   ++lastop;
 }
 
-| CONSTANTS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| CONSTANTS STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   c = (struct constants *)malloc(sizeof(struct constants));
   c->r[0]=$3;
   c->r[1]=$4;
@@ -123,8 +140,8 @@ command:
   ++lastop;
 }
 
-| CONSTANTS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| CONSTANTS STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   c = (struct constants *)malloc(sizeof(struct constants));
   c->r[0]=$3;
   c->r[1]=$4;
@@ -150,15 +167,15 @@ command:
 }
 
 | SAVE_COORDS STRING {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = SAVE_COORDS;
   m = new_matrix(4,4);
   op[lastop].op.save_coordinate_system.p = add_symbol($2,SYM_MATRIX,m);
   ++lastop;
 }
 
-| CAMERA DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| CAMERA NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = CAMERA;
   op[lastop].op.camera.eye[0] = $2;
   op[lastop].op.camera.eye[1] = $3;
@@ -171,8 +188,8 @@ command:
   ++lastop;
 }
 
-| TEXTURE STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| TEXTURE STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = TEXTURE;
   c = (struct constants *)malloc(sizeof(struct constants));
   op[lastop].op.texture.d0[0] = $3;
@@ -189,59 +206,107 @@ command:
   op[lastop].op.texture.d3[2] = $14;
   op[lastop].op.texture.cs = NULL;
   op[lastop].op.texture.constants =  add_symbol("",SYM_CONSTANTS,c);
-  op[lastop].op.texture.p = add_symbol($2,SYM_FILE,0);
+  op[lastop].op.texture.p = add_symbol($2,SYM_STRING,0);
   ++lastop;
 }
 
-| SPHERE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| SPHERE NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $2;
   op[lastop].op.sphere.d[1] = $3;
   op[lastop].op.sphere.d[2] = $4;
   op[lastop].op.sphere.d[3] = 0;
   op[lastop].op.sphere.r = $5;
+  op[lastop].op.sphere.step_size = DEFAULT_SPHERE_STEP_SIZE;
   op[lastop].op.sphere.constants = NULL;
   op[lastop].op.sphere.cs = NULL;
   ++lastop;
 }
 
-| SPHERE DOUBLE DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| SPHERE NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $2;
   op[lastop].op.sphere.d[1] = $3;
   op[lastop].op.sphere.d[2] = $4;
   op[lastop].op.sphere.d[3] = 0;
   op[lastop].op.sphere.r = $5;
+  op[lastop].op.sphere.step_size = $6;
+  op[lastop].op.sphere.constants = NULL;
+  op[lastop].op.sphere.cs = NULL;
+  ++lastop;
+}
+
+| SPHERE NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
+  op[lastop].opcode = SPHERE;
+  op[lastop].op.sphere.d[0] = $2;
+  op[lastop].op.sphere.d[1] = $3;
+  op[lastop].op.sphere.d[2] = $4;
+  op[lastop].op.sphere.d[3] = 0;
+  op[lastop].op.sphere.r = $5;
+  op[lastop].op.sphere.step_size = DEFAULT_SPHERE_STEP_SIZE;
   op[lastop].op.sphere.constants = NULL;
   m = (struct matrix *)new_matrix(4,4);
   op[lastop].op.sphere.cs = add_symbol($6,SYM_MATRIX,m);
   ++lastop;
 }
 
-| SPHERE STRING DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| SPHERE NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
+  op[lastop].opcode = SPHERE;
+  op[lastop].op.sphere.d[0] = $2;
+  op[lastop].op.sphere.d[1] = $3;
+  op[lastop].op.sphere.d[2] = $4;
+  op[lastop].op.sphere.d[3] = 0;
+  op[lastop].op.sphere.r = $5;
+  op[lastop].op.sphere.step_size = $6;
+  op[lastop].op.sphere.constants = NULL;
+  m = (struct matrix *)new_matrix(4,4);
+  op[lastop].op.sphere.cs = add_symbol($7,SYM_MATRIX,m);
+  ++lastop;
+}
+
+| SPHERE STRING NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $3;
   op[lastop].op.sphere.d[1] = $4;
   op[lastop].op.sphere.d[2] = $5;
   op[lastop].op.sphere.d[3] = 0;
   op[lastop].op.sphere.r = $6;
+  op[lastop].op.sphere.step_size = DEFAULT_SPHERE_STEP_SIZE;
   op[lastop].op.sphere.cs = NULL;
   c = (struct constants *)malloc(sizeof(struct constants));
   op[lastop].op.sphere.constants = add_symbol($2,SYM_CONSTANTS,c);
   ++lastop;
 }
 
-| SPHERE STRING DOUBLE DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| SPHERE STRING NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $3;
   op[lastop].op.sphere.d[1] = $4;
   op[lastop].op.sphere.d[2] = $5;
   op[lastop].op.sphere.d[3] = 0;
   op[lastop].op.sphere.r = $6;
+  op[lastop].op.sphere.step_size = $7;
+  op[lastop].op.sphere.cs = NULL;
+  c = (struct constants *)malloc(sizeof(struct constants));
+  op[lastop].op.sphere.constants = add_symbol($2,SYM_CONSTANTS,c);
+  ++lastop;
+}
+
+| SPHERE STRING NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
+  op[lastop].opcode = SPHERE;
+  op[lastop].op.sphere.d[0] = $3;
+  op[lastop].op.sphere.d[1] = $4;
+  op[lastop].op.sphere.d[2] = $5;
+  op[lastop].op.sphere.d[3] = 0;
+  op[lastop].op.sphere.r = $6;
+  op[lastop].op.sphere.step_size = DEFAULT_SPHERE_STEP_SIZE;
   op[lastop].op.sphere.constants = NULL;
   m = (struct matrix *)new_matrix(4,4);
   op[lastop].op.sphere.cs = add_symbol($7,SYM_MATRIX,m);
@@ -250,8 +315,25 @@ command:
   ++lastop;
 }
 
-| TORUS DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| SPHERE STRING NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
+  op[lastop].opcode = SPHERE;
+  op[lastop].op.sphere.d[0] = $3;
+  op[lastop].op.sphere.d[1] = $4;
+  op[lastop].op.sphere.d[2] = $5;
+  op[lastop].op.sphere.d[3] = 0;
+  op[lastop].op.sphere.r = $6;
+  op[lastop].op.sphere.step_size = $7;
+  op[lastop].op.sphere.constants = NULL;
+  m = (struct matrix *)new_matrix(4,4);
+  op[lastop].op.sphere.cs = add_symbol($8,SYM_MATRIX,m);
+  c = (struct constants *)malloc(sizeof(struct constants));
+  op[lastop].op.sphere.constants = add_symbol($2,SYM_CONSTANTS,c);
+  ++lastop;
+}
+
+| TORUS NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $2;
   op[lastop].op.torus.d[1] = $3;
@@ -259,14 +341,15 @@ command:
   op[lastop].op.torus.d[3] = 0;
   op[lastop].op.torus.circle_radius = $5;
   op[lastop].op.torus.torus_radius = $6;
+  op[lastop].op.torus.step_size = DEFAULT_TORUS_STEP_SIZE;
   op[lastop].op.torus.constants = NULL;
   op[lastop].op.torus.cs = NULL;
 
   ++lastop;
 }
 
-| TORUS DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| TORUS NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $2;
   op[lastop].op.torus.d[1] = $3;
@@ -274,14 +357,47 @@ command:
   op[lastop].op.torus.d[3] = 0;
   op[lastop].op.torus.circle_radius = $5;
   op[lastop].op.torus.torus_radius = $6;
+  op[lastop].op.torus.step_size = $7;
+  op[lastop].op.torus.constants = NULL;
+  op[lastop].op.torus.cs = NULL;
+
+  ++lastop;
+}
+
+| TORUS NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
+  op[lastop].opcode = TORUS;
+  op[lastop].op.torus.d[0] = $2;
+  op[lastop].op.torus.d[1] = $3;
+  op[lastop].op.torus.d[2] = $4;
+  op[lastop].op.torus.d[3] = 0;
+  op[lastop].op.torus.circle_radius = $5;
+  op[lastop].op.torus.torus_radius = $6;
+  op[lastop].op.torus.step_size = DEFAULT_TORUS_STEP_SIZE;
   op[lastop].op.torus.constants = NULL;
   m = (struct matrix *)new_matrix(4,4);
   op[lastop].op.torus.cs = add_symbol($7,SYM_MATRIX,m);
   ++lastop;
 }
 
-| TORUS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| TORUS NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
+  op[lastop].opcode = TORUS;
+  op[lastop].op.torus.d[0] = $2;
+  op[lastop].op.torus.d[1] = $3;
+  op[lastop].op.torus.d[2] = $4;
+  op[lastop].op.torus.d[3] = 0;
+  op[lastop].op.torus.circle_radius = $5;
+  op[lastop].op.torus.torus_radius = $6;
+  op[lastop].op.torus.step_size = $7;
+  op[lastop].op.torus.constants = NULL;
+  m = (struct matrix *)new_matrix(4,4);
+  op[lastop].op.torus.cs = add_symbol($8,SYM_MATRIX,m);
+  ++lastop;
+}
+
+| TORUS STRING NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $3;
   op[lastop].op.torus.d[1] = $4;
@@ -289,6 +405,7 @@ command:
   op[lastop].op.torus.d[3] = 0;
   op[lastop].op.torus.circle_radius = $6;
   op[lastop].op.torus.torus_radius = $7;
+  op[lastop].op.torus.step_size = DEFAULT_TORUS_STEP_SIZE;
   op[lastop].op.torus.cs = NULL;
   c = (struct constants *)malloc(sizeof(struct constants));
   op[lastop].op.torus.constants = add_symbol($2,SYM_CONSTANTS,c);
@@ -296,8 +413,8 @@ command:
   ++lastop;
 }
 
-| TORUS STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| TORUS STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $3;
   op[lastop].op.torus.d[1] = $4;
@@ -305,6 +422,24 @@ command:
   op[lastop].op.torus.d[3] = 0;
   op[lastop].op.torus.circle_radius = $6;
   op[lastop].op.torus.torus_radius = $7;
+  op[lastop].op.torus.step_size = $8;
+  op[lastop].op.torus.cs = NULL;
+  c = (struct constants *)malloc(sizeof(struct constants));
+  op[lastop].op.torus.constants = add_symbol($2,SYM_CONSTANTS,c);
+
+  ++lastop;
+}
+
+| TORUS STRING NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
+  op[lastop].opcode = TORUS;
+  op[lastop].op.torus.d[0] = $3;
+  op[lastop].op.torus.d[1] = $4;
+  op[lastop].op.torus.d[2] = $5;
+  op[lastop].op.torus.d[3] = 0;
+  op[lastop].op.torus.circle_radius = $6;
+  op[lastop].op.torus.torus_radius = $7;
+  op[lastop].op.torus.step_size = DEFAULT_TORUS_STEP_SIZE;
   c = (struct constants *)malloc(sizeof(struct constants));
   op[lastop].op.torus.constants = add_symbol($2,SYM_CONSTANTS,c);
   m = (struct matrix *)new_matrix(4,4);
@@ -312,8 +447,27 @@ command:
 
   ++lastop;
 }
-| BOX DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+
+| TORUS STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
+  op[lastop].opcode = TORUS;
+  op[lastop].op.torus.d[0] = $3;
+  op[lastop].op.torus.d[1] = $4;
+  op[lastop].op.torus.d[2] = $5;
+  op[lastop].op.torus.d[3] = 0;
+  op[lastop].op.torus.circle_radius = $6;
+  op[lastop].op.torus.torus_radius = $7;
+  op[lastop].op.torus.step_size = $8;
+  c = (struct constants *)malloc(sizeof(struct constants));
+  op[lastop].op.torus.constants = add_symbol($2,SYM_CONSTANTS,c);
+  m = (struct matrix *)new_matrix(4,4);
+  op[lastop].op.torus.cs = add_symbol($9,SYM_MATRIX,m);
+
+  ++lastop;
+}
+
+| BOX NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = BOX;
   op[lastop].op.box.d0[0] = $2;
   op[lastop].op.box.d0[1] = $3;
@@ -329,8 +483,8 @@ command:
   ++lastop;
 }
 
-| BOX DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| BOX NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
   op[lastop].opcode = BOX;
   op[lastop].op.box.d0[0] = $2;
   op[lastop].op.box.d0[1] = $3;
@@ -347,8 +501,8 @@ command:
   ++lastop;
 }
 
-| BOX STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| BOX STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = BOX;
   op[lastop].op.box.d0[0] = $3;
   op[lastop].op.box.d0[1] = $4;
@@ -364,8 +518,8 @@ command:
   ++lastop;
 }
 
-| BOX STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| BOX STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
   op[lastop].opcode = BOX;
   op[lastop].op.box.d0[0] = $3;
   op[lastop].op.box.d0[1] = $4;
@@ -383,8 +537,8 @@ command:
   ++lastop;
 }
 
-| LINE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| LINE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $2;
   op[lastop].op.line.p0[1] = $3;
@@ -401,8 +555,8 @@ command:
 }
 
 /* first do cs0, then cs1, then both - BUT NO CONSTANTS */
-| LINE DOUBLE DOUBLE DOUBLE STRING DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| LINE NUMBER NUMBER NUMBER STRING NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $2;
   op[lastop].op.line.p0[1] = $3;
@@ -419,8 +573,8 @@ command:
   ++lastop;
 }
 
-| LINE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| LINE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $2;
   op[lastop].op.line.p0[1] = $3;
@@ -437,8 +591,8 @@ command:
   ++lastop;
 }
 
-| LINE DOUBLE DOUBLE DOUBLE STRING DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| LINE NUMBER NUMBER NUMBER STRING NUMBER NUMBER NUMBER STRING {
+  ++lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $2;
   op[lastop].op.line.p0[1] = $3;
@@ -457,8 +611,8 @@ command:
 }
 
 /* now do constants, and constants with the cs stuff */
-| LINE STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| LINE STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $3;
   op[lastop].op.line.p0[1] = $4;
@@ -475,8 +629,8 @@ command:
   ++lastop;
 }
 
-| LINE STRING DOUBLE DOUBLE DOUBLE STRING DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| LINE STRING NUMBER NUMBER NUMBER STRING NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $3;
   op[lastop].op.line.p0[1] = $4;
@@ -494,8 +648,8 @@ command:
   ++lastop;
 }
 
-| LINE STRING DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| LINE STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
+  ++lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $3;
   op[lastop].op.line.p0[1] = $4;
@@ -514,8 +668,8 @@ command:
   ++lastop;
 }
 
-| LINE STRING DOUBLE DOUBLE DOUBLE STRING DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| LINE STRING NUMBER NUMBER NUMBER STRING NUMBER NUMBER NUMBER STRING {
+  ++lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $3;
   op[lastop].op.line.p0[1] = $4;
@@ -535,7 +689,7 @@ command:
 }
 
 | MESH CO STRING {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = MESH;
   strcpy(op[lastop].op.mesh.name,$3);
   op[lastop].op.mesh.constants = NULL;
@@ -544,7 +698,7 @@ command:
 }
 
 | MESH STRING CO STRING { /* name and constants */
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = MESH;
   strcpy(op[lastop].op.mesh.name,$4);
   c = (struct constants *)malloc(sizeof(struct constants));
@@ -554,7 +708,7 @@ command:
 }
 
 | MESH STRING CO STRING STRING {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = MESH;
   strcpy(op[lastop].op.mesh.name,$4);
   c = (struct constants *)malloc(sizeof(struct constants));
@@ -564,8 +718,8 @@ command:
   ++lastop;
 }
 
-| SET STRING DOUBLE {
-  //++lineno;
+| SET STRING NUMBER {
+  ++lineno;
   op[lastop].opcode = SET;
   op[lastop].op.set.p = add_symbol($2,SYM_VALUE,0);
   set_value(op[lastop].op.set.p,$3);
@@ -573,8 +727,8 @@ command:
   ++lastop;
 }
 
-| SCALE DOUBLE DOUBLE DOUBLE STRING {
-  //++lineno;
+| SCALE NUMBER NUMBER NUMBER STRING {
+  ++lineno;
   op[lastop].opcode = SCALE;
   op[lastop].op.scale.d[0] = $2;
   op[lastop].op.scale.d[1] = $3;
@@ -584,8 +738,8 @@ command:
   ++lastop;
 }
 
-| SCALE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| SCALE NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = SCALE;
   op[lastop].op.scale.d[0] = $2;
   op[lastop].op.scale.d[1] = $3;
@@ -595,8 +749,8 @@ command:
   ++lastop;
 }
 
-| ROTATE STRING DOUBLE STRING {
-  //++lineno;
+| ROTATE STRING NUMBER STRING {
+  ++lineno;
   op[lastop].opcode = ROTATE;
   switch (*$2) {
     case 'x':
@@ -619,8 +773,8 @@ command:
   ++lastop;
 }
 
-| ROTATE STRING DOUBLE {
-  //++lineno;
+| ROTATE STRING NUMBER {
+  ++lineno;
   op[lastop].opcode = ROTATE;
   switch (*$2)
     {
@@ -643,21 +797,21 @@ command:
 }
 
 | BASENAME STRING {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = BASENAME;
   op[lastop].op.basename.p = add_symbol($2,SYM_STRING,0);
   ++lastop;
 }
 
 | SAVE_KNOBS STRING {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = SAVE_KNOBS;
   op[lastop].op.save_knobs.p = add_symbol($2,SYM_STRING,0);
   ++lastop;
 }
 
-| TWEEN DOUBLE DOUBLE STRING STRING {
-  //++lineno;
+| TWEEN NUMBER NUMBER STRING STRING {
+  ++lineno;
   op[lastop].opcode = TWEEN;
   op[lastop].op.tween.start_frame = $2;
   op[lastop].op.tween.end_frame = $3;
@@ -666,15 +820,15 @@ command:
   ++lastop;
 }
 
-| FRAMES DOUBLE {
-  //++lineno;
+| FRAMES NUMBER {
+  ++lineno;
   op[lastop].opcode = FRAMES;
   op[lastop].op.frames.num_frames = $2;
   ++lastop;
 }
 
-| VARY STRING DOUBLE DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| VARY STRING NUMBER NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = VARY;
   op[lastop].op.vary.p = add_symbol($2,SYM_STRING,0);
   op[lastop].op.vary.start_frame = $3;
@@ -685,65 +839,65 @@ command:
 }
 
 | PUSH {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = PUSH;
   ++lastop;
 }
 
 | GENERATE_RAYFILES {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = GENERATE_RAYFILES;
   ++lastop;
 }
 
 | POP {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = POP;
   ++lastop;
 }
 
 | SAVE STRING {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = SAVE;
-  op[lastop].op.save.p = add_symbol($2,SYM_FILE,0);
+  op[lastop].op.save.p = add_symbol($2,SYM_STRING,0);
   ++lastop;
 }
 
 | SHADING SHADING_TYPE {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = SHADING;
   op[lastop].op.shading.p = add_symbol($2,SYM_STRING,0);
   ++lastop;
 }
 
-| SETKNOBS DOUBLE {
-  //++lineno;
+| SETKNOBS NUMBER {
+  ++lineno;
   op[lastop].opcode = SETKNOBS;
   op[lastop].op.setknobs.value = $2;
   ++lastop;
 }
 
-| FOCAL DOUBLE {
-  //++lineno;
+| FOCAL NUMBER {
+  ++lineno;
   op[lastop].opcode = FOCAL;
   op[lastop].op.focal.value = $2;
   ++lastop;
 }
 
 | DISPLAY {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = DISPLAY;
   ++lastop;
 }
 
 | WEB {
-  //++lineno;
+  ++lineno;
   op[lastop].opcode = WEB;
   ++lastop;
 }
 
-| AMBIENT DOUBLE DOUBLE DOUBLE {
-  //++lineno;
+| AMBIENT NUMBER NUMBER NUMBER {
+  ++lineno;
   op[lastop].opcode = AMBIENT;
   op[lastop].op.ambient.c[0] = $2;
   op[lastop].op.ambient.c[1] = $3;
@@ -757,7 +911,7 @@ command:
 
 /* ================ SUBROUTINES ============== */
 void yyerror(const char *s) {
-    fprintf(stderr, "Error on line %d: %s\n", yylineno, s);
+    fprintf(stderr, "Error on line %d: %s\n", lineno, s);
     // TODO uncomment when lib-readline is implemented
     //yyin = fdopen(pipes[0], "r");
     //yyrestart(yyin);
@@ -768,9 +922,14 @@ int yywrap() {
     return 1;
 }
 
-int main(int argc, char *argv[]) {
-    // TODO use lib-readline and pipes to run interactively or read from file
+static void sighandler(int signo) {
+    if (signo == SIGINT) {
+        free_table();
+        exit(EXIT_SUCCESS);
+    }
+}
 
+int main(int argc, char *argv[]) {
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
 
@@ -781,16 +940,22 @@ int main(int argc, char *argv[]) {
 
     }
 
-    yyparse();
+    int ret = yyparse();
+    if (ret == 1) { // Syntax error
+        print_error("Fatal error.");
+        exit(EXIT_FAILURE);
+    }
+
     #ifdef DEBUG
     print_pcode();
     #endif
     exec();
 
+    free_table();
     return 0;    
 }
 
-// TODO sighandler
-// TODO read plot mode and draw mode
 // TODO full code review
+// TODO dynamically allocated op array size
+// TODO use GNU readline and pipes to run interactively or read from file
 /* ============= END SUBROUTINES ============= */

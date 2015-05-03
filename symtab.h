@@ -13,7 +13,6 @@
 #define SYM_VALUE 2
 #define SYM_CONSTANTS 3
 #define SYM_LIGHT 4
-#define SYM_FILE   5
 #define SYM_STRING 5
 
 struct constants {
@@ -49,5 +48,6 @@ void print_light(struct light *p);
 void print_symtab();
 SYMTAB *add_symbol(char *name, int type, void *data);
 void set_value(SYMTAB *p, double value);
+void free_table();
 
 #endif

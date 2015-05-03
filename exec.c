@@ -120,9 +120,8 @@ void exec() {
                 #ifdef DEBUG
                 print_debug("Got sphere command");
                 #endif
-                // TODO read step size from input, default to 0.05
                 add_sphere(pts,
-                           0.05,
+                           current_op.op.sphere.step_size,
                            current_op.op.sphere.d[0],
                            current_op.op.sphere.d[1],
                            current_op.op.sphere.d[2],
@@ -138,9 +137,8 @@ void exec() {
                 #ifdef DEBUG
                 print_debug("Got torus command");
                 #endif
-                // TODO read step size from input, default to 0.05
                 add_torus(pts,
-                          0.05,
+                          current_op.op.torus.step_size,
                           current_op.op.torus.d[0],
                           current_op.op.torus.d[1],
                           current_op.op.torus.d[2],
@@ -182,6 +180,30 @@ void exec() {
                 #endif
                 display(_screen);
                 break;
+            case DRAW_MODE: ; // Obligatory empty statement
+                #ifdef DEBUG
+                print_debug("Got draw-mode command");
+                #endif
+                char *mode = current_op.op.drawmode.p->name;
+                if (strcmp(mode, "lines") == 0) {
+                    global_draw_mode = DRAW_LINE;
+                }
+                else if (strcmp(mode, "polygons") == 0) {
+                    global_draw_mode = DRAW_POLYGON;
+                }
+                else {
+                    print_warning("Invalid argument for plot mode command: \"%s\"", mode);
+                }
+                break;
+            case RESIZE:
+                #ifdef DEBUG
+                print_debug("Got resize command");
+                #endif
+                _screen = resize_screen(_screen,
+                                        current_op.op.resize.x,
+                                        current_op.op.resize.y);
+                break;
+
             default:
                 break;
         }
