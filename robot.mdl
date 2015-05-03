@@ -1,5 +1,6 @@
 draw-mode lines
 resize 500 500
+push
 //body
 push
 move 250 200 0
@@ -17,15 +18,18 @@ sphere 0 0 0 50
 pop
 push
 move 75 100 0
+rotate x -30
 box 0 0 20 40 180 40
 //right arm
 pop
 push
 move -75 100 0
+rotate x -30
 box 0 0 0 -40 180 40
 //crown
 pop
 push
 torus 0 200 0 20 60 0.05
 display
-save robot.png
+//save robot.png
+

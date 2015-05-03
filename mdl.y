@@ -6,7 +6,11 @@
 #include "parser.h"
 #include "matrix.h"
 #include "exec.h"
+
 #define YYERROR_VERBOSE 1
+#ifdef DEBUG
+#define YYDEBUG 1
+#endif
 
 SYMTAB *s;
 struct light *l;
@@ -18,9 +22,7 @@ int lineno=1;
 
 // Bison headers and variables
 void yyerror(const char *);
-void yyrestart(FILE *);
-int yylex(void);
-extern FILE * yyin;
+extern FILE *yyin;
 
 %}
 
@@ -911,10 +913,6 @@ command:
 /* ================ SUBROUTINES ============== */
 void yyerror(const char *s) {
     fprintf(stderr, "Error on line %d: %s\n", lineno, s);
-    // TODO uncomment when lib-readline is implemented
-    //yyin = fdopen(pipes[0], "r");
-    //yyrestart(yyin);
-    //yyparse();
 }
 
 int yywrap() {
@@ -955,5 +953,4 @@ int main(int argc, char *argv[]) {
 }
 
 // TODO dynamically allocated op array size
-// TODO use GNU readline and pipes to run interactively or read from file
 /* ============= END SUBROUTINES ============= */

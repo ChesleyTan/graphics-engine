@@ -9,7 +9,7 @@
 %x COMMENT_STATE
 
 ID         [a-zA-Z][a-zA-Z0-9_]*
-WHITESPACE [ \t]
+WHITESPACE [ \t\n]
     /* ============= END DEFINITIONS ============= */
 
     /* ================== RULES ================== */

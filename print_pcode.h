@@ -7,6 +7,7 @@
 #include "parser.h"
 #include "symtab.h"
 #include "y.tab.h"
+#include "utils.h"
 
 void print_pcode();
 #endif

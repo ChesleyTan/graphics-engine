@@ -1,5 +1,6 @@
 OBJECTS= draw.o display.o matrix.o utils.o parser-old.o gmath.o symtab.o print_pcode.o stack.o exec.o
 DEBUG= -DDEBUG -g
+BISON_DEBUG= --debug
 WARNINGS_QUIET= -Wall -Wno-unused-variable -Wno-unused-function
 WARNINGS_ALL= -Wall -Wpadded
 CFLAGS=$(WARNINGS_QUIET)
@@ -59,10 +60,10 @@ lex.yy.c: mdl.l y.tab.h
 	flex -I mdl.l
 
 y.tab.c: mdl.y symtab.h parser.h
-	bison -d -y mdl.y
+	bison $(BISON_DEBUG) -d -y mdl.y
 
 y.tab.h: mdl.y 
-	bison -d -y mdl.y
+	bison $(BISON_DEBUG) -d -y mdl.y
 
 clean:
 	rm -f *.o
