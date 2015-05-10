@@ -29,7 +29,8 @@ void add_circle(struct matrix *points,
     double t;
     double old_x = cx + r; // r*cos(0) is r
     double old_y = cy + 0; // r*sin(0) is 0
-    for (t = 0; t < 2 + step; t += step) {
+    double end_t = 2 + step;
+    for (t = 0; t < end_t; t += step) {
         double rad = M_PI * (t + step);
         double new_x = cx + r * cos(rad);
         double new_y = cy + r * sin(rad);
@@ -109,7 +110,8 @@ void add_hermite_curve(struct matrix *points,
     double t;
     double old_x = x0;
     double old_y = y0;
-    for (t = 0; t < 1 + step; t += step) {
+    double end_t = 1 + step;
+    for (t = 0; t < end_t; t += step) {
         double t_squared = t * t;
         double t_cubed = t_squared * t;
         // Calculate new x and y coordinates using at^3 + bt^2 + ct + d
@@ -168,7 +170,8 @@ void add_bezier_curve(struct matrix *points,
     double t;
     double old_x = x0;
     double old_y = y0;
-    for (t = 0; t < 1 + step; t += step) {
+    double end_t = 1 + step;
+    for (t = 0; t < end_t; t += step) {
         double t_squared = t * t;
         double t_cubed = t_squared * t;
         // Calculate new x and y coordinates using at^3 + bt^2 + ct + d
@@ -282,16 +285,18 @@ void add_sphere(struct matrix *points,
     // P12 P13 P14 P14 P15 ... P21 P22
     // P23 P24 P25 P26 P27 ... P32 P33
     // ...
-    int latitude, longitude;
+    int latitude, longitude, end_latitude, end_longitude;
     double **m = tmp->m;
     int num_steps = round(1.0 / step) + 1;
+    end_latitude = end_longitude = num_steps - 1;
+    int penultimate_longitude = end_longitude - 1;
     switch (draw_mode) {
         case DRAW_POLYGON: ; // Obligatory empty statement
             int num_pts = tmp->lastcol;
-            for (latitude = 0; latitude < num_steps - 1; ++latitude) {
+            for (latitude = 0; latitude < end_latitude; ++latitude) {
                 int lat_start = num_steps * latitude;
                 int next_lat_start = (lat_start + num_steps) % num_pts;
-                for (longitude = 0; longitude < num_steps - 1; ++longitude) {
+                for (longitude = 0; longitude < end_longitude; ++longitude) {
                     int index = lat_start + longitude;
                     int index_plus_one = index + 1;
                     int index_next_lat = next_lat_start + longitude;
@@ -322,7 +327,7 @@ void add_sphere(struct matrix *points,
                     );
                     // Don't draw the second triangle for the edge case at the
                     // end pole of the sphere
-                    if (longitude != num_steps - 2) {
+                    if (longitude != penultimate_longitude) {
                         add_polygon(points,
                                     m[0][index_next_lat_plus_one],
                                     m[1][index_next_lat_plus_one],
@@ -724,7 +729,8 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
     }
     double **m = polygons->m;
     int i;
-    for (i = 0; i < polygons->lastcol - 2; i+=3) {
+    int end_i = polygons->lastcol - 2;
+    for (i = 0; i < end_i; i+=3) {
         if (is_visible(m, i)) {
             draw_line(s, c, m[0][i], m[1][i],
                             m[0][i+1], m[1][i+1],

@@ -1,9 +1,9 @@
 draw-mode lines
-resize 500 500
+resize 500 700
 push
 //body
 push
-move 250 200 0
+move 250 350 0
 //rotate y 30
 //rotate x 20
 box -75 100 40 150 200 80
@@ -57,5 +57,5 @@ rotate x 20
 rotate y 20
 rotate z -10
 box -200 -100 0 40 40 40
-//save robot.png
 display
+save robot.png
