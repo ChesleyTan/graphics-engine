@@ -18,18 +18,44 @@ sphere 0 0 0 50
 pop
 push
 move 75 100 0
-rotate x -30
+rotate z -30
+rotate x 180
 box 0 0 20 40 180 40
+sphere 20 -190 0 20 0.04
 //right arm
 pop
 push
 move -75 100 0
 rotate x -30
 box 0 0 0 -40 180 40
+//right leg
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+//left leg
+pop
+push
+move 70 -100 0
+rotate y 180
+box 0 0 0 40 140 40
 //crown
 pop
 push
+rotate y 0
 torus 0 200 0 20 60 0.05
-display
+//background
+pop
+push
+rotate x 30
+rotate y 30
+rotate z 10
+box 150 -100 0 40 40 40
+pop
+push
+rotate x 20
+rotate y 20
+rotate z -10
+box -200 -100 0 40 40 40
 //save robot.png
-
+display
