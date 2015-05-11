@@ -8,5 +8,4 @@
 #include "y.tab.h"
 
 void exec();
-static void draw(screen s, struct matrix *pts, color c);
 #endif

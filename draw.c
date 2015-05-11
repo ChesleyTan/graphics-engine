@@ -1,4 +1,6 @@
 #include "draw.h"
+plotting_mode global_plot_mode = PLOT_ABSOLUTE;
+drawing_mode global_draw_mode = DRAW_POLYGON;
 
 void add_point(struct matrix * points, double x, double y, double z) {
     if (points->lastcol >= points->cols - 1) {
@@ -753,6 +755,25 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             }
             */
         }
+    }
+}
+
+void draw(screen s, struct matrix *pts, color c) {
+    // Draw the points matrix to the screen using the current drawing mode
+    if (global_plot_mode == PLOT_CARTESIAN) {
+        color axis_color;
+        axis_color.red = 255;
+        axis_color.blue = 0;
+        axis_color.green = 0;
+        draw_axes(s, axis_color);
+    }
+    switch (global_draw_mode) {
+        case DRAW_LINE:
+            draw_lines(s, c, pts, global_plot_mode);
+            break;
+        case DRAW_POLYGON:
+            draw_polygons(s, c, pts, global_plot_mode);
+            break;
     }
 }
 

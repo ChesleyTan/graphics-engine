@@ -213,22 +213,3 @@ void exec() {
     free_matrix(trans_mat);
     free_matrix(pts);
 }
-
-static void draw(screen s, struct matrix *pts, color c) {
-    // Draw the points matrix to the screen using the current drawing mode
-    if (global_plot_mode == PLOT_CARTESIAN) {
-        color axis_color;
-        axis_color.red = 255;
-        axis_color.blue = 0;
-        axis_color.green = 0;
-        draw_axes(s, axis_color);
-    }
-    switch (global_draw_mode) {
-        case DRAW_LINE:
-            draw_lines(s, c, pts, global_plot_mode);
-            break;
-        case DRAW_POLYGON:
-            draw_polygons(s, c, pts, global_plot_mode);
-            break;
-    }
-}

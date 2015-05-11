@@ -153,13 +153,13 @@ to Cartesian.
 =========================================*/
 static void draw_axes_if_cartesian_mode();
 
-/*======== void draw() ==========
+/*======== void parser_draw() ==========
 Inputs:
 Returns:
 Draws the point matrix to the screen using the global drawing mode
 (global_draw_mode).
-===============================*/
-static void draw();
+======================================*/
+static void parser_draw();
 
 /*======== void save() ==========
 Inputs:     char *line_buf

@@ -46,11 +46,11 @@ typedef enum {
 
 /* Plotting mode to be used by default globally.
  * This value may be set programmatically. */
-static plotting_mode global_plot_mode = PLOT_ABSOLUTE;
+extern plotting_mode global_plot_mode;
 
 /* Drawing mode to be used by default globally.
  * This value may be set programmatically. */
-static drawing_mode global_draw_mode = DRAW_LINE;
+extern drawing_mode global_draw_mode;
 
 /*======== void add_point() ==========
 Inputs:     struct matrix *points
@@ -338,5 +338,17 @@ The plotting mode determines the coordinate system to be used when plotting poin
 See plotting_mode for more information.
 =========================================*/
 void draw_polygons(screen s, color c, struct matrix *polygons, plotting_mode plot_mode);
+
+/*======== void draw() ==========
+Inputs:     screen s
+            struct matrix *pts
+            color c
+Returns:
+Draws the points in `pts` to the screen `s` using the color `c`.
+This function automatically draws the axes if `global_plot_mode` is
+PLOT_CARTESIAN, and it obeys `global_draw_mode` to either draw the points as
+lines or polygons.
+===============================*/
+void draw(screen s, struct matrix *pts, color c);
 #endif
 // vim: ts=4:et:sts:sw=4:sr

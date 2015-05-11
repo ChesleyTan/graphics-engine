@@ -202,7 +202,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         #endif
         // First, draw the axes if plotting in Cartesian plane
         draw_axes_if_cartesian_mode();
-        draw();
+        parser_draw();
         // Display image
         display(global_s);
     }
@@ -213,7 +213,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         #endif
         // First, draw the axes if plotting in Cartesian plane
         draw_axes_if_cartesian_mode();
-        draw();
+        parser_draw();
         // Save image to file with given filename
         save(line_buf, error_is_fatal);
     }
@@ -224,7 +224,7 @@ void parse_input(char *cmd, char *line_buf, char error_is_fatal) {
         #endif
         // First, draw the axes if plotting in Cartesian plane
         draw_axes_if_cartesian_mode();
-        draw();
+        parser_draw();
         // Display image
         display(global_s);
         // Save image to file with given filename
@@ -458,7 +458,7 @@ static void draw_axes_if_cartesian_mode() {
     }
 }
 
-static void draw() {
+static void parser_draw() {
     // Draw the points matrix to the screen using the current drawing mode
     color c;
     c.red = 30;
