@@ -65,8 +65,30 @@ SYMTAB *add_symbol(char *name, int type, void *data) {
         }
         t = (SYMTAB *)&(symtab[lastsym]);
         ++lastsym;
+        #ifdef DEBUG
+        print_debug("Symbol #%d: %s", lastsym, name);
+        #endif
     }
     else {
+        // If the symbol already exists, return it, and free the argument given.
+        // TODO update freeing when implementing other data types
+        #ifdef DEBUG
+        print_debug("Symbol already exists: %s; "
+                    "Freeing add_symbol() argument....", name);
+        #endif
+        switch (type) {
+            case SYM_MATRIX:
+                free_matrix((struct matrix *)data);
+                break;
+            case SYM_CONSTANTS:
+                free(data);
+                break;
+            case SYM_LIGHT:
+                free(data);
+                break;
+            default:
+                break;
+        }
         return t;
     }
 
@@ -114,5 +136,30 @@ void free_table() {
     for (i = 0; i < lastsym; ++i) {
         // TODO update free_table when implementing other commands
         free(symtab[i].name);
+        switch (symtab[i].type) {
+            case SYM_MATRIX:
+                free_matrix(symtab[i].s.m);
+                #ifdef DEBUG
+                print_debug("Freeing matrix at %d", i);
+                #endif
+                break;
+            case SYM_CONSTANTS:
+                free(symtab[i].s.c);
+                #ifdef DEBUG
+                print_debug("Freeing constant at %d", i);
+                #endif
+                break;
+            case SYM_LIGHT:
+                free(symtab[i].s.l);
+                #ifdef DEBUG
+                print_debug("Freeing light at %d", i);
+                #endif
+                break;
+            default:
+                #ifdef DEBUG
+                print_debug("Freeing no additional structures at %d", i);
+                #endif
+                break;
+        }
     }
 }
