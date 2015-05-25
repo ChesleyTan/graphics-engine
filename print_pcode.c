@@ -181,12 +181,12 @@ void print_pcode() {
                         current_op.op.tween.knob_list1->name);
                 break;
             case FRAMES:
-                printf("%s%sNum frames%s: %4.0f",
+                printf("%s%sNum frames%s: %d",
                         bold_prefix, fg_blue_30, reset,
                         current_op.op.frames.num_frames);
                 break;
             case VARY:
-                printf("%s%sVary%s: %4.0f %4.0f, %4.0f %4.0f",
+                printf("%s%sVary%s: %d %d, %4.0f %4.0f",
                         bold_prefix, fg_blue_30, reset,
                         current_op.op.vary.start_frame,
                         current_op.op.vary.end_frame,

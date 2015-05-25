@@ -58,7 +58,7 @@ void print_symtab() {
 SYMTAB *add_symbol(char *name, int type, void *data) {
     SYMTAB *t;
 
-    t = (SYMTAB *)lookup_symbol(name);
+    t = lookup_symbol(name);
     if (t==NULL) {
         if (lastsym >= MAX_SYMBOLS) {
             return NULL;

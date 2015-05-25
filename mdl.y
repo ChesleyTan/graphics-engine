@@ -6,6 +6,7 @@
 #include "parser.h"
 #include "matrix.h"
 #include "exec.h"
+#include "utils.h"
 
 #define YYERROR_VERBOSE 1
 #ifdef DEBUG
@@ -17,8 +18,9 @@ struct light *l;
 struct constants *c;
 struct command op[MAX_COMMANDS];
 struct matrix *m;
-int lastop=0;
-int lineno=1;
+int lastop = 0;
+int lineno = 0;
+char is_animation = FALSE;
 
 // Bison headers and variables
 void yyerror(const char *);
@@ -799,6 +801,17 @@ command:
 
 | BASENAME STRING {
   ++lineno;
+  if (!is_animation) {
+    print_error("Basename can only be set in an animation script. "
+                "The frames command must be the first command in the script!");
+    free_table();
+    exit(EXIT_FAILURE);
+  }
+  else if (lineno != 2) {
+    print_error("Basename must be the second command in an animation script! ");
+    free_table();
+    exit(EXIT_FAILURE);
+  }
   op[lastop].opcode = BASENAME;
   op[lastop].op.basename.p = add_symbol($2,SYM_STRING,0);
   ++lastop;
@@ -823,17 +836,31 @@ command:
 
 | FRAMES NUMBER {
   ++lineno;
+  if (lineno == 1) {
+    is_animation = TRUE;
+  }
+  else {
+    print_error("Frames must be the first command in an animation script!");
+    free_table();
+    exit(EXIT_FAILURE);
+  }
   op[lastop].opcode = FRAMES;
-  op[lastop].op.frames.num_frames = $2;
+  op[lastop].op.frames.num_frames = (int) $2;
   ++lastop;
 }
 
 | VARY STRING NUMBER NUMBER NUMBER NUMBER {
+  if (!is_animation) {
+    print_error("Vary can only be used in an animation script. "
+                "The frames command must be the first command in the script!");
+    free_table();
+    exit(EXIT_FAILURE);
+  }
   ++lineno;
   op[lastop].opcode = VARY;
   op[lastop].op.vary.p = add_symbol($2,SYM_STRING,0);
-  op[lastop].op.vary.start_frame = $3;
-  op[lastop].op.vary.end_frame = $4;
+  op[lastop].op.vary.start_frame = (int) $3;
+  op[lastop].op.vary.end_frame = (int) $4;
   op[lastop].op.vary.start_val = $5;
   op[lastop].op.vary.end_val = $6;
   ++lastop;
@@ -921,6 +948,7 @@ int yywrap() {
 
 static void sighandler(int signo) {
     if (signo == SIGINT) {
+        // TODO free vary_nodes
         free_table();
         exit(EXIT_SUCCESS);
     }
@@ -946,7 +974,13 @@ int main(int argc, char *argv[]) {
     #ifdef DEBUG
     print_pcode();
     #endif
-    exec();
+    if (is_animation) {
+        parse_animation_cmds();
+        exec_animation();
+    }
+    else {
+        exec(FALSE);
+    }
 
     free_table();
     return 0;    

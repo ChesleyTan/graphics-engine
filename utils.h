@@ -2,12 +2,16 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define FALSE 0
+#define TRUE 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
 #include <math.h>
+
 
 // ANSI Escape codes for output formatting
 static const char *reset = "\e[0m";

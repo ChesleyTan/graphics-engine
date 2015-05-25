@@ -99,11 +99,12 @@ struct command {
             SYMTAB *knob_list1;
         } tween;
         struct {
-            double num_frames;
-        }frames;
+            int num_frames;
+        } frames;
         struct {
             SYMTAB *p;
-            double start_frame, end_frame, start_val, end_val;
+            int start_frame, end_frame;
+            double start_val, end_val;
         } vary;
         struct {
             SYMTAB *p;
@@ -134,5 +135,6 @@ typedef enum {
 // Extern variables for use in parser files
 extern int lastop;
 extern struct command op[MAX_COMMANDS];
+extern char is_animation;
 
 #endif

@@ -1,3 +1,6 @@
+frames 5
+vary ayy 10 29 0 100
+vary lmao 4 20 420 1000
 draw-mode lines
 resize 500 700
 push
@@ -57,5 +60,5 @@ rotate x 20
 rotate y 20
 rotate z -10
 box -200 -100 0 40 40 40
-display
-save robot.png
+//display
+//save robot.png
