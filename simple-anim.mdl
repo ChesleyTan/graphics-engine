@@ -1,0 +1,29 @@
+frames 30
+basename frame
+resize 700 700
+push
+move 350 350 0
+push
+rotate x 50
+rotate z 50
+push
+rotate x 0 spinny
+rotate y 0 spinny2
+scale 1 1 1 bigenator
+torus 0 0 0 50 200 0.05
+pop
+push
+rotate x 0 spinny1
+rotate y 0 spinny1
+scale 1 1 1 bigenator1
+sphere 0 0 0 100 0.04
+pop
+vary spinny 0 29 0 360
+vary spinny1 0 29 0 -360
+vary spinny2 0 9 0 90
+vary spinny2 10 20 90 260
+vary spinny2 20 29 260 360
+vary bigenator 0 14 1 1.5
+vary bigenator 15 29 1.5 1
+vary bigenator1 0 14 1 0.9
+vary bigenator1 15 29 0.9 1
