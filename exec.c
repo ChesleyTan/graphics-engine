@@ -47,9 +47,21 @@ screen exec(char return_screen) {
                 free_matrix(trans_mat);
                 // Create a transformation matrix using the data stored for the
                 // translate command
-                trans_mat = make_translate(current_op.op.move.d[0],
-                                           current_op.op.move.d[1],
-                                           current_op.op.move.d[2]);
+                if (current_op.op.move.p != NULL) { // If a knob exists, use it
+                    // Only apply translation to coordinates axes who initial values
+                    // are non-zero
+                    trans_mat = make_translate(current_op.op.move.d[0] == 0 ? 0
+                                               : current_op.op.move.p->s.value,
+                                               current_op.op.move.d[1] == 0 ? 0
+                                               : current_op.op.move.p->s.value,
+                                               current_op.op.move.d[2] == 0 ? 0
+                                               : current_op.op.move.p->s.value);
+                }
+                else {
+                    trans_mat = make_translate(current_op.op.move.d[0],
+                                               current_op.op.move.d[1],
+                                               current_op.op.move.d[2]);
+                }
                 // Apply the transformation to the top matrix in the origin
                 // stack
                 tmp = matrix_mult(s->data[s->top], trans_mat);
@@ -101,12 +113,15 @@ screen exec(char return_screen) {
                 print_debug("Got scale command");
                 #endif
                 free_matrix(trans_mat);
-                // TODO apply scale only to coordinates axes who initial values
-                // are non-zero
                 if (current_op.op.scale.p != NULL) { // If knob exists, use it
-                    trans_mat = make_scale(current_op.op.scale.p->s.value,
-                                           current_op.op.scale.p->s.value,
-                                           current_op.op.scale.p->s.value);
+                    // Only apply scale to coordinates axes who initial values
+                    // are non-zero
+                    trans_mat = make_scale(current_op.op.scale.d[0] == 0 ? 1
+                                           : current_op.op.scale.p->s.value,
+                                           current_op.op.scale.d[1] == 0 ? 1
+                                           : current_op.op.scale.p->s.value,
+                                           current_op.op.scale.d[2] == 0 ? 1
+                                           : current_op.op.scale.p->s.value);
                 }
                 else {
                     trans_mat = make_scale(current_op.op.scale.d[0],
