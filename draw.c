@@ -734,15 +734,20 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
     int end_i = polygons->lastcol - 2;
     for (i = 0; i < end_i; i+=3) {
         if (is_visible(m, i)) {
-            draw_line(s, c, m[0][i], m[1][i],
-                            m[0][i+1], m[1][i+1],
-                            plot_mode);
-            draw_line(s, c, m[0][i+1], m[1][i+1],
-                            m[0][i+2], m[1][i+2],
-                            plot_mode);
-            draw_line(s, c, m[0][i+2], m[1][i+2],
-                            m[0][i], m[1][i],
-                            plot_mode);
+            double x0 = m[0][i];
+            double y0 = m[1][i];
+            double x1 = m[0][i+1];
+            double y1 = m[1][i+1];
+            double x2 = m[0][i+2];
+            double y2 = m[1][i+2];
+            //draw_line(s, c, x0, y0, x1, y1, plot_mode);
+            //draw_line(s, c, x1, y1, x2, y2, plot_mode);
+            //draw_line(s, c, x2, y2, x1, y1, plot_mode);
+            // Perform scanline conversion
+            // TODO remove this after testing
+            c.red += (i * i);
+            c.red %= 256;
+            scanline_convert(s, c, plot_mode, x0, y0, x1, y1, x2, y2);
             /* DEBUG
             print_debug("drawing (%lf,%lf,%lf)\n"
                 "\tto      (%lf, %lf, %lf)\n"
@@ -754,6 +759,7 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
                 display(s);
             }
             */
+
         }
     }
 }
@@ -774,6 +780,434 @@ void draw(screen s, struct matrix *pts, color c) {
         case DRAW_POLYGON:
             draw_polygons(s, c, pts, global_plot_mode);
             break;
+    }
+}
+
+void scanline_convert(screen s,
+                      color c,
+                      plotting_mode plot_mode,
+                      double x0,
+                      double y0,
+                      double x1,
+                      double y1,
+                      double x2,
+                      double y2) {
+    char _case = 0;
+    double x_b, x_m, x_t;
+    double y_b, y_m, y_t;
+    double curr_y, curr_x0, curr_x1;
+    double end_y;
+    double d0, d1;
+    // TODO fix glitchiness
+    // Case 1 - If no vertices have the same y value
+    if (y0 != y1 && y1 != y2 && y0 != y2) {
+        _case = 1;
+        // Set the bottom, middle, and top vertices
+        if (y0 < y1) {
+            if (y2 > y1) {
+                x_b = x0;
+                y_b = y0;
+                x_m = x1;
+                y_m = y1;
+                x_t = x2;
+                y_t = y2;
+            }
+            else if (y2 < y1) {
+                if (y0 > y2) {
+                    x_b = x2;
+                    y_b = y2;
+                    x_m = x0;
+                    y_m = y0;
+                    x_t = x1;
+                    y_t = y1;
+                }
+                else {
+                    x_b = x0;
+                    y_b = y0;
+                    x_m = x2;
+                    y_m = y2;
+                    x_t = x1;
+                    y_t = y1;
+                }
+            }
+            else if (y2 < y0) {
+                x_b = x2;
+                y_b = y2;
+                x_m = x0;
+                y_m = y0;
+                x_t = x1;
+                y_t = y1;
+            }
+            else if (y2 > y0) {
+                if (y1 > y2) {
+                    x_b = x0;
+                    y_b = y0;
+                    x_m = x2;
+                    y_m = y2;
+                    x_t = x1;
+                    y_t = y1;
+                }
+                else {
+                    x_b = x0;
+                    y_b = y0;
+                    x_m = x1;
+                    y_m = y1;
+                    x_t = x2;
+                    y_t = y2;
+                }
+            }
+        }
+        else { // y0 > y1
+            if (y2 < y1) {
+                x_b = x2;
+                y_b = y2;
+                x_m = x1;
+                y_m = y1;
+                x_t = x0;
+                y_t = y0;
+            }
+            else if (y2 > y1) {
+                if (y0 > y2) {
+                    x_b = x1;
+                    y_b = y1;
+                    x_m = x2;
+                    y_m = y2;
+                    x_t = x0;
+                    y_t = y0;
+                }
+                else {
+                    x_b = x1;
+                    y_b = y1;
+                    x_m = x0;
+                    y_m = y0;
+                    x_t = x2;
+                    y_t = y2;
+                }
+            }
+            else if (y2 > y0) {
+                x_b = x1;
+                y_b = y1;
+                x_m = x0;
+                y_m = y0;
+                x_t = x2;
+                y_t = y2;
+            }
+            else if (y2 < y0) {
+                if (y1 > y2) {
+                    x_b = x2;
+                    y_b = y2;
+                    x_m = x1;
+                    y_m = y1;
+                    x_t = x0;
+                    y_t = y0;
+                }
+                else {
+                    x_b = x1;
+                    y_b = y1;
+                    x_m = x2;
+                    y_m = y2;
+                    x_t = x0;
+                    y_t = y0;
+                }
+            }
+        }
+    }
+    else if (y0 == y1) {
+        // Case 2 - if the two vertices are on the bottom (i.e two vertices are equal
+        // and have lower y values than the other vertex)
+        if (y0 < y2) {
+            _case = 2;
+            // Set the bottom, middle, and top vertices
+            x_t = x2;
+            y_t = y2;
+            x_m = x1;
+            y_m = y1;
+            x_b = x0;
+            y_b = y0;
+        }
+        // Case 3 - if the two vertices are on the top (i.e. two vertices are equal and
+        // have higher y values than the other vertex)
+
+        else {
+            _case = 3;
+            // Set the bottom, middle, and top vertices
+            x_t = x0;
+            y_t = y0;
+            x_m = x1;
+            y_m = y1;
+            x_b = x2;
+            y_b = y2;
+        }
+    }
+    else if (y1 == y2) {
+        if (y1 < y0) {
+            _case = 2;
+            x_t = x0;
+            y_t = y0;
+            x_m = x1;
+            y_m = y1;
+            x_b = x2;
+            y_b = y2;
+        }
+        else {
+            _case = 3;
+            x_t = x2;
+            y_t = y2;
+            x_m = x1;
+            y_m = y1;
+            x_b = x0;
+            y_b = y0;
+        }
+    }
+    else if (y0 == y2) {
+        if (y0 < y1) {
+            _case = 2;
+            x_t = x1;
+            y_t = y1;
+            x_m = x2;
+            y_m = y2;
+            x_b = x0;
+            y_b = y0;
+        }
+        else {
+            _case = 3;
+            x_t = x0;
+            y_t = y0;
+            x_m = x2;
+            y_m = y2;
+            x_b = x1;
+            y_b = y1;
+        }
+    }
+    switch (_case) {
+        case 1:
+            d0 = (x_t - x_b) / (y_t - y_b);
+            d1 = (x_m - x_b) / (y_m - y_b);
+            curr_y = y_b;
+            curr_x0 = curr_x1 = x_b;
+            end_y = floor(y_m);
+            while ((curr_y) <= end_y) {
+                draw_line(s, c, (curr_x0), (curr_y), (curr_x1), (curr_y),
+                        plot_mode);
+                curr_x0 += d0;
+                curr_x1 += d1;
+                ++curr_y;
+            }
+            d1 = (x_t - x_m) / (y_t - y_m);
+            curr_y = y_m;
+            curr_x1 = x_m;
+            end_y = floor(y_t);
+            while ((curr_y) <= end_y) {
+                draw_line(s, c, (curr_x0), (curr_y), (curr_x1), (curr_y),
+                            plot_mode);
+                curr_x0 += d0;
+                curr_x1 += d1;
+                ++curr_y;
+            }
+            break;
+        case 2:
+            d0 = (x_t - x_b) / (y_t - y_b);
+            d1 = (x_t - x_m) / (y_t - y_m);
+            curr_y = y_b;
+            curr_x0 = x_b;
+            curr_x1 = x_m;
+            end_y = floor(y_t);
+            while ((curr_y) <= end_y) {
+                draw_line(s, c, (curr_x0), (curr_y), (curr_x1), (curr_y),
+                            plot_mode);
+                curr_x0 += d0;
+                curr_x1 += d1;
+                ++curr_y;
+            }
+            break;
+        case 3:
+            d0 = (x_t - x_b) / (y_t - y_b);
+            d1 = (x_m - x_b) / (y_m - y_b);
+            curr_y = y_b;
+            curr_x0 = curr_x1 = x_b;
+            end_y = floor(y_t);
+            while ((curr_y) <= end_y) {
+                draw_line(s, c, (curr_x0), (curr_y), (curr_x1), (curr_y),
+                            plot_mode);
+                curr_x0 += d0;
+                curr_x1 += d1;
+                ++curr_y;
+            }
+            break;
+    }
+}
+
+void dual_bresenham(screen s, color c, plotting_mode plot_mode,
+                    double x_b, 
+                    double y_b,
+                    double x_m,
+                    double y_m,
+                    double x_t,
+                    double y_t) {
+    // Ensure that x values are increasing (or equal), for simplification
+    if (x0 > x1) {
+        // Swap points if necessary
+        double tmp;
+        tmp = x0;
+        x0 = x1;
+        x1 = tmp;
+        tmp = y0;
+        y0 = y1;
+        y1 = tmp;
+    }
+    double a = 2 * (y1 - y0);
+    double b = -2 * (x1 - x0);
+    // 1st and 5th octants of the 2D plane
+    if (a >= 0 && a <= (-1*b)) {
+        // Shortcut for the first round of calculations of Ax + By + C
+        // using the midpoint of the next two possible coordinates:
+        // d = f(x0+1, y0+1/2)
+        //   = A(x0+1) + B(y+1/2) + C
+        //   = Ax0 + By0 + C + A + B/2
+        //   = A + B/2
+        double d = a + b / 2;
+        double x = x0;
+        double y = y0;
+        while (x <= x1) {
+            switch (plot_mode) {
+                case PLOT_CARTESIAN:
+                    plot_cartesian(s, c, x, y);
+                    break;
+                case PLOT_ABSOLUTE:
+                    plot_absolute(s, c, x, y);
+                    break;
+            }
+            // If Ax + By + C > 0, then the midpoint of the next two
+            // possible coordinates is below the line,
+            // so we have to draw the pixel in the upper coordinate
+            // We increase d according to the rule:
+            // if   x → x + 1
+            //      y → y
+            // then d = d + A
+            // if   x → x + 1
+            //      y → y + 1
+            // then d = d + A + B
+            if (d > 0) {
+                ++y;
+                d += b;
+            }
+            ++x;
+            d += a;
+        }
+    }
+    // 2nd and 6th octants of the 2D plane
+    else if (a >= 0 && a > (-1*b)) {
+        // Shortcut for the first round of calculations of Ax + By + C
+        // using the midpoint of the next two possible coordinates:
+        // d = f(x0+1/2, y0+1)
+        //   = A(x0+1/2) + B(y+1) + C
+        //   = Ax0 + By0 + C + A/2 + B
+        //   = A/2 + B
+        double d = a / 2 + b;
+        double x = x0;
+        double y = y0;
+        while (y <= y1) {
+            switch (plot_mode) {
+                case PLOT_CARTESIAN:
+                    plot_cartesian(s, c, x, y);
+                    break;
+                case PLOT_ABSOLUTE:
+                    plot_absolute(s, c, x, y);
+                    break;
+            }
+            // If Ax + By + C < 0, then the midpoint of the next two
+            // possible coordinates is above the line,
+            // so we have to draw the pixel in the righter coordinate
+            // We increase d according to the rule:
+            // if   y → y + 1
+            //      x → x
+            // then d = d + B
+            // if   y → y + 1
+            //      x → x + 1
+            // then d = d + A + B
+            if (d < 0) {
+                ++x;
+                d += a;
+            }
+            ++y;
+            d += b;
+        }
+    }
+    // 3rd and 7th octants of the 2D plane
+    else if (a < 0 && a <= b) {
+        // Shortcut for the first round of calculations of Ax + By + C
+        // using the midpoint of the next two possible coordinates:
+        // d = f(x0+1/2, y0-1)
+        //   = A(x0+1/2) + B(y0-1) + C
+        //   = Ax0 + By0 + C + A/2 - B
+        //   = A/2 - B
+        double d = a / 2 - b;
+        double x = x0;
+        double y = y0;
+        while (y >= y1) {
+            switch (plot_mode) {
+                case PLOT_CARTESIAN:
+                    plot_cartesian(s, c, x, y);
+                    break;
+                case PLOT_ABSOLUTE:
+                    plot_absolute(s, c, x, y);
+                    break;
+            }
+            // If Ax + By + C > 0, then the midpoint of the next two
+            // possible coordinates is below the line,
+            // so we have to draw the pixel in the righter coordinate
+            // We increase d according to the rule:
+            // if   y → y - 1
+            //      x → x
+            // then d = d - B
+            // if   y → y - 1
+            //      x → x + 1
+            // then d = d + A - B
+            if (d > 0) {
+                ++x;
+                d += a;
+            }
+            --y;
+            d -= b;
+        }
+    }
+    // 4th and 8th octants of the 2D plane
+    else if (a < 0 && a > b) {
+        // Shortcut for the first round of calculations of Ax + By + C
+        // using the midpoint of the next two possible coordinates:
+        // d = f(x0+1, y0-1/2)
+        //   = A(x0+1) + B(y0-1/2) + C
+        //   = Ax0 + By0 + C + A - B/2
+        //   = A - B/2
+        double d = a - b / 2;
+        double x = x0;
+        double y = y0;
+        while (x <= x1) {
+            switch (plot_mode) {
+                case PLOT_CARTESIAN:
+                    plot_cartesian(s, c, x, y);
+                    break;
+                case PLOT_ABSOLUTE:
+                    plot_absolute(s, c, x, y);
+                    break;
+            }
+            // If Ax + By + C < 0, then the midpoint of the next two
+            // possible coordinates is above the line,
+            // so we have to draw the pixel in the lower coordinate
+            // We increase d according to the rule:
+            // if   x → x + 1
+            //      y → y
+            // then d = d + A
+            // if   x → x + 1
+            //      y → y - 1
+            // then d = d + A - B
+            if (d < 0) {
+                --y;
+                d -= b;
+            }
+            ++x;
+            d += a;
+        }
     }
 }
 

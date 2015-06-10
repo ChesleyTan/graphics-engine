@@ -350,5 +350,29 @@ PLOT_CARTESIAN, and it obeys `global_draw_mode` to either draw the points as
 lines or polygons.
 ===============================*/
 void draw(screen s, struct matrix *pts, color c);
+
+/*======== void scanline_convert() ==========
+Inputs:     screen s
+            color c
+            plotting_mode plot_mode
+            double x0
+            double y0
+            double x1
+            double y1
+            double x2
+            double y2
+Returns:
+Performs scanline conversion on the triangle bounded by the three vertices 
+(x0, y0), (x1, y1), and (x2, y2).
+============================================*/
+void scanline_convert(screen s,
+                      color c,
+                      plotting_mode plot_mode,
+                      double x0,
+                      double y0,
+                      double x1,
+                      double y1,
+                      double x2,
+                      double y2);
 #endif
 // vim: ts=4:et:sts:sw=4:sr
