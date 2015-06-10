@@ -530,7 +530,8 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
         double d = a + b / 2;
         double x = x0;
         double y = y0;
-        while (x <= x1) {
+        int end_x = (int)x1;
+        while ((int)x <= end_x) {
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y);
@@ -568,7 +569,8 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
         double d = a / 2 + b;
         double x = x0;
         double y = y0;
-        while (y <= y1) {
+        int end_y = (int)y1;
+        while ((int)y <= end_y) {
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y);
@@ -606,7 +608,8 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
         double d = a / 2 - b;
         double x = x0;
         double y = y0;
-        while (y >= y1) {
+        int end_y = (int)y1;
+        while ((int)y >= end_y) {
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y);
@@ -644,7 +647,8 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
         double d = a - b / 2;
         double x = x0;
         double y = y0;
-        while (x <= x1) {
+        int end_x = (int)x1;
+        while ((int)x <= end_x) {
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y);
@@ -986,8 +990,8 @@ void scanline_convert(screen s,
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
             end_y = floor(y_m);
-            while ((curr_y) <= end_y) {
-                draw_line(s, c, (curr_x0), (curr_y), (curr_x1), (curr_y),
+            while (curr_y < end_y) {
+                draw_line(s, c, curr_x0, curr_y, curr_x1, curr_y,
                         plot_mode);
                 curr_x0 += d0;
                 curr_x1 += d1;
@@ -996,9 +1000,9 @@ void scanline_convert(screen s,
             d1 = (x_t - x_m) / (y_t - y_m);
             curr_y = y_m;
             curr_x1 = x_m;
-            end_y = floor(y_t);
-            while ((curr_y) <= end_y) {
-                draw_line(s, c, (curr_x0), (curr_y), (curr_x1), (curr_y),
+            end_y = y_t;
+            while (curr_y <= end_y) {
+                draw_line(s, c, curr_x0, curr_y, curr_x1, curr_y,
                             plot_mode);
                 curr_x0 += d0;
                 curr_x1 += d1;
@@ -1011,9 +1015,9 @@ void scanline_convert(screen s,
             curr_y = y_b;
             curr_x0 = x_b;
             curr_x1 = x_m;
-            end_y = floor(y_t);
-            while ((curr_y) <= end_y) {
-                draw_line(s, c, (curr_x0), (curr_y), (curr_x1), (curr_y),
+            end_y = y_t;
+            while (curr_y <= end_y) {
+                draw_line(s, c, curr_x0, curr_y, curr_x1, curr_y,
                             plot_mode);
                 curr_x0 += d0;
                 curr_x1 += d1;
@@ -1025,9 +1029,9 @@ void scanline_convert(screen s,
             d1 = (x_m - x_b) / (y_m - y_b);
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
-            end_y = floor(y_t);
-            while ((curr_y) <= end_y) {
-                draw_line(s, c, (curr_x0), (curr_y), (curr_x1), (curr_y),
+            end_y = y_t;
+            while (curr_y <= end_y) {
+                draw_line(s, c, curr_x0, curr_y, curr_x1, curr_y,
                             plot_mode);
                 curr_x0 += d0;
                 curr_x1 += d1;
@@ -1037,6 +1041,7 @@ void scanline_convert(screen s,
     }
 }
 
+/*
 void dual_bresenham(screen s, color c, plotting_mode plot_mode,
                     double x_b, 
                     double y_b,
@@ -1044,6 +1049,10 @@ void dual_bresenham(screen s, color c, plotting_mode plot_mode,
                     double y_m,
                     double x_t,
                     double y_t) {
+    // TODO allow x to increase or decrease
+    // Change algorithm so that y is always increasing
+    // Convert algorithm to iterative
+    // Draw line between successive y values
     // Ensure that x values are increasing (or equal), for simplification
     if (x0 > x1) {
         // Swap points if necessary
@@ -1210,5 +1219,6 @@ void dual_bresenham(screen s, color c, plotting_mode plot_mode,
         }
     }
 }
+*/
 
 // vim: ts=4:et:sts:sw=4:sr
