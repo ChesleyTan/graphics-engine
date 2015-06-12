@@ -11,8 +11,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 
 #include "utils.h"
+
+#define MAX_COLOR 255
 
 static int XRES = 500;
 static int YRES = 500;
@@ -20,7 +23,8 @@ static int YRES = 500;
 // respectively.
 static int XRES_CARTESIAN = 250;
 static int YRES_CARTESIAN = 250;
-#define MAX_COLOR 255
+
+extern double **z_buffer;
 
 /*
   Every point has an individual int for
@@ -90,29 +94,32 @@ Inputs:     screen s
             color c
             int x
             int y
+            int z
 Returns:
 Sets the color at pixel x, y to the color represented by c.
 NOTE: s[0][0] will be the lower left hand corner of the screen.
 ========================================*/
-void plot_absolute(screen s, color c, int x, int y);
+void plot_absolute(screen s, color c, int x, int y, int z);
 
 /*======== void plot_cartesian() ==========
 Inputs:     screen s
             color c
             int x
             int y
+            int z
 Returns:
 Sets the color at pixel x, y in the standard cartesian plane
 to the color represented by c.
 NOTE: s[0][0] will be the center of the screen.
 ========================================*/
-void plot_cartesian(screen s, color c, int x, int y);
+void plot_cartesian(screen s, color c, int x, int y, int z);
 
 /*======== void plot_cartesian_wrap() ==========
 Inputs:     screen s
             color c
             int x
             int y
+            int z
 Returns:
 Sets the color at pixel x, y in the standard cartesian plane
 to the color represented by c.
@@ -120,7 +127,7 @@ NOTE: s[0][0] will be the center of the screen.
 Coordinates that exceed the dimensions of the screen array will be automatically
 wrapped.
 ========================================*/
-void plot_cartesian_wrap(screen s, color c, int x, int y);
+void plot_cartesian_wrap(screen s, color c, int x, int y, int z);
 
 /*======== void save_ppm() ==========
 Inputs:     screen s
@@ -159,5 +166,8 @@ chesleytan
 ==================================*/
 void display(screen s);
 
+// TODO doc
+void allocate_z_buffer();
+void free_z_buffer();
 #endif
 // vim: ts=4:et:sts:sw=4:sr

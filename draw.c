@@ -504,7 +504,9 @@ void generate_torus(struct matrix *points,
     }
 }
 
-void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
+void draw_line(screen s, color c,
+               double x0, double y0, double z0,
+               double x1, double y1, double z1,
                plotting_mode plot_mode) {
     // Ensure that x values are increasing (or equal), for simplification
     if (x0 > x1) {
@@ -516,6 +518,9 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
         tmp = y0;
         y0 = y1;
         y1 = tmp;
+        tmp = z0;
+        z0 = z1;
+        z1 = tmp;
     }
     double a = 2 * (y1 - y0);
     double b = -2 * (x1 - x0);
@@ -528,16 +533,18 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
         //   = Ax0 + By0 + C + A + B/2
         //   = A + B/2
         double d = a + b / 2;
+        double dz_dx = (z1 - z0) / (x1 - x0); // dz/dx
         double x = x0;
         double y = y0;
+        double z = z0;
         int end_x = (int)x1;
         while ((int)x <= end_x) {
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
-                    plot_cartesian(s, c, x, y);
+                    plot_cartesian(s, c, x, y, z);
                     break;
                 case PLOT_ABSOLUTE:
-                    plot_absolute(s, c, x, y);
+                    plot_absolute(s, c, x, y, z);
                     break;
             }
             // If Ax + By + C > 0, then the midpoint of the next two
@@ -556,6 +563,7 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
             }
             ++x;
             d += a;
+            z += dz_dx;
         }
     }
     // 2nd and 6th octants of the 2D plane
@@ -567,16 +575,18 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
         //   = Ax0 + By0 + C + A/2 + B
         //   = A/2 + B
         double d = a / 2 + b;
+        double dz_dy = (z1 - z0) / (y1 - y0); // dz/dy
         double x = x0;
         double y = y0;
+        double z = z0;
         int end_y = (int)y1;
         while ((int)y <= end_y) {
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
-                    plot_cartesian(s, c, x, y);
+                    plot_cartesian(s, c, x, y, z);
                     break;
                 case PLOT_ABSOLUTE:
-                    plot_absolute(s, c, x, y);
+                    plot_absolute(s, c, x, y, z);
                     break;
             }
             // If Ax + By + C < 0, then the midpoint of the next two
@@ -595,6 +605,7 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
             }
             ++y;
             d += b;
+            z += dz_dy;
         }
     }
     // 3rd and 7th octants of the 2D plane
@@ -606,16 +617,18 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
         //   = Ax0 + By0 + C + A/2 - B
         //   = A/2 - B
         double d = a / 2 - b;
+        double dz_dy = (z1 - z0) / (y1 - y0); // dz/dy
         double x = x0;
         double y = y0;
+        double z = z0;
         int end_y = (int)y1;
         while ((int)y >= end_y) {
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
-                    plot_cartesian(s, c, x, y);
+                    plot_cartesian(s, c, x, y, z);
                     break;
                 case PLOT_ABSOLUTE:
-                    plot_absolute(s, c, x, y);
+                    plot_absolute(s, c, x, y, z);
                     break;
             }
             // If Ax + By + C > 0, then the midpoint of the next two
@@ -634,6 +647,7 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
             }
             --y;
             d -= b;
+            z += dz_dy;
         }
     }
     // 4th and 8th octants of the 2D plane
@@ -645,16 +659,18 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
         //   = Ax0 + By0 + C + A - B/2
         //   = A - B/2
         double d = a - b / 2;
+        double dz_dx = (z1 - z0) / (x1 - x0); // dz/dx
         double x = x0;
         double y = y0;
+        double z = z0;
         int end_x = (int)x1;
         while ((int)x <= end_x) {
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
-                    plot_cartesian(s, c, x, y);
+                    plot_cartesian(s, c, x, y, z);
                     break;
                 case PLOT_ABSOLUTE:
-                    plot_absolute(s, c, x, y);
+                    plot_absolute(s, c, x, y, z);
                     break;
             }
             // If Ax + By + C < 0, then the midpoint of the next two
@@ -673,6 +689,7 @@ void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
             }
             ++x;
             d += a;
+            z += dz_dx;
         }
     }
 }
@@ -685,18 +702,20 @@ void draw_lines(screen s, color c, struct matrix *edges,
     }
     int i;
     for (i = 0; i < edges->lastcol - 1; i+=2) {
-        draw_line(s, c, edges->m[0][i], edges->m[1][i],
-                  edges->m[0][i+1], edges->m[1][i+1], plot_mode);
+        draw_line(s, c,
+                  edges->m[0][i], edges->m[1][i], edges->m[2][i],
+                  edges->m[0][i+1], edges->m[1][i+1], edges->m[2][i+1],
+                  plot_mode);
     }
 }
 
 void draw_axes(screen s, color c) {
     int i;
     for (i = -1 * XRES_CARTESIAN; i < XRES_CARTESIAN; ++i) {
-        plot_cartesian(s, c, i, 0);
+        plot_cartesian(s, c, i, 0, 0);
     }
     for (i = -1 * YRES_CARTESIAN; i < YRES_CARTESIAN; ++i) {
-        plot_cartesian(s, c, 0, i);
+        plot_cartesian(s, c, 0, i, 0);
     }
 }
 
@@ -740,18 +759,24 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
         if (is_visible(m, i)) {
             double x0 = m[0][i];
             double y0 = m[1][i];
+            double z0 = m[2][i];
             double x1 = m[0][i+1];
             double y1 = m[1][i+1];
+            double z1 = m[2][i+1];
             double x2 = m[0][i+2];
             double y2 = m[1][i+2];
-            //draw_line(s, c, x0, y0, x1, y1, plot_mode);
-            //draw_line(s, c, x1, y1, x2, y2, plot_mode);
-            //draw_line(s, c, x2, y2, x1, y1, plot_mode);
+            double z2 = m[2][i+2];
+            //draw_line(s, c, x0, y0, z0, x1, y1, z1, plot_mode);
+            //draw_line(s, c, x1, y1, z1, x2, y2, z2, plot_mode);
+            //draw_line(s, c, x2, y2, z2, x1, y1, z1, plot_mode);
             // Perform scanline conversion
             // TODO remove this after testing
             c.red += (i * i);
             c.red %= 256;
-            scanline_convert(s, c, plot_mode, x0, y0, x1, y1, x2, y2);
+            scanline_convert(s, c, plot_mode,
+                             x0, y0, z0,
+                             x1, y1, z1,
+                             x2, y2, z2);
             /* DEBUG
             print_debug("drawing (%lf,%lf,%lf)\n"
                 "\tto      (%lf, %lf, %lf)\n"
@@ -790,18 +815,16 @@ void draw(screen s, struct matrix *pts, color c) {
 void scanline_convert(screen s,
                       color c,
                       plotting_mode plot_mode,
-                      double x0,
-                      double y0,
-                      double x1,
-                      double y1,
-                      double x2,
-                      double y2) {
+                      double x0, double y0, double z0,
+                      double x1, double y1, double z1,
+                      double x2, double y2, double z2) {
     char _case = 0;
     double x_b, x_m, x_t;
     double y_b, y_m, y_t;
-    double curr_y, curr_x0, curr_x1;
+    double z_b, z_m, z_t;
+    double curr_y, curr_x0, curr_x1, curr_z0, curr_z1;
     double end_y;
-    double d0, d1;
+    double dx0, dx1, dz0, dz1;
     // TODO fix glitchiness
     // Case 1 - If no vertices have the same y value
     if (y0 != y1 && y1 != y2 && y0 != y2) {
@@ -811,53 +834,71 @@ void scanline_convert(screen s,
             if (y2 > y1) {
                 x_b = x0;
                 y_b = y0;
+                z_b = z0;
                 x_m = x1;
                 y_m = y1;
+                z_m = z1;
                 x_t = x2;
                 y_t = y2;
+                z_t = z2;
             }
             else if (y2 < y1) {
                 if (y0 > y2) {
                     x_b = x2;
                     y_b = y2;
+                    z_b = z2;
                     x_m = x0;
                     y_m = y0;
+                    z_m = z0;
                     x_t = x1;
                     y_t = y1;
+                    z_t = z1;
                 }
                 else {
                     x_b = x0;
                     y_b = y0;
+                    z_b = z0;
                     x_m = x2;
                     y_m = y2;
+                    z_m = z2;
                     x_t = x1;
                     y_t = y1;
+                    z_t = z1;
                 }
             }
             else if (y2 < y0) {
                 x_b = x2;
                 y_b = y2;
+                z_b = z2;
                 x_m = x0;
                 y_m = y0;
+                z_m = z0;
                 x_t = x1;
                 y_t = y1;
+                z_t = z1;
             }
             else if (y2 > y0) {
                 if (y1 > y2) {
                     x_b = x0;
                     y_b = y0;
+                    z_b = z0;
                     x_m = x2;
                     y_m = y2;
+                    z_m = z2;
                     x_t = x1;
                     y_t = y1;
+                    z_t = z1;
                 }
                 else {
                     x_b = x0;
                     y_b = y0;
+                    z_b = z0;
                     x_m = x1;
                     y_m = y1;
+                    z_m = z1;
                     x_t = x2;
                     y_t = y2;
+                    z_t = z2;
                 }
             }
         }
@@ -865,53 +906,71 @@ void scanline_convert(screen s,
             if (y2 < y1) {
                 x_b = x2;
                 y_b = y2;
+                z_b = z2;
                 x_m = x1;
                 y_m = y1;
+                z_m = z1;
                 x_t = x0;
                 y_t = y0;
+                z_t = z0;
             }
             else if (y2 > y1) {
                 if (y0 > y2) {
                     x_b = x1;
                     y_b = y1;
+                    z_b = z1;
                     x_m = x2;
                     y_m = y2;
+                    z_m = z2;
                     x_t = x0;
                     y_t = y0;
+                    z_t = z0;
                 }
                 else {
                     x_b = x1;
                     y_b = y1;
+                    z_b = z1;
                     x_m = x0;
                     y_m = y0;
+                    z_m = z0;
                     x_t = x2;
                     y_t = y2;
+                    z_t = z2;
                 }
             }
             else if (y2 > y0) {
                 x_b = x1;
                 y_b = y1;
+                z_b = z1;
                 x_m = x0;
                 y_m = y0;
+                z_b = z0;
                 x_t = x2;
                 y_t = y2;
+                z_t = z2;
             }
             else if (y2 < y0) {
                 if (y1 > y2) {
                     x_b = x2;
                     y_b = y2;
+                    z_b = z2;
                     x_m = x1;
                     y_m = y1;
+                    z_m = z1;
                     x_t = x0;
                     y_t = y0;
+                    z_t = z0;
                 }
                 else {
                     x_b = x1;
                     y_b = y1;
+                    z_b = z1;
                     x_m = x2;
                     y_m = y2;
+                    z_m = z2;
                     x_t = x0;
                     y_t = y0;
+                    z_t = z0;
                 }
             }
         }
@@ -924,10 +983,13 @@ void scanline_convert(screen s,
             // Set the bottom, middle, and top vertices
             x_t = x2;
             y_t = y2;
+            z_t = z2;
             x_m = x1;
             y_m = y1;
+            z_m = z1;
             x_b = x0;
             y_b = y0;
+            z_b = z0;
         }
         // Case 3 - if the two vertices are on the top (i.e. two vertices are equal and
         // have higher y values than the other vertex)
@@ -937,10 +999,13 @@ void scanline_convert(screen s,
             // Set the bottom, middle, and top vertices
             x_t = x0;
             y_t = y0;
+            z_t = z0;
             x_m = x1;
             y_m = y1;
+            z_m = z1;
             x_b = x2;
             y_b = y2;
+            z_b = z2;
         }
     }
     else if (y1 == y2) {
@@ -948,19 +1013,25 @@ void scanline_convert(screen s,
             _case = 2;
             x_t = x0;
             y_t = y0;
+            z_t = z0;
             x_m = x1;
             y_m = y1;
+            z_m = z1;
             x_b = x2;
             y_b = y2;
+            z_b = z2;
         }
         else {
             _case = 3;
             x_t = x2;
             y_t = y2;
+            z_t = z2;
             x_m = x1;
             y_m = y1;
+            z_m = z1;
             x_b = x0;
             y_b = y0;
+            z_b = z0;
         }
     }
     else if (y0 == y2) {
@@ -968,257 +1039,111 @@ void scanline_convert(screen s,
             _case = 2;
             x_t = x1;
             y_t = y1;
+            z_t = z1;
             x_m = x2;
             y_m = y2;
+            z_m = z2;
             x_b = x0;
             y_b = y0;
+            z_b = z0;
         }
         else {
             _case = 3;
             x_t = x0;
             y_t = y0;
+            z_t = z0;
             x_m = x2;
             y_m = y2;
+            z_m = z2;
             x_b = x1;
             y_b = y1;
+            z_b = z1;
         }
     }
     switch (_case) {
         case 1:
-            d0 = (x_t - x_b) / (y_t - y_b);
-            d1 = (x_m - x_b) / (y_m - y_b);
+            dx0 = (x_t - x_b) / (y_t - y_b);
+            dx1 = (x_m - x_b) / (y_m - y_b);
+            dz0 = (z_t - z_b) / (y_t - y_b);
+            dz1 = (z_m - z_b) / (y_t - y_b);
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
+            curr_z0 = curr_z1 = z_b;
             end_y = floor(y_m);
             while (curr_y < end_y) {
-                draw_line(s, c, curr_x0, curr_y, curr_x1, curr_y,
+                draw_line(s, c,
+                        curr_x0, curr_y, curr_z0,
+                        curr_x1, curr_y, curr_z1,
                         plot_mode);
-                curr_x0 += d0;
-                curr_x1 += d1;
+                curr_x0 += dx0;
+                curr_x1 += dx1;
+                curr_z0 += dz0;
+                curr_z1 += dz1;
                 ++curr_y;
             }
-            d1 = (x_t - x_m) / (y_t - y_m);
+            dx1 = (x_t - x_m) / (y_t - y_m);
+            dz1 = (z_t - z_m) / (y_t - y_m);
             curr_y = y_m;
             curr_x1 = x_m;
+            curr_z1 = z_m;
             end_y = y_t;
             while (curr_y <= end_y) {
-                draw_line(s, c, curr_x0, curr_y, curr_x1, curr_y,
-                            plot_mode);
-                curr_x0 += d0;
-                curr_x1 += d1;
+                draw_line(s, c,
+                          curr_x0, curr_y, curr_z0,
+                          curr_x1, curr_y, curr_z1,
+                          plot_mode);
+                curr_x0 += dx0;
+                curr_x1 += dx1;
+                curr_z0 += dz0;
+                curr_z1 += dz1;
                 ++curr_y;
             }
             break;
         case 2:
-            d0 = (x_t - x_b) / (y_t - y_b);
-            d1 = (x_t - x_m) / (y_t - y_m);
+            dx0 = (x_t - x_b) / (y_t - y_b);
+            dx1 = (x_t - x_m) / (y_t - y_m);
+            dz0 = (z_t - z_b) / (y_t - y_b);
+            dz1 = (z_t - z_m) / (y_t - y_m);
             curr_y = y_b;
             curr_x0 = x_b;
             curr_x1 = x_m;
+            curr_z0 = z_b;
+            curr_z1 = z_m;
             end_y = y_t;
             while (curr_y <= end_y) {
-                draw_line(s, c, curr_x0, curr_y, curr_x1, curr_y,
-                            plot_mode);
-                curr_x0 += d0;
-                curr_x1 += d1;
+                draw_line(s, c,
+                          curr_x0, curr_y, curr_z0,
+                          curr_x1, curr_y, curr_z1,
+                          plot_mode);
+                curr_x0 += dx0;
+                curr_x1 += dx1;
+                curr_z0 += dz0;
+                curr_z1 += dz1;
                 ++curr_y;
             }
             break;
         case 3:
-            d0 = (x_t - x_b) / (y_t - y_b);
-            d1 = (x_m - x_b) / (y_m - y_b);
+            dx0 = (x_t - x_b) / (y_t - y_b);
+            dx1 = (x_m - x_b) / (y_m - y_b);
+            dz0 = (z_t - z_b) / (y_t - y_b);
+            dz1 = (z_m - z_b) / (y_m - y_b);
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
+            curr_z0 = curr_z1 = z_b;
             end_y = y_t;
             while (curr_y <= end_y) {
-                draw_line(s, c, curr_x0, curr_y, curr_x1, curr_y,
-                            plot_mode);
-                curr_x0 += d0;
-                curr_x1 += d1;
+                draw_line(s, c,
+                          curr_x0, curr_y, curr_z0,
+                          curr_x1, curr_y, curr_z1,
+                          plot_mode);
+                curr_x0 += dx0;
+                curr_x1 += dx1;
+                curr_z0 += dz0;
+                curr_z1 += dz1;
                 ++curr_y;
             }
             break;
     }
 }
-
-/*
-void dual_bresenham(screen s, color c, plotting_mode plot_mode,
-                    double x_b, 
-                    double y_b,
-                    double x_m,
-                    double y_m,
-                    double x_t,
-                    double y_t) {
-    // TODO allow x to increase or decrease
-    // Change algorithm so that y is always increasing
-    // Convert algorithm to iterative
-    // Draw line between successive y values
-    // Ensure that x values are increasing (or equal), for simplification
-    if (x0 > x1) {
-        // Swap points if necessary
-        double tmp;
-        tmp = x0;
-        x0 = x1;
-        x1 = tmp;
-        tmp = y0;
-        y0 = y1;
-        y1 = tmp;
-    }
-    double a = 2 * (y1 - y0);
-    double b = -2 * (x1 - x0);
-    // 1st and 5th octants of the 2D plane
-    if (a >= 0 && a <= (-1*b)) {
-        // Shortcut for the first round of calculations of Ax + By + C
-        // using the midpoint of the next two possible coordinates:
-        // d = f(x0+1, y0+1/2)
-        //   = A(x0+1) + B(y+1/2) + C
-        //   = Ax0 + By0 + C + A + B/2
-        //   = A + B/2
-        double d = a + b / 2;
-        double x = x0;
-        double y = y0;
-        while (x <= x1) {
-            switch (plot_mode) {
-                case PLOT_CARTESIAN:
-                    plot_cartesian(s, c, x, y);
-                    break;
-                case PLOT_ABSOLUTE:
-                    plot_absolute(s, c, x, y);
-                    break;
-            }
-            // If Ax + By + C > 0, then the midpoint of the next two
-            // possible coordinates is below the line,
-            // so we have to draw the pixel in the upper coordinate
-            // We increase d according to the rule:
-            // if   x → x + 1
-            //      y → y
-            // then d = d + A
-            // if   x → x + 1
-            //      y → y + 1
-            // then d = d + A + B
-            if (d > 0) {
-                ++y;
-                d += b;
-            }
-            ++x;
-            d += a;
-        }
-    }
-    // 2nd and 6th octants of the 2D plane
-    else if (a >= 0 && a > (-1*b)) {
-        // Shortcut for the first round of calculations of Ax + By + C
-        // using the midpoint of the next two possible coordinates:
-        // d = f(x0+1/2, y0+1)
-        //   = A(x0+1/2) + B(y+1) + C
-        //   = Ax0 + By0 + C + A/2 + B
-        //   = A/2 + B
-        double d = a / 2 + b;
-        double x = x0;
-        double y = y0;
-        while (y <= y1) {
-            switch (plot_mode) {
-                case PLOT_CARTESIAN:
-                    plot_cartesian(s, c, x, y);
-                    break;
-                case PLOT_ABSOLUTE:
-                    plot_absolute(s, c, x, y);
-                    break;
-            }
-            // If Ax + By + C < 0, then the midpoint of the next two
-            // possible coordinates is above the line,
-            // so we have to draw the pixel in the righter coordinate
-            // We increase d according to the rule:
-            // if   y → y + 1
-            //      x → x
-            // then d = d + B
-            // if   y → y + 1
-            //      x → x + 1
-            // then d = d + A + B
-            if (d < 0) {
-                ++x;
-                d += a;
-            }
-            ++y;
-            d += b;
-        }
-    }
-    // 3rd and 7th octants of the 2D plane
-    else if (a < 0 && a <= b) {
-        // Shortcut for the first round of calculations of Ax + By + C
-        // using the midpoint of the next two possible coordinates:
-        // d = f(x0+1/2, y0-1)
-        //   = A(x0+1/2) + B(y0-1) + C
-        //   = Ax0 + By0 + C + A/2 - B
-        //   = A/2 - B
-        double d = a / 2 - b;
-        double x = x0;
-        double y = y0;
-        while (y >= y1) {
-            switch (plot_mode) {
-                case PLOT_CARTESIAN:
-                    plot_cartesian(s, c, x, y);
-                    break;
-                case PLOT_ABSOLUTE:
-                    plot_absolute(s, c, x, y);
-                    break;
-            }
-            // If Ax + By + C > 0, then the midpoint of the next two
-            // possible coordinates is below the line,
-            // so we have to draw the pixel in the righter coordinate
-            // We increase d according to the rule:
-            // if   y → y - 1
-            //      x → x
-            // then d = d - B
-            // if   y → y - 1
-            //      x → x + 1
-            // then d = d + A - B
-            if (d > 0) {
-                ++x;
-                d += a;
-            }
-            --y;
-            d -= b;
-        }
-    }
-    // 4th and 8th octants of the 2D plane
-    else if (a < 0 && a > b) {
-        // Shortcut for the first round of calculations of Ax + By + C
-        // using the midpoint of the next two possible coordinates:
-        // d = f(x0+1, y0-1/2)
-        //   = A(x0+1) + B(y0-1/2) + C
-        //   = Ax0 + By0 + C + A - B/2
-        //   = A - B/2
-        double d = a - b / 2;
-        double x = x0;
-        double y = y0;
-        while (x <= x1) {
-            switch (plot_mode) {
-                case PLOT_CARTESIAN:
-                    plot_cartesian(s, c, x, y);
-                    break;
-                case PLOT_ABSOLUTE:
-                    plot_absolute(s, c, x, y);
-                    break;
-            }
-            // If Ax + By + C < 0, then the midpoint of the next two
-            // possible coordinates is above the line,
-            // so we have to draw the pixel in the lower coordinate
-            // We increase d according to the rule:
-            // if   x → x + 1
-            //      y → y
-            // then d = d + A
-            // if   x → x + 1
-            //      y → y - 1
-            // then d = d + A - B
-            if (d < 0) {
-                --y;
-                d -= b;
-            }
-            ++x;
-            d += a;
-        }
-    }
-}
-*/
 
 // vim: ts=4:et:sts:sw=4:sr

@@ -1,11 +1,15 @@
 #include "display.h"
 
+double **z_buffer;
+
 screen resize_screen(screen s, int x_res, int y_res) {
     free_screen(s);
+    free_z_buffer();
     XRES = x_res;
     YRES = y_res;
     XRES_CARTESIAN = x_res / 2;
     YRES_CARTESIAN = y_res / 2;
+    allocate_z_buffer();
     return new_screen();
 }
 
@@ -59,22 +63,28 @@ void free_screen(screen s) {
     }
 }
 
-void plot_absolute(screen s, color c, int x, int y) {
+void plot_absolute(screen s, color c, int x, int y, int z) {
     int newY = YRES - 1 - y;
     if (x >= 0 && x < XRES && newY >= 0 && newY < YRES) {
-        s[x][newY] = c;
+        if (z_buffer[x][newY] <= z) {
+            s[x][newY] = c;
+            z_buffer[x][newY] = z;
+        }
     }
 }
 
-void plot_cartesian(screen s, color c, int x, int y) {
+void plot_cartesian(screen s, color c, int x, int y, int z) {
     int newY = YRES_CARTESIAN - y;
     int newX = x + XRES_CARTESIAN;
     if (newX >= 0 && newX < XRES && newY >= 0 && newY < YRES) {
-        s[newX][newY] = c;
+        if (z_buffer[newX][newY] <= z) {
+            s[newX][newY] = c;
+            z_buffer[newX][newY] = z;
+        }
     }
 }
 
-void plot_cartesian_wrap(screen s, color c, int x, int y) {
+void plot_cartesian_wrap(screen s, color c, int x, int y, int z) {
     int newY = YRES_CARTESIAN - y;
     int newX = x + XRES_CARTESIAN;
     if (newY >= YRES) {
@@ -89,7 +99,10 @@ void plot_cartesian_wrap(screen s, color c, int x, int y) {
     if (newX < 0) {
         newX = newX % XRES + XRES_CARTESIAN;
     }
-    s[newX][newY] = c;
+    if (z_buffer[newX][newY] <= z) {
+        s[newX][newY] = c;
+        z_buffer[newX][newY] = z;
+    }
 }
 
 void save_ppm(screen s, char *file) {
@@ -158,6 +171,32 @@ void display(screen s) {
         fprintf(f, "\n");
     }
     pclose(f);
+}
+
+void allocate_z_buffer() {
+    int i, u;
+    // Allocate and initialize z_buffer to the minimum double
+    z_buffer = (double **) malloc(sizeof(double *) * XRES);
+    for (i = 0; i < XRES; ++i) {
+        z_buffer[i] = (double *) malloc(sizeof(double) * YRES);
+    }
+    for (i = 0; i < XRES; ++i) {
+        for (u = 0; u < YRES; ++u) {
+            z_buffer[i][u] = -DBL_MAX;
+        }
+    }
+}
+
+void free_z_buffer() {
+    if (z_buffer != NULL) {
+        int i;
+        // Free allocated memory for z_buffer
+        for (i = 0; i < XRES; ++i) {
+            free(z_buffer[i]);
+        }
+        free(z_buffer);
+        z_buffer = NULL;
+    }
 }
 
 // vim: ts=4:et:sts:sw=4:sr

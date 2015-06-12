@@ -61,4 +61,4 @@ rotate y 20
 rotate z -10
 box -200 -100 0 40 40 40
 display
-save robot3.png
+save robot4.png

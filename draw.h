@@ -262,15 +262,19 @@ Inputs:     screen s
             color c
             double x0
             double y0
+            double z0
             double x1
             double y1
+            double z1
             plotting_mode plot_mode
 Returns:
 Plots all the points necessary to draw line (x0, y0) - (x1, y1) onto
 screen c using color c.
 The plotting mode determines the coordinate system to be used when plotting points.
 ====================================*/
-void draw_line(screen s, color c, double x0, double y0, double x1, double y1,
+void draw_line(screen s, color c,
+               double x0, double y0, double z0,
+               double x1, double y1, double z1,
                plotting_mode plot_mode);
 
 /*======== void draw_lines() ==========
@@ -357,22 +361,22 @@ Inputs:     screen s
             plotting_mode plot_mode
             double x0
             double y0
+            double z0
             double x1
             double y1
+            double z1
             double x2
             double y2
+            double z2
 Returns:
 Performs scanline conversion on the triangle bounded by the three vertices 
-(x0, y0), (x1, y1), and (x2, y2).
+(x0, y0, z0), (x1, y1, z1), and (x2, y2, z2).
 ============================================*/
 void scanline_convert(screen s,
                       color c,
                       plotting_mode plot_mode,
-                      double x0,
-                      double y0,
-                      double x1,
-                      double y1,
-                      double x2,
-                      double y2);
+                      double x0, double y0, double z0,
+                      double x1, double y1, double z1,
+                      double x2, double y2, double z2);
 #endif
 // vim: ts=4:et:sts:sw=4:sr

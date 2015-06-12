@@ -6,12 +6,13 @@ char *basename = NULL;
 struct vary_node **vary_knobs;
 
 screen exec(char return_screen) {
-    int i;
+    int i, u;
     screen _screen;
     struct stack *s;
     struct matrix *trans_mat;
     struct matrix *pts;
     color c;
+    allocate_z_buffer();
     c.red = 30;
     c.blue = 100;
     c.green = 155;
@@ -247,6 +248,7 @@ screen exec(char return_screen) {
     free_stack(s);
     free_matrix(trans_mat);
     free_matrix(pts);
+    free_z_buffer();
     if (!return_screen) {
         free_screen(_screen);
         return NULL;
