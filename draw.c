@@ -738,10 +738,10 @@ char is_visible(double **polygons, int index) {
                                 polygons[0][index+2] - polygons[0][index],
                                 polygons[1][index+2] - polygons[1][index],
                                 polygons[2][index+2] - polygons[2][index]);
-    double view_vector[3] = {0.0, 0.0, -1.0};
+    double view_vector[3] = {0.0, 0.0, 1.0};
     char visible = (dot_prod(normal[0], normal[1], normal[2],
                              view_vector[0], view_vector[1], view_vector[2]
-                           ) < 0) ? 0 : 1;
+                           ) < 0) ? 1 : 0;
     free(normal);
     return visible;
 }
@@ -766,17 +766,21 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             double x2 = m[0][i+2];
             double y2 = m[1][i+2];
             double z2 = m[2][i+2];
-            //draw_line(s, c, x0, y0, z0, x1, y1, z1, plot_mode);
-            //draw_line(s, c, x1, y1, z1, x2, y2, z2, plot_mode);
-            //draw_line(s, c, x2, y2, z2, x1, y1, z1, plot_mode);
+
+            // Wireframe
+            draw_line(s, c, x0, y0, z0, x1, y1, z1, plot_mode);
+            draw_line(s, c, x1, y1, z1, x2, y2, z2, plot_mode);
+            draw_line(s, c, x2, y2, z2, x1, y1, z1, plot_mode);
+
             // Perform scanline conversion
             // TODO remove this after testing
-            c.red += (i * i);
-            c.red %= 256;
-            scanline_convert(s, c, plot_mode,
-                             x0, y0, z0,
-                             x1, y1, z1,
-                             x2, y2, z2);
+            //c.red += (i * i);
+            //c.red %= 256;
+            //scanline_convert(s, c, plot_mode,
+            //                 x0, y0, z0,
+            //                 x1, y1, z1,
+            //                 x2, y2, z2);
+
             /* DEBUG
             print_debug("drawing (%lf,%lf,%lf)\n"
                 "\tto      (%lf, %lf, %lf)\n"
