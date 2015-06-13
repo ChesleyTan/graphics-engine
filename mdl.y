@@ -37,7 +37,7 @@ extern FILE *yyin;
 
 %token COMMENT
 %token <val> NUMBER
-%token <string> DRAW_MODE RESIZE
+%token <string> DRAW_MODE RENDER_MODE RESIZE
 %token <string> LIGHT AMBIENT
 %token <string> CONSTANTS SAVE_COORDS CAMERA 
 %token <string> SPHERE TORUS BOX LINE CS MESH TEXTURE
@@ -64,6 +64,13 @@ command:
   ++lineno;
   op[lastop].opcode=DRAW_MODE;
   op[lastop].op.drawmode.p = add_symbol($2,SYM_STRING,NULL);
+  ++lastop;
+}
+
+| RENDER_MODE STRING {
+  ++lineno;
+  op[lastop].opcode=RENDER_MODE;
+  op[lastop].op.rendermode.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 

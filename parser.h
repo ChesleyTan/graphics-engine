@@ -122,6 +122,9 @@ struct command {
             SYMTAB *p;
         } drawmode;
         struct {
+            SYMTAB *p;
+        } rendermode;
+        struct {
             int x;
             int y;
         } resize;

@@ -1,6 +1,7 @@
 #include "draw.h"
 plotting_mode global_plot_mode = PLOT_ABSOLUTE;
 drawing_mode global_draw_mode = DRAW_POLYGON;
+rendering_mode global_render_mode = RENDER_WIREFRAME;
 double view_vector[3] = {0.0, 0.0, -1.0};
 double light_vector[3] = {0.0, 0.0, -1.0};
 int i_ambient_r = 50;
@@ -820,11 +821,6 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             double y2 = m[1][i+2];
             double z2 = m[2][i+2];
 
-            // Wireframe
-            //draw_line(s, c, x0, y0, z0, x1, y1, z1, plot_mode);
-            //draw_line(s, c, x1, y1, z1, x2, y2, z2, plot_mode);
-            //draw_line(s, c, x2, y2, z2, x0, y0, z0, plot_mode);
-
             /* Lighting */
             // Ambient
             c.red   = i_ambient_r * k_ambient_r;
@@ -852,12 +848,20 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             if (c.blue > MAX_COLOR) c.blue = MAX_COLOR;
             else if (c.blue < 0) c.blue = 0;
 
+            // Wireframe
+            if (global_render_mode == RENDER_WIREFRAME) {
+                draw_line(s, c, x0, y0, z0, x1, y1, z1, plot_mode);
+                draw_line(s, c, x1, y1, z1, x2, y2, z2, plot_mode);
+                draw_line(s, c, x2, y2, z2, x0, y0, z0, plot_mode);
+            }
             // Perform scanline conversion
-            // TODO remove this after testing
-            scanline_convert(s, c, plot_mode,
-                             x0, y0, z0,
-                             x1, y1, z1,
-                             x2, y2, z2);
+            else if (global_render_mode == RENDER_SURFACE) {
+                scanline_convert(s, c, plot_mode,
+                                x0, y0, z0,
+                                x1, y1, z1,
+                                x2, y2, z2);
+            }
+
 
             /* DEBUG
             print_debug("drawing (%lf,%lf,%lf)\n"

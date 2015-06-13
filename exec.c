@@ -221,15 +221,30 @@ screen exec(char return_screen) {
                 #ifdef DEBUG
                 print_debug("Got draw-mode command");
                 #endif
-                char *mode = current_op.op.drawmode.p->name;
-                if (strcmp(mode, "lines") == 0) {
+                char *draw_mode = current_op.op.drawmode.p->name;
+                if (strcmp(draw_mode, "lines") == 0) {
                     global_draw_mode = DRAW_LINE;
                 }
-                else if (strcmp(mode, "polygons") == 0) {
+                else if (strcmp(draw_mode, "polygons") == 0) {
                     global_draw_mode = DRAW_POLYGON;
                 }
                 else {
-                    print_warning("Invalid argument for plot mode command: \"%s\"", mode);
+                    print_error("Invalid argument for draw-mode command: \"%s\"", draw_mode);
+                }
+                break;
+            case RENDER_MODE: ; // Obligatory empty statement
+                #ifdef DEBUG
+                print_debug("Got render-mode command");
+                #endif
+                char *render_mode = current_op.op.rendermode.p->name;
+                if (strcmp(render_mode, "wireframe") == 0) {
+                    global_render_mode = RENDER_WIREFRAME;
+                }
+                else if (strcmp(render_mode, "surface") == 0) {
+                    global_render_mode = RENDER_SURFACE;
+                }
+                else {
+                    print_error("Invalid argument for render-mode command: \"%s\"", render_mode);
                 }
                 break;
             case RESIZE:

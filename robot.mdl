@@ -1,53 +1,47 @@
-frames 5
-vary ayy 10 29 0 100
-vary lmao 4 20 420 1000
 draw-mode lines
+render-mode surface
 resize 500 700
 push
-//body
+/* body */
 push
 move 250 350 0
-//rotate y 30
-//rotate x 20
+rotate y 30
+rotate x 20
 box -75 100 40 150 200 80
-//head
+/* head */
 push
 move 0 151 0
-//"eyeball"
-//rotate y 90
 draw-mode polygons
 sphere 0 0 0 50
-//left arm
+/* left arm */
 pop
 push
 move 75 100 0
 rotate z -30
 rotate x 180
 box 0 0 20 40 180 40
-sphere 20 -190 0 20 0.04
-//right arm
+sphere 20 -190 0 20 0.08
+/* right arm */
 pop
 push
 move -75 100 0
 rotate x -30
 box 0 0 0 -40 180 40
-//right leg
+/* right leg */
 pop
 push
 move -70 -100 0
 box 0 0 0 40 140 40
-//left leg
+/* left leg */
 pop
 push
-move 70 -100 0
-rotate y 180
+move 30 -100 0
 box 0 0 0 40 140 40
-//crown
+/* crown */
 pop
 push
-rotate y 0
 torus 0 200 0 20 60 0.05
-//background
+/* misc background boxes */
 pop
 push
 rotate x 30
@@ -61,4 +55,4 @@ rotate y 20
 rotate z -10
 box -200 -100 0 40 40 40
 display
-save robot4.png
+//save robot.png

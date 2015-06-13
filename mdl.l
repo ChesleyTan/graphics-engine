@@ -35,6 +35,7 @@ WHITESPACE [ \t\n]
     /* =========================================== */
 
 "draw-mode" { return DRAW_MODE; }
+"render-mode" { return RENDER_MODE; }
 "resize" { return RESIZE; }
 "light" { return LIGHT; }
 "constants" { return CONSTANTS; }
@@ -66,7 +67,7 @@ WHITESPACE [ \t\n]
 
 "shading" { return SHADING; }
 
-phong|flat|goroud|raytrace|wireframe {
+phong|flat|goroud|raytrace {
     strncpy(yylval.string, yytext, sizeof(yylval.string) - 1);
     yylval.string[sizeof(yylval.string) - 1] = '\0';
     return SHADING_TYPE;

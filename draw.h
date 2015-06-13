@@ -54,6 +54,16 @@ typedef enum {
     DRAW_POLYGON
 } drawing_mode;
 
+/* enum for rendering mode for use in functions defined in draw.c
+ * Its value can be one of RENDER_WIREFRAME or RENDER_SURFACE.
+ * If RENDER_WIREFRAME is selected, polygons will be rendered as wireframes.
+ * If RENDER_SURFACE is selected, points will be rendered as surfaces.
+ */
+typedef enum {
+    RENDER_WIREFRAME,
+    RENDER_SURFACE
+} rendering_mode;
+
 /* enum for curve types passed into add_curve() */
 typedef enum {
     HERMITE_CURVE,
@@ -67,6 +77,10 @@ extern plotting_mode global_plot_mode;
 /* Drawing mode to be used by default globally.
  * This value may be set programmatically. */
 extern drawing_mode global_draw_mode;
+
+/* Rendering mode to be used by default globally.
+ * This value may be set programmatically. */
+extern rendering_mode global_render_mode;
 
 /*======== void add_point() ==========
 Inputs:     struct matrix *points
