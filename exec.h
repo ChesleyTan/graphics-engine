@@ -32,4 +32,5 @@ void exec_animation();
 struct vary_node *get_vary_knobs_tail(int frame);
 int vary_node_uniq(int frame, SYMTAB *knob);
 void free_vary_knobs();
+void free_all();
 #endif

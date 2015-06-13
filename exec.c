@@ -362,16 +362,14 @@ void exec_animation() {
             int ret = mkdir("frames", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); // 775
             if (ret != 0) {
                 print_errno("Error encountered while creating `frames/` directory.");
-                free_vary_knobs();
-                free_table();
+                free_all();
                 exit(EXIT_FAILURE);
             }
         }
         // If file is not a directory, print error
         else if (errno == ENOENT) {
             print_error("`frames` already exists, but is not a directory! Cannot save animation output. Exiting....");
-            free_vary_knobs();
-            free_table();
+            free_all();
             exit(EXIT_FAILURE);
         }
     }
@@ -434,4 +432,9 @@ void free_vary_knobs() {
     print_debug("Freeing vary_knobs");
     #endif
     return;
+}
+
+void free_all() {
+    free_vary_knobs();
+    free_table();
 }

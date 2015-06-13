@@ -15,6 +15,22 @@
 #define STEP_SIZE 0.001
 #define MIN_STEP_SIZE 0.0001
 
+// TODO doc
+extern double view_vector[3];
+extern double light_vector[3];
+extern int i_ambient_r;
+extern int i_ambient_g;
+extern int i_ambient_b;
+extern double k_ambient_r;
+extern double k_ambient_g;
+extern double k_ambient_b;
+extern int i_point_r;
+extern int i_point_g;
+extern int i_point_b;
+extern double k_point_r;
+extern double k_point_g;
+extern double k_point_b;
+
 /* enum for plotting mode for use in functions defined in draw.c
  * Its value can be one of PLOT_CARTESIAN or PLOT_ABSOLUTE.
  * If PLOT_CARTESIAN is selected, the points are plotted on the Cartesian axes,

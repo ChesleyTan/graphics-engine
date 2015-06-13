@@ -23,3 +23,13 @@ double dot_prod(double x1, double y1, double z1,
     return x1*x2 + y1*y2 + z1*z2;
 }
 
+double *normalize(double* vector) {
+    double mag = sqrt(vector[0] * vector[0]
+                    + vector[1] * vector[1]
+                    + vector[2] * vector[2]);
+    vector[0] /= mag;
+    vector[1] /= mag;
+    vector[2] /= mag;
+    return vector;
+}
+

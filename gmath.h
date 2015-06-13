@@ -47,4 +47,12 @@ The dot product of vectors <x1, y1, z1> and <x2, y2, z2>.
 ================================================*/
 double dot_prod(double x1, double y1, double z1,
                 double x2, double y2, double z2);
+
+/*============== double *normalize() ==============
+Inputs:     double* vector
+Returns:
+Normalizes the given vector.
+================================================*/
+double *normalize(double* vector);
+
 #endif

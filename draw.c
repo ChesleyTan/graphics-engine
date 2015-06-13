@@ -1,6 +1,20 @@
 #include "draw.h"
 plotting_mode global_plot_mode = PLOT_ABSOLUTE;
 drawing_mode global_draw_mode = DRAW_POLYGON;
+double view_vector[3] = {0.0, 0.0, 1.0};
+double light_vector[3] = {0.0, 0.0, 1.0};
+int i_ambient_r = 50;
+int i_ambient_g = 50;
+int i_ambient_b = 50;
+double k_ambient_r = 1.0;
+double k_ambient_g = 1.0;
+double k_ambient_b = 1.0;
+int i_point_r = 100;
+int i_point_g = 100;
+int i_point_b = 100;
+double k_point_r = 1.0;
+double k_point_g = 1.0;
+double k_point_b = 1.0;
 
 void add_point(struct matrix * points, double x, double y, double z) {
     if (points->lastcol >= points->cols - 1) {
@@ -423,6 +437,7 @@ void add_torus(struct matrix *points,
             for (latitude = 0; latitude < num_steps; ++latitude) {
                 int lat_start = num_steps * latitude;
                 int next_lat_start = (lat_start + num_steps) % num_pts;
+                int penultimate_longitude = num_steps - 1;
                 for (longitude = 0; longitude < num_steps; ++longitude) {
                     int index = lat_start + longitude;
                     // These checks ensure that the last point plotted is
@@ -431,24 +446,50 @@ void add_torus(struct matrix *points,
                     int index_plus_one = lat_start + ((longitude + 1) % num_steps);
                     int index_next_lat = (next_lat_start + longitude) % num_pts;
                     int index_next_lat_plus_one = (index_next_lat + 1) % num_pts;
-                    add_polygon(points,
-                                m[0][index], m[1][index], m[2][index],
-                                m[0][index_next_lat],
-                                m[1][index_next_lat],
-                                m[2][index_next_lat],
-                                m[0][index_next_lat_plus_one],
-                                m[1][index_next_lat_plus_one],
-                                m[2][index_next_lat_plus_one]
-                    );
-                    add_polygon(points,
-                                m[0][index], m[1][index], m[2][index],
-                                m[0][index_next_lat_plus_one],
-                                m[1][index_next_lat_plus_one],
-                                m[2][index_next_lat_plus_one],
-                                m[0][index_plus_one],
-                                m[1][index_plus_one],
-                                m[2][index_plus_one]
-                    );
+                    if (longitude != penultimate_longitude) {
+                        add_polygon(points,
+                                    m[0][index], m[1][index], m[2][index],
+                                    m[0][index_next_lat],
+                                    m[1][index_next_lat],
+                                    m[2][index_next_lat],
+                                    m[0][index_next_lat_plus_one],
+                                    m[1][index_next_lat_plus_one],
+                                    m[2][index_next_lat_plus_one]
+                        );
+                        add_polygon(points,
+                                    m[0][index], m[1][index], m[2][index],
+                                    m[0][index_next_lat_plus_one],
+                                    m[1][index_next_lat_plus_one],
+                                    m[2][index_next_lat_plus_one],
+                                    m[0][index_plus_one],
+                                    m[1][index_plus_one],
+                                    m[2][index_plus_one]
+                        );
+                    }
+                    else {
+                        int index_plus_one_prev_lat = index + 1 - num_steps - num_steps;
+                        if (index_plus_one_prev_lat < 0) {
+                            index_plus_one_prev_lat += num_pts;
+                        }
+                        add_polygon(points,
+                                    m[0][index], m[1][index], m[2][index],
+                                    m[0][index_next_lat],
+                                    m[1][index_next_lat],
+                                    m[2][index_next_lat],
+                                    m[0][index_plus_one],
+                                    m[1][index_plus_one],
+                                    m[2][index_plus_one]
+                        );
+                        add_polygon(points,
+                                    m[0][index], m[1][index], m[2][index],
+                                    m[0][index_plus_one],
+                                    m[1][index_plus_one],
+                                    m[2][index_plus_one],
+                                    m[0][index_plus_one_prev_lat],
+                                    m[1][index_plus_one_prev_lat],
+                                    m[2][index_plus_one_prev_lat]
+                        );
+                    }
                 }
             }
             break;
@@ -490,6 +531,19 @@ void generate_torus(struct matrix *points,
     int i, u;
     int torus_steps, circle_steps;
     torus_steps = circle_steps = round(1.0 / step);
+    for (i = 0; i < torus_steps; ++i) {
+        for (u = 0; u < circle_steps; ++u) {
+            double theta_rad = M_PI * (2.0 * i / circle_steps);
+            double circle_radius_cos_theta = circle_radius * cos(theta_rad);
+            double circle_radius_sin_theta = circle_radius * sin(theta_rad);
+            double phi_rad = M_PI * (2.0 * u / torus_steps);
+            double curr_x = x + cos(phi_rad) * (circle_radius_cos_theta + torus_radius);
+            double curr_y = y + circle_radius_sin_theta;
+            double curr_z = z - sin(phi_rad) * (circle_radius_cos_theta + torus_radius);
+            add_point(points, curr_x, curr_y, curr_z);
+        }
+    }
+    /*
     for (i = 0; i < circle_steps; ++i) {
         double theta_rad = M_PI * (2.0 * i / circle_steps);
         double circle_radius_cos_theta = circle_radius * cos(theta_rad);
@@ -502,6 +556,7 @@ void generate_torus(struct matrix *points,
             add_point(points, curr_x, curr_y, curr_z);
         }
     }
+    */
 }
 
 void draw_line(screen s, color c,
@@ -738,7 +793,6 @@ char is_visible(double **polygons, int index) {
                                 polygons[0][index+2] - polygons[0][index],
                                 polygons[1][index+2] - polygons[1][index],
                                 polygons[2][index+2] - polygons[2][index]);
-    double view_vector[3] = {0.0, 0.0, 1.0};
     char visible = (dot_prod(normal[0], normal[1], normal[2],
                              view_vector[0], view_vector[1], view_vector[2]
                            ) < 0) ? 1 : 0;
@@ -768,18 +822,42 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             double z2 = m[2][i+2];
 
             // Wireframe
-            draw_line(s, c, x0, y0, z0, x1, y1, z1, plot_mode);
-            draw_line(s, c, x1, y1, z1, x2, y2, z2, plot_mode);
-            draw_line(s, c, x2, y2, z2, x0, y0, z0, plot_mode);
+            //draw_line(s, c, x0, y0, z0, x1, y1, z1, plot_mode);
+            //draw_line(s, c, x1, y1, z1, x2, y2, z2, plot_mode);
+            //draw_line(s, c, x2, y2, z2, x0, y0, z0, plot_mode);
+
+            /* Lighting */
+            // Ambient
+            c.red   = i_ambient_r * k_ambient_r;
+            c.green = i_ambient_g * k_ambient_g;
+            c.blue  = i_ambient_b * k_ambient_b;
+
+            // Diffuse
+            double *normal = normalize(cross_prod(x1 - x0,
+                                                  y1 - y0,
+                                                  z1 - z0,
+                                                  x2 - x0,
+                                                  y2 - y0,
+                                                  z2 - z0));
+            double dot = -1 * dot_prod(light_vector[0], light_vector[1], light_vector[2],
+                                  normal[0], normal[1], normal[2]);
+            c.red   += i_point_r * k_point_r * dot;
+            c.green += i_point_g * k_point_g * dot;
+            c.blue  += i_point_b * k_point_b * dot;
+
+            if (c.red > MAX_COLOR) c.red = MAX_COLOR;
+            else if (c.red < 0) c.red = 0;
+            if (c.green > MAX_COLOR) c.green = MAX_COLOR;
+            else if (c.green < 0) c.green = 0;
+            if (c.blue > MAX_COLOR) c.blue = MAX_COLOR;
+            else if (c.blue < 0) c.blue = 0;
 
             // Perform scanline conversion
             // TODO remove this after testing
-            //c.red += (i * i);
-            //c.red %= 256;
-            //scanline_convert(s, c, plot_mode,
-            //                 x0, y0, z0,
-            //                 x1, y1, z1,
-            //                 x2, y2, z2);
+            scanline_convert(s, c, plot_mode,
+                             x0, y0, z0,
+                             x1, y1, z1,
+                             x2, y2, z2);
 
             /* DEBUG
             print_debug("drawing (%lf,%lf,%lf)\n"
