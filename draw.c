@@ -1,8 +1,8 @@
 #include "draw.h"
 plotting_mode global_plot_mode = PLOT_ABSOLUTE;
 drawing_mode global_draw_mode = DRAW_POLYGON;
-double view_vector[3] = {0.0, 0.0, 1.0};
-double light_vector[3] = {0.0, 0.0, 1.0};
+double view_vector[3] = {0.0, 0.0, -1.0};
+double light_vector[3] = {0.0, 0.0, -1.0};
 int i_ambient_r = 50;
 int i_ambient_g = 50;
 int i_ambient_b = 50;
@@ -334,12 +334,12 @@ void add_sphere(struct matrix *points,
                     // Polygon-wise version
                     add_polygon(points,
                                 m[0][index], m[1][index], m[2][index],
-                                m[0][index_next_lat],
-                                m[1][index_next_lat],
-                                m[2][index_next_lat],
                                 m[0][index_next_lat_plus_one],
                                 m[1][index_next_lat_plus_one],
-                                m[2][index_next_lat_plus_one]
+                                m[2][index_next_lat_plus_one],
+                                m[0][index_next_lat],
+                                m[1][index_next_lat],
+                                m[2][index_next_lat]
                     );
                     // Don't draw the second triangle for the edge case at the
                     // end pole of the sphere
@@ -348,10 +348,10 @@ void add_sphere(struct matrix *points,
                                     m[0][index_next_lat_plus_one],
                                     m[1][index_next_lat_plus_one],
                                     m[2][index_next_lat_plus_one],
+                                    m[0][index], m[1][index], m[2][index],
                                     m[0][index_plus_one],
                                     m[1][index_plus_one],
-                                    m[2][index_plus_one],
-                                    m[0][index], m[1][index], m[2][index]
+                                    m[2][index_plus_one]
                         );
                     }
                 }
@@ -449,21 +449,21 @@ void add_torus(struct matrix *points,
                     if (longitude != penultimate_longitude) {
                         add_polygon(points,
                                     m[0][index], m[1][index], m[2][index],
-                                    m[0][index_next_lat],
-                                    m[1][index_next_lat],
-                                    m[2][index_next_lat],
-                                    m[0][index_next_lat_plus_one],
-                                    m[1][index_next_lat_plus_one],
-                                    m[2][index_next_lat_plus_one]
-                        );
-                        add_polygon(points,
-                                    m[0][index], m[1][index], m[2][index],
                                     m[0][index_next_lat_plus_one],
                                     m[1][index_next_lat_plus_one],
                                     m[2][index_next_lat_plus_one],
+                                    m[0][index_next_lat],
+                                    m[1][index_next_lat],
+                                    m[2][index_next_lat]
+                        );
+                        add_polygon(points,
+                                    m[0][index], m[1][index], m[2][index],
                                     m[0][index_plus_one],
                                     m[1][index_plus_one],
-                                    m[2][index_plus_one]
+                                    m[2][index_plus_one],
+                                    m[0][index_next_lat_plus_one],
+                                    m[1][index_next_lat_plus_one],
+                                    m[2][index_next_lat_plus_one]
                         );
                     }
                     else {
@@ -473,21 +473,21 @@ void add_torus(struct matrix *points,
                         }
                         add_polygon(points,
                                     m[0][index], m[1][index], m[2][index],
-                                    m[0][index_next_lat],
-                                    m[1][index_next_lat],
-                                    m[2][index_next_lat],
-                                    m[0][index_plus_one],
-                                    m[1][index_plus_one],
-                                    m[2][index_plus_one]
-                        );
-                        add_polygon(points,
-                                    m[0][index], m[1][index], m[2][index],
                                     m[0][index_plus_one],
                                     m[1][index_plus_one],
                                     m[2][index_plus_one],
+                                    m[0][index_next_lat],
+                                    m[1][index_next_lat],
+                                    m[2][index_next_lat]
+                        );
+                        add_polygon(points,
+                                    m[0][index], m[1][index], m[2][index],
                                     m[0][index_plus_one_prev_lat],
                                     m[1][index_plus_one_prev_lat],
-                                    m[2][index_plus_one_prev_lat]
+                                    m[2][index_plus_one_prev_lat],
+                                    m[0][index_plus_one],
+                                    m[1][index_plus_one],
+                                    m[2][index_plus_one]
                         );
                     }
                 }
@@ -502,7 +502,6 @@ void add_torus(struct matrix *points,
                                      m[0][index], m[1][index], m[2][index]);
                 }
             }
-            break;
             break;
     }
     free_matrix(tmp);
@@ -790,12 +789,12 @@ char is_visible(double **polygons, int index) {
     double *normal = cross_prod(polygons[0][index+1] - polygons[0][index],
                                 polygons[1][index+1] - polygons[1][index],
                                 polygons[2][index+1] - polygons[2][index],
-                                polygons[0][index+2] - polygons[0][index],
-                                polygons[1][index+2] - polygons[1][index],
-                                polygons[2][index+2] - polygons[2][index]);
+                                polygons[0][index] - polygons[0][index+2],
+                                polygons[1][index] - polygons[1][index+2],
+                                polygons[2][index] - polygons[2][index+2]);
     char visible = (dot_prod(normal[0], normal[1], normal[2],
                              view_vector[0], view_vector[1], view_vector[2]
-                           ) < 0) ? 1 : 0;
+                           ) >= 0) ? 1 : 0;
     free(normal);
     return visible;
 }
@@ -841,6 +840,7 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
                                                   z2 - z0));
             double dot = -1 * dot_prod(light_vector[0], light_vector[1], light_vector[2],
                                   normal[0], normal[1], normal[2]);
+            free(normal);
             c.red   += i_point_r * k_point_r * dot;
             c.green += i_point_g * k_point_g * dot;
             c.blue  += i_point_b * k_point_b * dot;
