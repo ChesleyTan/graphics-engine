@@ -741,7 +741,7 @@ char is_visible(double **polygons, int index) {
     double view_vector[3] = {0.0, 0.0, -1.0};
     char visible = (dot_prod(normal[0], normal[1], normal[2],
                              view_vector[0], view_vector[1], view_vector[2]
-                           ) < 0) ? 1 : 0;
+                           ) < 0) ? 0 : 1;
     free(normal);
     return visible;
 }
