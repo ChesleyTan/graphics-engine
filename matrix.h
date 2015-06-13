@@ -68,13 +68,13 @@ Converts m in to an identity matrix
 ==========================================*/
 void ident(struct matrix *m);
 
-/*============== void scalar_mult() ==============
+/*============== void mat_scalar_mult() ==========
 Inputs:     double x
             struct matrix *m
 Returns:
 Multiply each element of m by x
 ================================================*/
-void scalar_mult(double x, struct matrix *m);
+void mat_scalar_mult(double x, struct matrix *m);
 
 /*============== struct matrix *matrix_mult() ==============
 Inputs:     struct matrix *a

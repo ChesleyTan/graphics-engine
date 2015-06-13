@@ -4,18 +4,25 @@ drawing_mode global_draw_mode = DRAW_POLYGON;
 rendering_mode global_render_mode = RENDER_WIREFRAME;
 double view_vector[3] = {0.0, 0.0, -1.0};
 double light_vector[3] = {0.0, 0.0, -1.0};
-int i_ambient_r = 50;
-int i_ambient_g = 50;
-int i_ambient_b = 50;
+int i_ambient_r = 20;
+int i_ambient_g = 20;
+int i_ambient_b = 20;
 double k_ambient_r = 1.0;
 double k_ambient_g = 1.0;
 double k_ambient_b = 1.0;
-int i_point_r = 100;
-int i_point_g = 100;
-int i_point_b = 100;
-double k_point_r = 1.0;
-double k_point_g = 1.0;
-double k_point_b = 1.0;
+int i_diffuse_r = 50;
+int i_diffuse_g = 50;
+int i_diffuse_b = 50;
+double k_diffuse_r = 1.0;
+double k_diffuse_g = 1.0;
+double k_diffuse_b = 1.0;
+int i_specular_r = 100;
+int i_specular_g = 100;
+int i_specular_b = 100;
+double k_specular_r = 1.0;
+double k_specular_g = 1.0;
+double k_specular_b = 1.0;
+int specular_expt = 20;
 
 void add_point(struct matrix * points, double x, double y, double z) {
     if (points->lastcol >= points->cols - 1) {
@@ -793,9 +800,7 @@ char is_visible(double **polygons, int index) {
                                 polygons[0][index] - polygons[0][index+2],
                                 polygons[1][index] - polygons[1][index+2],
                                 polygons[2][index] - polygons[2][index+2]);
-    char visible = (dot_prod(normal[0], normal[1], normal[2],
-                             view_vector[0], view_vector[1], view_vector[2]
-                           ) >= 0) ? 1 : 0;
+    char visible = (dot_prod(normal, view_vector) >= 0) ? 1 : 0;
     free(normal);
     return visible;
 }
@@ -834,12 +839,24 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
                                                   x2 - x0,
                                                   y2 - y0,
                                                   z2 - z0));
-            double dot = -1 * dot_prod(light_vector[0], light_vector[1], light_vector[2],
-                                  normal[0], normal[1], normal[2]);
+            double dot = -1 * dot_prod(light_vector, normal);
+            c.red   += i_diffuse_r * k_diffuse_r * dot;
+            c.green += i_diffuse_g * k_diffuse_g * dot;
+            c.blue  += i_diffuse_b * k_diffuse_b * dot;
+
+            // Specular
+            double *reflection_vector = normalize(vect_add(scalar_mult(normal, 2 * dot),
+                                                 light_vector));
+            double cos_angle = dot_prod(reflection_vector, view_vector);
+            if (cos_angle < 0) { // 90° < α < 270°
+                double specular_mult = pow(cos_angle, specular_expt);
+                c.red   += i_specular_r * k_specular_r * specular_mult;
+                c.green += i_specular_g * k_specular_g * specular_mult;
+                c.blue  += i_specular_b * k_specular_b * specular_mult;
+            }
+
+            free(reflection_vector);
             free(normal);
-            c.red   += i_point_r * k_point_r * dot;
-            c.green += i_point_g * k_point_g * dot;
-            c.blue  += i_point_b * k_point_b * dot;
 
             if (c.red > MAX_COLOR) c.red = MAX_COLOR;
             else if (c.red < 0) c.red = 0;

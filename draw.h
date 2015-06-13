@@ -24,12 +24,19 @@ extern int i_ambient_b;
 extern double k_ambient_r;
 extern double k_ambient_g;
 extern double k_ambient_b;
-extern int i_point_r;
-extern int i_point_g;
-extern int i_point_b;
-extern double k_point_r;
-extern double k_point_g;
-extern double k_point_b;
+extern int i_diffuse_r;
+extern int i_diffuse_g;
+extern int i_diffuse_b;
+extern double k_diffuse_r;
+extern double k_diffuse_g;
+extern double k_diffuse_b;
+extern int i_specular_r;
+extern int i_specular_g;
+extern int i_specular_b;
+extern double k_specular_r;
+extern double k_specular_g;
+extern double k_specular_b;
+extern int specular_expt;
 
 /* enum for plotting mode for use in functions defined in draw.c
  * Its value can be one of PLOT_CARTESIAN or PLOT_ABSOLUTE.

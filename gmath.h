@@ -36,23 +36,33 @@ double *cross_prod(double x1, double y1, double z1,
                    double x2, double y2, double z2);
 
 /*============== double *dot_prod() ==============
-Inputs:     double x1
-            double y1
-            double z1
-            double x2
-            double y2
-            double z2
+Inputs:     double *u
+            double *v
 Returns:
-The dot product of vectors <x1, y1, z1> and <x2, y2, z2>.
+The dot product of vectors u and v.
 ================================================*/
-double dot_prod(double x1, double y1, double z1,
-                double x2, double y2, double z2);
+double dot_prod(double *u, double *v);
 
-/*============== double *normalize() ==============
-Inputs:     double* vector
+/*============== double *normalize() =============
+Inputs:     double *vector
 Returns:
-Normalizes the given vector.
+Normalizes the given vector. This operation is performed in-place.
 ================================================*/
 double *normalize(double* vector);
 
+/*============== double *scalar_mult() ===========
+Inputs:     double *vector
+            double scalar
+Returns:
+Scales the given vector by the given scalar. This operation is performed in-place.
+================================================*/
+double *scalar_mult(double* vector, double scalar);
+
+/*============== double *vect_add() ==============
+Inputs:     double *u
+            double *v
+Returns:
+Returns a new vector that equals the sum of vectors u and v.
+================================================*/
+double *vect_add(double* u, double *v);
 #endif

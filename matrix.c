@@ -103,7 +103,7 @@ void ident(struct matrix *m) {
     m->lastcol = m->cols;
 }
 
-void scalar_mult(double x, struct matrix *m) {
+void mat_scalar_mult(double x, struct matrix *m) {
     int r,c;
     for (r = 0; r < m->rows; ++r) {
         for (c = 0; c < m->lastcol; ++c) {
