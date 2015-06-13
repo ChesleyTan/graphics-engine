@@ -6,7 +6,7 @@ char *basename = NULL;
 struct vary_node **vary_knobs;
 
 screen exec(char return_screen) {
-    int i, u;
+    int i;
     screen _screen;
     struct stack *s;
     struct matrix *trans_mat;
