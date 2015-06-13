@@ -770,7 +770,7 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             // Wireframe
             draw_line(s, c, x0, y0, z0, x1, y1, z1, plot_mode);
             draw_line(s, c, x1, y1, z1, x2, y2, z2, plot_mode);
-            draw_line(s, c, x2, y2, z2, x1, y1, z1, plot_mode);
+            draw_line(s, c, x2, y2, z2, x0, y0, z0, plot_mode);
 
             // Perform scanline conversion
             // TODO remove this after testing
