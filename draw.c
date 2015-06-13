@@ -22,7 +22,7 @@ int i_specular_b = 100;
 double k_specular_r = 1.0;
 double k_specular_g = 1.0;
 double k_specular_b = 1.0;
-int specular_expt = 20;
+int specular_expt = 3;
 
 void add_point(struct matrix * points, double x, double y, double z) {
     if (points->lastcol >= points->cols - 1) {
@@ -847,9 +847,9 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             // Specular
             double *reflection_vector = normalize(vect_add(scalar_mult(normal, 2 * dot),
                                                  light_vector));
-            double cos_angle = dot_prod(reflection_vector, view_vector);
-            if (cos_angle < 0) { // 90° < α < 270°
-                double specular_mult = pow(cos_angle, specular_expt);
+            double inv_cos_angle = -1 * dot_prod(reflection_vector, view_vector);
+            if (inv_cos_angle > 0) { // 90° < α < 270°
+                double specular_mult = pow(inv_cos_angle, specular_expt);
                 c.red   += i_specular_r * k_specular_r * specular_mult;
                 c.green += i_specular_g * k_specular_g * specular_mult;
                 c.blue  += i_specular_b * k_specular_b * specular_mult;
