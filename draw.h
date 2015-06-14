@@ -405,6 +405,11 @@ Inputs:     screen s
             double x2
             double y2
             double z2
+            double **vertex_normals
+            double **polygon_normals
+            double **polygons
+            int num_vertices
+            int current_polygon_index
 Returns:
 Performs scanline conversion on the triangle bounded by the three vertices 
 (x0, y0, z0), (x1, y1, z1), and (x2, y2, z2).
@@ -414,7 +419,12 @@ void scanline_convert(screen s,
                       plotting_mode plot_mode,
                       double x0, double y0, double z0,
                       double x1, double y1, double z1,
-                      double x2, double y2, double z2);
+                      double x2, double y2, double z2,
+                      double **vertex_normals,
+                      double **polygon_normals,
+                      double **polygons,
+                      int num_vertices,
+                      int current_polygon_index);
 
 /*======== void calc_lighting() =============
 Inputs:     double *normal

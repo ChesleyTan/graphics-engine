@@ -842,25 +842,6 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             double y2 = m[1][i+2];
             double z2 = m[2][i+2];
 
-            /* Lighting */
-            double *normal = get_polygon_normal(polygon_normals, m, i);
-            double *vertex_normal0 = get_vertex_normal(vertex_normals,
-                                                       polygon_normals,
-                                                       m,
-                                                       num_vertices,
-                                                       i);
-            double *vertex_normal1 = get_vertex_normal(vertex_normals,
-                                                       polygon_normals,
-                                                       m,
-                                                       num_vertices,
-                                                       i+1);
-            double *vertex_normal2 = get_vertex_normal(vertex_normals,
-                                                       polygon_normals,
-                                                       m,
-                                                       num_vertices,
-                                                       i+2);
-            c = calc_lighting(normal, c);
-
             // Wireframe
             if (global_render_mode == RENDER_WIREFRAME) {
                 draw_line(s, c, x0, y0, z0, x1, y1, z1, plot_mode);
@@ -870,9 +851,11 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             // Perform scanline conversion
             else if (global_render_mode == RENDER_SURFACE) {
                 scanline_convert(s, c, plot_mode,
-                                x0, y0, z0,
-                                x1, y1, z1,
-                                x2, y2, z2);
+                                 x0, y0, z0,
+                                 x1, y1, z1,
+                                 x2, y2, z2,
+                                 vertex_normals, polygon_normals, m,
+                                 num_vertices, i);
             }
 
 
@@ -928,15 +911,25 @@ void scanline_convert(screen s,
                       plotting_mode plot_mode,
                       double x0, double y0, double z0,
                       double x1, double y1, double z1,
-                      double x2, double y2, double z2) {
+                      double x2, double y2, double z2,
+                      double **vertex_normals,
+                      double **polygon_normals,
+                      double **polygons,
+                      int num_vertices,
+                      int current_polygon_index) {
     char _case = 0;
+    int polygon_index_b, polygon_index_m, polygon_index_t;
+    // NOTE:
+    // Ordering of polygon_index_b, polygon_index_m, polygon_index_t assumes
+    // that x0 corresponds to polygons[current_polygon_index], x1 corresponds to
+    // polygons[current_polygon_index+1], and x2 corresponds
+    // polygon[current_polygon_index+2].
     double x_b, x_m, x_t;
     double y_b, y_m, y_t;
     double z_b, z_m, z_t;
     double curr_y, curr_x0, curr_x1, curr_z0, curr_z1;
     double end_y;
     double dx0, dx1, dz0, dz1;
-    // TODO fix glitchiness
     // Case 1 - If no vertices have the same y value
     if (y0 != y1 && y1 != y2 && y0 != y2) {
         _case = 1;
@@ -946,70 +939,88 @@ void scanline_convert(screen s,
                 x_b = x0;
                 y_b = y0;
                 z_b = z0;
+                polygon_index_b = 0;
                 x_m = x1;
                 y_m = y1;
                 z_m = z1;
+                polygon_index_m = 1;
                 x_t = x2;
                 y_t = y2;
                 z_t = z2;
+                polygon_index_t = 2;
             }
             else if (y2 < y1) {
                 if (y0 > y2) {
                     x_b = x2;
                     y_b = y2;
                     z_b = z2;
+                    polygon_index_b = 2;
                     x_m = x0;
                     y_m = y0;
                     z_m = z0;
+                    polygon_index_m = 0;
                     x_t = x1;
                     y_t = y1;
                     z_t = z1;
+                    polygon_index_t = 1;
                 }
                 else {
                     x_b = x0;
                     y_b = y0;
                     z_b = z0;
+                    polygon_index_b = 0;
                     x_m = x2;
                     y_m = y2;
                     z_m = z2;
+                    polygon_index_m = 2;
                     x_t = x1;
                     y_t = y1;
                     z_t = z1;
+                    polygon_index_t = 1;
                 }
             }
             else if (y2 < y0) {
                 x_b = x2;
                 y_b = y2;
                 z_b = z2;
+                polygon_index_b = 2;
                 x_m = x0;
                 y_m = y0;
                 z_m = z0;
+                polygon_index_m = 0;
                 x_t = x1;
                 y_t = y1;
                 z_t = z1;
+                polygon_index_t = 1;
             }
             else if (y2 > y0) {
                 if (y1 > y2) {
                     x_b = x0;
                     y_b = y0;
                     z_b = z0;
+                    polygon_index_b = 0;
                     x_m = x2;
                     y_m = y2;
                     z_m = z2;
+                    polygon_index_m = 2;
                     x_t = x1;
                     y_t = y1;
                     z_t = z1;
+                    polygon_index_t = 1;
                 }
                 else {
                     x_b = x0;
                     y_b = y0;
                     z_b = z0;
+                    polygon_index_b = 0;
                     x_m = x1;
                     y_m = y1;
                     z_m = z1;
+                    polygon_index_m = 1;
                     x_t = x2;
                     y_t = y2;
                     z_t = z2;
+                    polygon_index_t = 2;
                 }
             }
         }
@@ -1018,70 +1029,88 @@ void scanline_convert(screen s,
                 x_b = x2;
                 y_b = y2;
                 z_b = z2;
+                polygon_index_b = 2;
                 x_m = x1;
                 y_m = y1;
                 z_m = z1;
+                polygon_index_m = 1;
                 x_t = x0;
                 y_t = y0;
                 z_t = z0;
+                polygon_index_t = 0;
             }
             else if (y2 > y1) {
                 if (y0 > y2) {
                     x_b = x1;
                     y_b = y1;
                     z_b = z1;
+                    polygon_index_b = 1;
                     x_m = x2;
                     y_m = y2;
                     z_m = z2;
+                    polygon_index_m = 2;
                     x_t = x0;
                     y_t = y0;
                     z_t = z0;
+                    polygon_index_t = 0;
                 }
                 else {
                     x_b = x1;
                     y_b = y1;
                     z_b = z1;
+                    polygon_index_b = 1;
                     x_m = x0;
                     y_m = y0;
                     z_m = z0;
+                    polygon_index_m = 0;
                     x_t = x2;
                     y_t = y2;
                     z_t = z2;
+                    polygon_index_t = 2;
                 }
             }
             else if (y2 > y0) {
                 x_b = x1;
                 y_b = y1;
                 z_b = z1;
+                polygon_index_b = 1;
                 x_m = x0;
                 y_m = y0;
-                z_b = z0;
+                z_m = z0;
+                polygon_index_m = 0;
                 x_t = x2;
                 y_t = y2;
                 z_t = z2;
+                polygon_index_t = 2;
             }
             else if (y2 < y0) {
                 if (y1 > y2) {
                     x_b = x2;
                     y_b = y2;
                     z_b = z2;
+                    polygon_index_b = 2;
                     x_m = x1;
                     y_m = y1;
                     z_m = z1;
+                    polygon_index_m = 1;
                     x_t = x0;
                     y_t = y0;
                     z_t = z0;
+                    polygon_index_t = 0;
                 }
                 else {
                     x_b = x1;
                     y_b = y1;
                     z_b = z1;
+                    polygon_index_b = 1;
                     x_m = x2;
                     y_m = y2;
                     z_m = z2;
+                    polygon_index_m = 2;
                     x_t = x0;
                     y_t = y0;
                     z_t = z0;
+                    polygon_index_t = 0;
                 }
             }
         }
@@ -1171,6 +1200,39 @@ void scanline_convert(screen s,
             z_b = z1;
         }
     }
+
+    /* Lighting */
+    // Flat shading
+    double *normal = get_polygon_normal(polygon_normals, polygons,
+                                        current_polygon_index);
+    c = calc_lighting(normal, c);
+
+    // Gouraud shading
+    //color c0, c1, c2;
+    //double *vertex_normal0, *vertex_normal1, *vertex_normal2;
+    //vertex_normal0 = get_vertex_normal(vertex_normals,
+    //                                            polygon_normals,
+    //                                            polygons,
+    //                                            num_vertices,
+    //                                            current_polygon_index);
+    //vertex_normal1 = get_vertex_normal(vertex_normals,
+    //                                            polygon_normals,
+    //                                            polygons,
+    //                                            num_vertices,
+    //                                            current_polygon_index+1);
+    //vertex_normal2 = get_vertex_normal(vertex_normals,
+    //                                            polygon_normals,
+    //                                            polygons,
+    //                                            num_vertices,
+    //                                            current_polygon_index+2);
+    //c0 = calc_lighting(vertex_normal0, c0);
+    //c1 = calc_lighting(vertex_normal1, c1);
+    //c2 = calc_lighting(vertex_normal2, c2);
+    //dc0 = (c0)
+    //free(vertex_normal0);
+    //free(vertex_normal1);
+    //free(vertex_normal2);
+
     switch (_case) {
         case 1:
             dx0 = (x_t - x_b) / (y_t - y_b);
