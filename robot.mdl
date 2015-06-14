@@ -1,5 +1,6 @@
 draw-mode lines
 render-mode surface
+shade-mode gouraud
 resize 500 700
 push
 /* body */

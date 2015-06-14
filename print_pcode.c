@@ -207,8 +207,8 @@ void print_pcode() {
                         bold_prefix, fg_blue_30, reset,
                         current_op.op.save.p->name);
                 break;
-            case SHADING:
-                printf("%s%sShading%s: %s",
+            case SHADE_MODE:
+                printf("%s%sShade mode%s: %s",
                         bold_prefix, fg_blue_30, reset,
                         current_op.op.shading.p->name);
                 break;

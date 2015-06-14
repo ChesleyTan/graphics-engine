@@ -35,7 +35,17 @@ WHITESPACE [ \t\n]
     /* =========================================== */
 
 "draw-mode" { return DRAW_MODE; }
+"lines"|"polygons" {
+    strncpy(yylval.string, yytext, sizeof(yylval.string) - 1);
+    yylval.string[sizeof(yylval.string) - 1] = '\0';
+    return DRAW_TYPE;
+}
 "render-mode" { return RENDER_MODE; }
+"wireframe"|"surface" {
+    strncpy(yylval.string, yytext, sizeof(yylval.string) - 1);
+    yylval.string[sizeof(yylval.string) - 1] = '\0';
+    return RENDER_TYPE;
+}
 "resize" { return RESIZE; }
 "light" { return LIGHT; }
 "constants" { return CONSTANTS; }
@@ -65,9 +75,9 @@ WHITESPACE [ \t\n]
 "save" { return SAVE; }
 "generate_rayfiles" { return GENERATE_RAYFILES; }
 
-"shading" { return SHADING; }
+"shade-mode" { return SHADE_MODE; }
 
-phong|flat|goroud|raytrace {
+"flat"|"gouraud"|"phong"|"raytrace" {
     strncpy(yylval.string, yytext, sizeof(yylval.string) - 1);
     yylval.string[sizeof(yylval.string) - 1] = '\0';
     return SHADING_TYPE;

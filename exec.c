@@ -247,6 +247,21 @@ screen exec(char return_screen) {
                     print_error("Invalid argument for render-mode command: \"%s\"", render_mode);
                 }
                 break;
+            case SHADE_MODE: ; // Obligatory empty statement
+                #ifdef DEBUG
+                print_debug("Got shade-mode command");
+                #endif
+                char *shade_mode = current_op.op.drawmode.p->name;
+                if (strcmp(shade_mode, "flat") == 0) {
+                    global_shade_mode = SHADE_FLAT;
+                }
+                else if (strcmp(shade_mode, "gouraud") == 0) {
+                    global_shade_mode = SHADE_GOURAUD;
+                }
+                else {
+                    print_error("Invalid argument for shade-mode command: \"%s\"", shade_mode);
+                }
+                break;
             case RESIZE:
                 #ifdef DEBUG
                 print_debug("Got resize command");

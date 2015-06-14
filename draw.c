@@ -2,6 +2,7 @@
 plotting_mode global_plot_mode = PLOT_ABSOLUTE;
 drawing_mode global_draw_mode = DRAW_POLYGON;
 rendering_mode global_render_mode = RENDER_WIREFRAME;
+shading_mode global_shade_mode = SHADE_GOURAUD;
 double view_vector[3] = {0.0, 0.0, -1.0};
 double light_vector[3] = {0.0, 0.0, -1.0};
 int i_ambient_r = 20;
@@ -1331,20 +1332,16 @@ void scanline_convert(screen s,
     }
 
     /* Lighting */
-    char use_flat_shading = FALSE;
+    color c_b, c_m, c_t, dc0, dc1, curr_c0, curr_c1;
+    double *vertex_normal_b, *vertex_normal_m, *vertex_normal_t;
     // Flat shading
-    if (use_flat_shading) {
+    if (global_shade_mode == SHADE_FLAT) {
         double *normal = get_polygon_normal(polygon_normals, polygons,
                                             current_polygon_index);
         c = calc_lighting(normal, c);
     }
-
-    char use_gouraud_shading = !use_flat_shading;
-
     // Gouraud shading
-    color c_b, c_m, c_t, dc0, dc1, curr_c0, curr_c1;
-    double *vertex_normal_b, *vertex_normal_m, *vertex_normal_t;
-    if (use_gouraud_shading) {
+    else if (global_shade_mode == SHADE_GOURAUD) {
         vertex_normal_b = get_vertex_normal(vertex_normals,
                                             polygon_normals,
                                             polygons,
@@ -1374,25 +1371,25 @@ void scanline_convert(screen s,
             dx1 = (x_m - x_b) / (y_m - y_b);
             dz0 = (z_t - z_b) / (y_t - y_b);
             dz1 = (z_m - z_b) / (y_t - y_b);
-            if (use_gouraud_shading) {
+            if (global_shade_mode == SHADE_GOURAUD) {
                 dc0 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
                 dc1 = divide_color(subtract_color(c_m, c_b), (y_m - y_b));
             }
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
             curr_z0 = curr_z1 = z_b;
-            if (use_gouraud_shading) {
+            if (global_shade_mode == SHADE_GOURAUD) {
                 curr_c0 = curr_c1 = c_b;
             }
             end_y = floor(y_m);
             while (curr_y < end_y) {
-                if (use_flat_shading) {
+                if (global_shade_mode == SHADE_FLAT) {
                     draw_line(s, c, c,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
                             plot_mode);
                 }
-                else if (use_gouraud_shading) {
+                else if (global_shade_mode == SHADE_GOURAUD) {
                     draw_line(s, curr_c0, curr_c1,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
@@ -1402,7 +1399,7 @@ void scanline_convert(screen s,
                 curr_x1 += dx1;
                 curr_z0 += dz0;
                 curr_z1 += dz1;
-                if (use_gouraud_shading) {
+                if (global_shade_mode == SHADE_GOURAUD) {
                     curr_c0 = add_color(curr_c0, dc0);
                     curr_c1 = add_color(curr_c1, dc1);
                 }
@@ -1410,18 +1407,18 @@ void scanline_convert(screen s,
             }
             dx1 = (x_t - x_m) / (y_t - y_m);
             dz1 = (z_t - z_m) / (y_t - y_m);
-            if (use_gouraud_shading) {
+            if (global_shade_mode == SHADE_GOURAUD) {
                 dc1 = divide_color(subtract_color(c_t, c_m), (y_t - y_m));
             }
             curr_y = y_m;
             curr_x1 = x_m;
             curr_z1 = z_m;
-            if (use_gouraud_shading) {
+            if (global_shade_mode == SHADE_GOURAUD) {
                 curr_c1 = c_m;
             }
             end_y = y_t;
             while (curr_y <= end_y) {
-                if (use_flat_shading) {
+                if (global_shade_mode == SHADE_FLAT) {
                     draw_line(s, c, c,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
@@ -1437,7 +1434,7 @@ void scanline_convert(screen s,
                 curr_x1 += dx1;
                 curr_z0 += dz0;
                 curr_z1 += dz1;
-                if (use_gouraud_shading) {
+                if (global_shade_mode == SHADE_GOURAUD) {
                     curr_c0 = add_color(curr_c0, dc0);
                     curr_c1 = add_color(curr_c1, dc1);
                 }
@@ -1449,7 +1446,7 @@ void scanline_convert(screen s,
             dx1 = (x_t - x_m) / (y_t - y_m);
             dz0 = (z_t - z_b) / (y_t - y_b);
             dz1 = (z_t - z_m) / (y_t - y_m);
-            if (use_gouraud_shading) {
+            if (global_shade_mode == SHADE_GOURAUD) {
                 dc0 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
                 dc1 = divide_color(subtract_color(c_t, c_m), (y_t - y_m));
             }
@@ -1458,13 +1455,13 @@ void scanline_convert(screen s,
             curr_x1 = x_m;
             curr_z0 = z_b;
             curr_z1 = z_m;
-            if (use_gouraud_shading) {
+            if (global_shade_mode == SHADE_GOURAUD) {
                 curr_c0 = c_b;
                 curr_c1 = c_m;
             }
             end_y = y_t;
             while (curr_y <= end_y) {
-                if (use_flat_shading) {
+                if (global_shade_mode == SHADE_FLAT) {
                     draw_line(s, c, c,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
@@ -1480,7 +1477,7 @@ void scanline_convert(screen s,
                 curr_x1 += dx1;
                 curr_z0 += dz0;
                 curr_z1 += dz1;
-                if (use_gouraud_shading) {
+                if (global_shade_mode == SHADE_GOURAUD) {
                     curr_c0 = add_color(curr_c0, dc0);
                     curr_c1 = add_color(curr_c1, dc1);
                 }
@@ -1492,25 +1489,25 @@ void scanline_convert(screen s,
             dx1 = (x_t - x_b) / (y_t - y_b);
             dz0 = (z_m - z_b) / (y_m - y_b);
             dz1 = (z_t - z_b) / (y_t - y_b);
-            if (use_gouraud_shading) {
+            if (global_shade_mode == SHADE_GOURAUD) {
                 dc0 = divide_color(subtract_color(c_m, c_b), (y_m - y_b));
                 dc1 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
             }
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
             curr_z0 = curr_z1 = z_b;
-            if (use_gouraud_shading) {
+            if (global_shade_mode == SHADE_GOURAUD) {
                 curr_c0 = curr_c1 = c_b;
             }
             end_y = y_t;
             while (curr_y <= end_y) {
-                if (use_flat_shading) {
+                if (global_shade_mode == SHADE_FLAT) {
                     draw_line(s, c, c,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
                             plot_mode);
                 }
-                else if (use_gouraud_shading) {
+                else if (global_shade_mode == SHADE_GOURAUD) {
                     draw_line(s, curr_c0, curr_c1,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
@@ -1520,7 +1517,7 @@ void scanline_convert(screen s,
                 curr_x1 += dx1;
                 curr_z0 += dz0;
                 curr_z1 += dz1;
-                if (use_gouraud_shading) {
+                if (global_shade_mode == SHADE_GOURAUD) {
                     curr_c0 = add_color(curr_c0, dc0);
                     curr_c1 = add_color(curr_c1, dc1);
                 }

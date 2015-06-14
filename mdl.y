@@ -37,14 +37,14 @@ extern FILE *yyin;
 
 %token COMMENT
 %token <val> NUMBER
-%token <string> DRAW_MODE RENDER_MODE RESIZE
+%token <string> DRAW_MODE DRAW_TYPE RENDER_MODE RENDER_TYPE RESIZE
 %token <string> LIGHT AMBIENT
 %token <string> CONSTANTS SAVE_COORDS CAMERA 
 %token <string> SPHERE TORUS BOX LINE CS MESH TEXTURE
 %token <string> STRING
 %token <string> SET MOVE SCALE ROTATE BASENAME SAVE_KNOBS TWEEN FRAMES VARY 
 %token <string> PUSH POP SAVE GENERATE_RAYFILES
-%token <string> SHADING SHADING_TYPE SETKNOBS FOCAL DISPLAY WEB
+%token <string> SHADE_MODE SHADING_TYPE SETKNOBS FOCAL DISPLAY WEB
 %token <string> CO
 %%
 /* ============= END DEFINITIONS ============= */
@@ -60,17 +60,24 @@ command:
   ++lineno;
   }
 
-| DRAW_MODE STRING {
+| DRAW_MODE DRAW_TYPE {
   ++lineno;
   op[lastop].opcode=DRAW_MODE;
   op[lastop].op.drawmode.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 
-| RENDER_MODE STRING {
+| RENDER_MODE RENDER_TYPE {
   ++lineno;
   op[lastop].opcode=RENDER_MODE;
   op[lastop].op.rendermode.p = add_symbol($2,SYM_STRING,NULL);
+  ++lastop;
+}
+
+| SHADE_MODE SHADING_TYPE {
+  ++lineno;
+  op[lastop].opcode = SHADE_MODE;
+  op[lastop].op.shading.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 
@@ -108,7 +115,7 @@ command:
   op[lastop].op.move.d[1] = $3;
   op[lastop].op.move.d[2] = $4;
   op[lastop].op.move.d[3] = 0;
-  op[lastop].op.move.p = add_symbol($5,SYM_STRING,0);
+  op[lastop].op.move.p = add_symbol($5,SYM_STRING,NULL);
   ++lastop;
 }
 
@@ -216,7 +223,7 @@ command:
   op[lastop].op.texture.d3[2] = $14;
   op[lastop].op.texture.cs = NULL;
   op[lastop].op.texture.constants =  add_symbol("",SYM_CONSTANTS,c);
-  op[lastop].op.texture.p = add_symbol($2,SYM_STRING,0);
+  op[lastop].op.texture.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 
@@ -731,7 +738,7 @@ command:
 | SET STRING NUMBER {
   ++lineno;
   op[lastop].opcode = SET;
-  op[lastop].op.set.p = add_symbol($2,SYM_STRING,0);
+  op[lastop].op.set.p = add_symbol($2,SYM_STRING,NULL);
   set_value(op[lastop].op.set.p,$3);
   op[lastop].op.set.val = $3;
   ++lastop;
@@ -744,7 +751,7 @@ command:
   op[lastop].op.scale.d[1] = $3;
   op[lastop].op.scale.d[2] = $4;
   op[lastop].op.scale.d[3] = 0;
-  op[lastop].op.scale.p = add_symbol($5,SYM_STRING,0);
+  op[lastop].op.scale.p = add_symbol($5,SYM_STRING,NULL);
   ++lastop;
 }
 
@@ -778,7 +785,7 @@ command:
     }
 
   op[lastop].op.rotate.degrees = $3;
-  op[lastop].op.rotate.p = add_symbol($4,SYM_STRING,0);
+  op[lastop].op.rotate.p = add_symbol($4,SYM_STRING,NULL);
   
   ++lastop;
 }
@@ -820,14 +827,14 @@ command:
     exit(EXIT_FAILURE);
   }
   op[lastop].opcode = BASENAME;
-  op[lastop].op.basename.p = add_symbol($2,SYM_STRING,0);
+  op[lastop].op.basename.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 
 | SAVE_KNOBS STRING {
   ++lineno;
   op[lastop].opcode = SAVE_KNOBS;
-  op[lastop].op.save_knobs.p = add_symbol($2,SYM_STRING,0);
+  op[lastop].op.save_knobs.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 
@@ -836,8 +843,8 @@ command:
   op[lastop].opcode = TWEEN;
   op[lastop].op.tween.start_frame = $2;
   op[lastop].op.tween.end_frame = $3;
-  op[lastop].op.tween.knob_list0 = add_symbol($4,SYM_STRING,0);
-  op[lastop].op.tween.knob_list1 = add_symbol($5,SYM_STRING,0);
+  op[lastop].op.tween.knob_list0 = add_symbol($4,SYM_STRING,NULL);
+  op[lastop].op.tween.knob_list1 = add_symbol($5,SYM_STRING,NULL);
   ++lastop;
 }
 
@@ -865,7 +872,7 @@ command:
   }
   ++lineno;
   op[lastop].opcode = VARY;
-  op[lastop].op.vary.p = add_symbol($2,SYM_STRING,0);
+  op[lastop].op.vary.p = add_symbol($2,SYM_STRING,NULL);
   op[lastop].op.vary.start_frame = (int) $3;
   op[lastop].op.vary.end_frame = (int) $4;
   op[lastop].op.vary.start_val = $5;
@@ -894,14 +901,7 @@ command:
 | SAVE STRING {
   ++lineno;
   op[lastop].opcode = SAVE;
-  op[lastop].op.save.p = add_symbol($2,SYM_STRING,0);
-  ++lastop;
-}
-
-| SHADING SHADING_TYPE {
-  ++lineno;
-  op[lastop].opcode = SHADING;
-  op[lastop].op.shading.p = add_symbol($2,SYM_STRING,0);
+  op[lastop].op.save.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 

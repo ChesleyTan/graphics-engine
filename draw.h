@@ -71,6 +71,16 @@ typedef enum {
     RENDER_SURFACE
 } rendering_mode;
 
+/* enum for shading mode for use in functions defined in draw.c
+ * Its value can be one of SHADE_FLAT or SHADE_GOURAUD.
+ * If SHADE_FLAT is selected, flat shading will be used.
+ * If SHADE_GOURAUD is selected, Gouraud shading will be used.
+ */
+typedef enum {
+    SHADE_FLAT,
+    SHADE_GOURAUD
+} shading_mode;
+
 /* enum for curve types passed into add_curve() */
 typedef enum {
     HERMITE_CURVE,
@@ -88,6 +98,10 @@ extern drawing_mode global_draw_mode;
 /* Rendering mode to be used by default globally.
  * This value may be set programmatically. */
 extern rendering_mode global_render_mode;
+
+/* Shading mode to be used by default globally.
+ * This value may be set programmatically. */
+extern shading_mode global_shade_mode;
 
 /*======== void add_point() ==========
 Inputs:     struct matrix *points
