@@ -207,11 +207,6 @@ void print_pcode() {
                         bold_prefix, fg_blue_30, reset,
                         current_op.op.save.p->name);
                 break;
-            case SHADE_MODE:
-                printf("%s%sShade mode%s: %s",
-                        bold_prefix, fg_blue_30, reset,
-                        current_op.op.shading.p->name);
-                break;
             case SETKNOBS:
                 printf("%s%sSetknobs%s: %f",
                         bold_prefix, fg_blue_30, reset,
@@ -229,6 +224,16 @@ void print_pcode() {
                 printf("%s%sDraw mode%s: %s",
                         bold_prefix, fg_blue_30, reset,
                         current_op.op.drawmode.p->name);
+                break;
+            case RENDER_MODE:
+                printf("%s%sRender mode%s: %s",
+                        bold_prefix, fg_blue_30, reset,
+                        current_op.op.rendermode.p->name);
+                break;
+            case SHADE_MODE:
+                printf("%s%sShade mode%s: %s",
+                        bold_prefix, fg_blue_30, reset,
+                        current_op.op.shading.p->name);
                 break;
             case RESIZE:
                 printf("%s%sResize%s: x=%d y=%d",
