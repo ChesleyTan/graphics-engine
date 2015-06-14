@@ -169,6 +169,9 @@ void display(screen s);
 // TODO doc
 void allocate_z_buffer();
 void free_z_buffer();
-void avg_color(color c1, color c2);
+color avg_color(color c1, color c2);
+color add_color(color c1, color c2);
+color subtract_color(color c1, color c2);
+color divide_color(color c, int n);
 #endif
 // vim: ts=4:et:sts:sw=4:sr

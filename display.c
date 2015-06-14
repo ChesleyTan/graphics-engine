@@ -199,10 +199,37 @@ void free_z_buffer() {
     }
 }
 
-void avg_color(color c1, color c2) {
-    c1.red = (c1.red + c2.red) / 2;
-    c1.green = (c1.green + c2.green) / 2;
-    c1.blue = (c1.blue + c2.blue) / 2;
+color avg_color(color c1, color c2) {
+    color c;
+    c.red = (c1.red + c2.red) / 2;
+    c.green = (c1.green + c2.green) / 2;
+    c.blue = (c1.blue + c2.blue) / 2;
+    return c;
+}
+
+color add_color(color c1, color c2) {
+    color c;
+    c.red = c1.red + c2.red;
+    c.green = c1.green + c2.green;
+    c.blue = c1.blue + c2.blue;
+    return c;
+}
+
+color subtract_color(color c1, color c2) {
+    color c;
+    c.red = c1.red - c2.red;
+    c.green = c1.green - c2.green;
+    c.blue = c1.blue - c2.blue;
+    return c;
+}
+
+color divide_color(color c, int n) {
+    if (n == 0) n = 1;
+    color new_c;
+    new_c.red = c.red / n;
+    new_c.green = c.green / n;
+    new_c.blue = c.blue / n;
+    return new_c;
 }
 
 // vim: ts=4:et:sts:sw=4:sr

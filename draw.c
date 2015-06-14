@@ -1124,12 +1124,15 @@ void scanline_convert(screen s,
             x_t = x2;
             y_t = y2;
             z_t = z2;
+            polygon_index_t = 2;
             x_m = x1;
             y_m = y1;
             z_m = z1;
+            polygon_index_m = 1;
             x_b = x0;
             y_b = y0;
             z_b = z0;
+            polygon_index_b = 0;
         }
         // Case 3 - if the two vertices are on the top (i.e. two vertices are equal and
         // have higher y values than the other vertex)
@@ -1140,12 +1143,15 @@ void scanline_convert(screen s,
             x_t = x0;
             y_t = y0;
             z_t = z0;
+            polygon_index_t = 0;
             x_m = x1;
             y_m = y1;
             z_m = z1;
+            polygon_index_m = 1;
             x_b = x2;
             y_b = y2;
             z_b = z2;
+            polygon_index_b = 2;
         }
     }
     else if (y1 == y2) {
@@ -1154,24 +1160,30 @@ void scanline_convert(screen s,
             x_t = x0;
             y_t = y0;
             z_t = z0;
+            polygon_index_t = 0;
             x_m = x1;
             y_m = y1;
             z_m = z1;
+            polygon_index_m = 1;
             x_b = x2;
             y_b = y2;
             z_b = z2;
+            polygon_index_b = 2;
         }
         else {
             _case = 3;
             x_t = x2;
             y_t = y2;
             z_t = z2;
+            polygon_index_t = 2;
             x_m = x1;
             y_m = y1;
             z_m = z1;
+            polygon_index_m = 1;
             x_b = x0;
             y_b = y0;
             z_b = z0;
+            polygon_index_b = 0;
         }
     }
     else if (y0 == y2) {
@@ -1180,58 +1192,70 @@ void scanline_convert(screen s,
             x_t = x1;
             y_t = y1;
             z_t = z1;
+            polygon_index_t = 1;
             x_m = x2;
             y_m = y2;
             z_m = z2;
+            polygon_index_m = 2;
             x_b = x0;
             y_b = y0;
             z_b = z0;
+            polygon_index_b = 0;
         }
         else {
             _case = 3;
             x_t = x0;
             y_t = y0;
             z_t = z0;
+            polygon_index_t = 0;
             x_m = x2;
             y_m = y2;
             z_m = z2;
+            polygon_index_m = 2;
             x_b = x1;
             y_b = y1;
             z_b = z1;
+            polygon_index_b = 1;
         }
     }
 
     /* Lighting */
+    char use_flat_shading = 1;
     // Flat shading
-    double *normal = get_polygon_normal(polygon_normals, polygons,
-                                        current_polygon_index);
-    c = calc_lighting(normal, c);
+    if (use_flat_shading) {
+        double *normal = get_polygon_normal(polygon_normals, polygons,
+                                            current_polygon_index);
+        c = calc_lighting(normal, c);
+    }
+
+    char use_gouraud_shading = !use_flat_shading;
 
     // Gouraud shading
-    //color c0, c1, c2;
-    //double *vertex_normal0, *vertex_normal1, *vertex_normal2;
-    //vertex_normal0 = get_vertex_normal(vertex_normals,
-    //                                            polygon_normals,
-    //                                            polygons,
-    //                                            num_vertices,
-    //                                            current_polygon_index);
-    //vertex_normal1 = get_vertex_normal(vertex_normals,
-    //                                            polygon_normals,
-    //                                            polygons,
-    //                                            num_vertices,
-    //                                            current_polygon_index+1);
-    //vertex_normal2 = get_vertex_normal(vertex_normals,
-    //                                            polygon_normals,
-    //                                            polygons,
-    //                                            num_vertices,
-    //                                            current_polygon_index+2);
-    //c0 = calc_lighting(vertex_normal0, c0);
-    //c1 = calc_lighting(vertex_normal1, c1);
-    //c2 = calc_lighting(vertex_normal2, c2);
-    //dc0 = (c0)
-    //free(vertex_normal0);
-    //free(vertex_normal1);
-    //free(vertex_normal2);
+    color c_b, c_m, c_t, dc0, dc1, curr_c0, curr_c1;
+    double *vertex_normal_b, *vertex_normal_m, *vertex_normal_t;
+    if (use_gouraud_shading) {
+        vertex_normal_b = get_vertex_normal(vertex_normals,
+                                            polygon_normals,
+                                            polygons,
+                                            num_vertices,
+                                            current_polygon_index
+                                            + polygon_index_b);
+        vertex_normal_m = get_vertex_normal(vertex_normals,
+                                            polygon_normals,
+                                            polygons,
+                                            num_vertices,
+                                            current_polygon_index
+                                            + polygon_index_m);
+        vertex_normal_t = get_vertex_normal(vertex_normals,
+                                            polygon_normals,
+                                            polygons,
+                                            num_vertices,
+                                            current_polygon_index
+                                            + polygon_index_t);
+        c_b = calc_lighting(vertex_normal_b, c_b);
+        c_m = calc_lighting(vertex_normal_m, c_m);
+        c_t = calc_lighting(vertex_normal_t, c_t);
+    }
 
     switch (_case) {
         case 1:
@@ -1239,11 +1263,21 @@ void scanline_convert(screen s,
             dx1 = (x_m - x_b) / (y_m - y_b);
             dz0 = (z_t - z_b) / (y_t - y_b);
             dz1 = (z_m - z_b) / (y_t - y_b);
+            if (use_gouraud_shading) {
+                dc0 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
+                dc1 = divide_color(subtract_color(c_m, c_b), (y_m - y_b));
+            }
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
             curr_z0 = curr_z1 = z_b;
+            if (use_gouraud_shading) {
+                curr_c0 = curr_c1 = c_b;
+            }
             end_y = floor(y_m);
             while (curr_y < end_y) {
+                if (use_gouraud_shading) {
+                    c = avg_color(curr_c0, curr_c1);
+                }
                 draw_line(s, c,
                         curr_x0, curr_y, curr_z0,
                         curr_x1, curr_y, curr_z1,
@@ -1252,15 +1286,28 @@ void scanline_convert(screen s,
                 curr_x1 += dx1;
                 curr_z0 += dz0;
                 curr_z1 += dz1;
+                if (use_gouraud_shading) {
+                    curr_c0 = add_color(curr_c0, dc0);
+                    curr_c1 = add_color(curr_c1, dc1);
+                }
                 ++curr_y;
             }
             dx1 = (x_t - x_m) / (y_t - y_m);
             dz1 = (z_t - z_m) / (y_t - y_m);
+            if (use_gouraud_shading) {
+                dc1 = divide_color(subtract_color(c_t, c_m), (y_t - y_m));
+            }
             curr_y = y_m;
             curr_x1 = x_m;
             curr_z1 = z_m;
+            if (use_gouraud_shading) {
+                curr_c1 = c_m;
+            }
             end_y = y_t;
             while (curr_y <= end_y) {
+                if (use_gouraud_shading) {
+                    c = avg_color(curr_c0, curr_c1);
+                }
                 draw_line(s, c,
                           curr_x0, curr_y, curr_z0,
                           curr_x1, curr_y, curr_z1,
@@ -1269,6 +1316,10 @@ void scanline_convert(screen s,
                 curr_x1 += dx1;
                 curr_z0 += dz0;
                 curr_z1 += dz1;
+                if (use_gouraud_shading) {
+                    curr_c0 = add_color(curr_c0, dc0);
+                    curr_c1 = add_color(curr_c1, dc1);
+                }
                 ++curr_y;
             }
             break;
@@ -1277,13 +1328,24 @@ void scanline_convert(screen s,
             dx1 = (x_t - x_m) / (y_t - y_m);
             dz0 = (z_t - z_b) / (y_t - y_b);
             dz1 = (z_t - z_m) / (y_t - y_m);
+            if (use_gouraud_shading) {
+                dc0 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
+                dc1 = divide_color(subtract_color(c_t, c_m), (y_t - y_m));
+            }
             curr_y = y_b;
             curr_x0 = x_b;
             curr_x1 = x_m;
             curr_z0 = z_b;
             curr_z1 = z_m;
+            if (use_gouraud_shading) {
+                curr_c0 = c_b;
+                curr_c1 = c_m;
+            }
             end_y = y_t;
             while (curr_y <= end_y) {
+                if (use_gouraud_shading) {
+                    c = avg_color(curr_c0, curr_c1);
+                }
                 draw_line(s, c,
                           curr_x0, curr_y, curr_z0,
                           curr_x1, curr_y, curr_z1,
@@ -1292,6 +1354,10 @@ void scanline_convert(screen s,
                 curr_x1 += dx1;
                 curr_z0 += dz0;
                 curr_z1 += dz1;
+                if (use_gouraud_shading) {
+                    curr_c0 = add_color(curr_c0, dc0);
+                    curr_c1 = add_color(curr_c1, dc1);
+                }
                 ++curr_y;
             }
             break;
@@ -1300,11 +1366,21 @@ void scanline_convert(screen s,
             dx1 = (x_m - x_b) / (y_m - y_b);
             dz0 = (z_t - z_b) / (y_t - y_b);
             dz1 = (z_m - z_b) / (y_m - y_b);
+            if (use_gouraud_shading) {
+                dc0 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
+                dc1 = divide_color(subtract_color(c_m, c_b), (y_m - y_b));
+            }
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
             curr_z0 = curr_z1 = z_b;
+            if (use_gouraud_shading) {
+                curr_c0 = curr_c1 = c_b;
+            }
             end_y = y_t;
             while (curr_y <= end_y) {
+                if (use_gouraud_shading) {
+                    c = avg_color(curr_c0, curr_c1);
+                }
                 draw_line(s, c,
                           curr_x0, curr_y, curr_z0,
                           curr_x1, curr_y, curr_z1,
@@ -1313,6 +1389,10 @@ void scanline_convert(screen s,
                 curr_x1 += dx1;
                 curr_z0 += dz0;
                 curr_z1 += dz1;
+                if (use_gouraud_shading) {
+                    curr_c0 = add_color(curr_c0, dc0);
+                    curr_c1 = add_color(curr_c1, dc1);
+                }
                 ++curr_y;
             }
             break;
@@ -1383,6 +1463,10 @@ double *get_vertex_normal(double **vertex_normals,
                           double **polygons,
                           int num_vertices,
                           int current_polygon_index) {
+    if (current_polygon_index >= num_vertices) {
+        print_error("current_polygon_index >= num_vertices!");
+        exit(EXIT_FAILURE);
+    }
     int num_polygons_sharing_vertex = 0;
     double *vertex_normal = vertex_normals[current_polygon_index];
     if (vertex_normal == NULL) {
