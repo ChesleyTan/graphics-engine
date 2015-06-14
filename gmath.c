@@ -53,6 +53,13 @@ double *vect_add(double *u, double *v) {
     return sum;
 }
 
+double *vect_add_in_place(double *u, double *v) {
+    u[0] = u[0] + v[0];
+    u[1] = u[1] + v[1];
+    u[2] = u[2] + v[2];
+    return u;
+}
+
 double *clone_vect(double *vector) {
     double *clone;
     clone = (double *) malloc(3 * sizeof(double));

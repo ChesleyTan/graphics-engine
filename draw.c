@@ -807,13 +807,29 @@ char is_visible(double **polygons, int index) {
 
 void draw_polygons(screen s, color c, struct matrix *polygons,
                    plotting_mode plot_mode) {
-    if (polygons->lastcol < 3) {
+    int num_vertices = polygons->lastcol;
+    if (num_vertices < 3) {
         print_error("Polygon matrix has a length of less than 3.");
         return;
     }
     double **m = polygons->m;
     int i;
-    int end_i = polygons->lastcol - 2;
+    int end_i = num_vertices - 2;
+    int num_polygons = num_vertices / 3;
+    double **polygon_normals = (double **) malloc(
+                                   sizeof(double *) * num_polygons
+                               ); // An array of the surface normals of each polygon
+    double **vertex_normals = (double **) malloc(
+                                   sizeof(double *) * num_vertices
+                               ); // An array of the vertex normals of each vertex
+    for (i = 0; i < num_polygons; ++i) {
+        // Initialize all polygon normals to NULL
+        polygon_normals[i] = NULL;
+    }
+    for (i = 0; i < num_vertices; ++i) {
+        // Initialize all vertex normals to NULL
+        vertex_normals[i] = NULL;
+    }
     for (i = 0; i < end_i; i+=3) {
         if (is_visible(m, i)) {
             double x0 = m[0][i];
@@ -827,7 +843,23 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             double z2 = m[2][i+2];
 
             /* Lighting */
-            c = calc_lighting(x0, y0, z0, x1, y1, z1, x2, y2, z2, c);
+            double *normal = get_polygon_normal(polygon_normals, m, i);
+            double *vertex_normal0 = get_vertex_normal(vertex_normals,
+                                                       polygon_normals,
+                                                       m,
+                                                       num_vertices,
+                                                       i);
+            double *vertex_normal1 = get_vertex_normal(vertex_normals,
+                                                       polygon_normals,
+                                                       m,
+                                                       num_vertices,
+                                                       i+1);
+            double *vertex_normal2 = get_vertex_normal(vertex_normals,
+                                                       polygon_normals,
+                                                       m,
+                                                       num_vertices,
+                                                       i+2);
+            c = calc_lighting(normal, c);
 
             // Wireframe
             if (global_render_mode == RENDER_WIREFRAME) {
@@ -858,6 +890,18 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
 
         }
     }
+    for (i = 0; i < num_polygons; ++i) {
+        if (polygon_normals[i] != NULL) {
+            free(polygon_normals[i]);
+        }
+    }
+    free(polygon_normals);
+    for (i = 0; i < num_vertices; ++i) {
+        if (vertex_normals[i] != NULL) {
+            free(vertex_normals[i]);
+        }
+    }
+    free(vertex_normals);
 }
 
 void draw(screen s, struct matrix *pts, color c) {
@@ -1213,29 +1257,21 @@ void scanline_convert(screen s,
     }
 }
 
-color calc_lighting(double x0, double y0, double z0,
-                    double x1, double y1, double z1,
-                    double x2, double y2, double z2,
-                    color c) {
+color calc_lighting(double *normal, color c) {
     // Ambient
     c.red   = i_ambient_r * k_ambient_r;
     c.green = i_ambient_g * k_ambient_g;
     c.blue  = i_ambient_b * k_ambient_b;
 
     // Diffuse
-    double *normal = normalize(cross_prod(x1 - x0,
-                                            y1 - y0,
-                                            z1 - z0,
-                                            x2 - x0,
-                                            y2 - y0,
-                                            z2 - z0));
+    normal = normalize(clone_vect(normal));
     double dot = -1 * dot_prod(light_vector, normal);
     c.red   += i_diffuse_r * k_diffuse_r * dot;
     c.green += i_diffuse_g * k_diffuse_g * dot;
     c.blue  += i_diffuse_b * k_diffuse_b * dot;
 
     // Specular
-    double *reflection_vector = normalize(vect_add(scalar_mult(normal, 2 * dot),
+    double *reflection_vector = normalize(vect_add_in_place(scalar_mult(normal, 2 * dot),
                                             light_vector));
     double inv_cos_angle = -1 * dot_prod(reflection_vector, view_vector);
     if (inv_cos_angle > 0) { // 90° < α < 270°
@@ -1245,16 +1281,74 @@ color calc_lighting(double x0, double y0, double z0,
         c.blue  += i_specular_b * k_specular_b * specular_mult;
     }
 
-    free(reflection_vector);
-    free(normal);
-
     if (c.red > MAX_COLOR) c.red = MAX_COLOR;
     else if (c.red < 0) c.red = 0;
     if (c.green > MAX_COLOR) c.green = MAX_COLOR;
     else if (c.green < 0) c.green = 0;
     if (c.blue > MAX_COLOR) c.blue = MAX_COLOR;
     else if (c.blue < 0) c.blue = 0;
+
+    free(normal);
     return c;
+}
+
+double *get_polygon_normal(double **polygon_normals,
+                           double **polygons,
+                           int current_polygon_index) {
+    current_polygon_index = (current_polygon_index / 3) * 3; // Previous multiple of 3
+    if (polygon_normals[current_polygon_index/3] == NULL) {
+        double x0 = polygons[0][current_polygon_index];
+        double y0 = polygons[1][current_polygon_index];
+        double z0 = polygons[2][current_polygon_index];
+        double x1 = polygons[0][current_polygon_index+1];
+        double y1 = polygons[1][current_polygon_index+1];
+        double z1 = polygons[2][current_polygon_index+1];
+        double x2 = polygons[0][current_polygon_index+2];
+        double y2 = polygons[1][current_polygon_index+2];
+        double z2 = polygons[2][current_polygon_index+2];
+        polygon_normals[current_polygon_index/3] = cross_prod(x1 - x0,
+                                                              y1 - y0,
+                                                              z1 - z0,
+                                                              x2 - x0,
+                                                              y2 - y0,
+                                                              z2 - z0);
+    }
+    return polygon_normals[current_polygon_index/3];
+}
+
+double *get_vertex_normal(double **vertex_normals,
+                          double **polygon_normals,
+                          double **polygons,
+                          int num_vertices,
+                          int current_polygon_index) {
+    int num_polygons_sharing_vertex = 0;
+    double *vertex_normal = vertex_normals[current_polygon_index];
+    if (vertex_normal == NULL) {
+        /* Calculate vertex normal */
+        vertex_normal = (double *) malloc(sizeof(double) * 3);
+        vertex_normal[0] = 0;
+        vertex_normal[1] = 0;
+        vertex_normal[2] = 0;
+        int vertex_index;
+        // Find all polygons that share this vertex
+        double curr_polygon_x = polygons[0][current_polygon_index];
+        double curr_polygon_y = polygons[1][current_polygon_index];
+        double curr_polygon_z = polygons[2][current_polygon_index];
+        for (vertex_index = 0; vertex_index < num_vertices; ++vertex_index) {
+            if (polygons[0][vertex_index] == curr_polygon_x &&
+                polygons[1][vertex_index] == curr_polygon_y &&
+                polygons[2][vertex_index] == curr_polygon_z) {
+                vect_add_in_place(vertex_normal,
+                    get_polygon_normal(polygon_normals,
+                                       polygons,
+                                       vertex_index));
+                ++num_polygons_sharing_vertex;
+            }
+        }
+        scalar_mult(vertex_normal, 1.0 / num_polygons_sharing_vertex);
+        vertex_normals[current_polygon_index] = vertex_normal;
+    }
+    return vertex_normal;
 }
 
 // vim: ts=4:et:sts:sw=4:sr

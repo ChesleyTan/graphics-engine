@@ -1,5 +1,7 @@
 frames 30
 basename frame
+draw-mode polygons
+render-mode surface
 resize 700 700
 push
 move 350 350 0

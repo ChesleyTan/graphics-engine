@@ -955,7 +955,7 @@ int yywrap() {
 
 static void sighandler(int signo) {
     if (signo == SIGINT) {
-        // TODO free vary_nodes
+        // TODO free vary_nodes and others
         free_table();
         exit(EXIT_SUCCESS);
     }

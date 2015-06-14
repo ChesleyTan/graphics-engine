@@ -65,4 +65,20 @@ Returns:
 Returns a new vector that equals the sum of vectors u and v.
 ================================================*/
 double *vect_add(double* u, double *v);
+
+/*============== double *vect_add() ==============
+Inputs:     double *u
+            double *v
+Returns:
+Performs an in-place addition of vector v to vector u.
+Returns vector u.
+================================================*/
+double *vect_add_in_place(double *u, double *v);
+
+/*============== double *vect_add() ==============
+Inputs:     double *vector
+Returns:
+Creates an identical copy of the given vector.
+================================================*/
+double *clone_vect(double *vector);
 #endif

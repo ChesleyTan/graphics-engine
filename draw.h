@@ -417,23 +417,39 @@ void scanline_convert(screen s,
                       double x2, double y2, double z2);
 
 /*======== void calc_lighting() =============
-Inputs:     double x0
-            double y0
-            double z0
-            double x1
-            double y1
-            double z1
-            double x2
-            double y2
-            double z2
+Inputs:     double *normal
             color c
 Returns:
-Calculates the lighting at a vertex (x0, y0, z0) in the polygon bounded by
-(x0, y0, z0), (x1, y1, z1), and (x2, y2, z2).
+Calculates the lighting for a polygon/point with the given normal vector.
 ============================================*/
-color calc_lighting(double x0, double y0, double z0,
-                    double x1, double y1, double z1,
-                    double x2, double y2, double z2,
-                    color c);
+color calc_lighting(double *normal, color c);
+
+/*======== double *get_polygon_normal() =============
+Inputs:     double **polygon_normals
+            double **polygons
+            int current_polygon_index
+Returns:
+Uses dynamic programming on polygon_normals to calculate the polygon normal at the
+specified polygon index in `polygons`.
+===================================================*/
+double *get_polygon_normal(double **polygon_normals,
+                           double **polygons,
+                           int current_polygon_index);
+
+/*======== double *get_vertex_normal() =============
+Inputs:     double **vertex_normals
+            double **polygon_normals
+            double **polygons
+            int num_vertices
+            int current_polygon_index
+Returns:
+Uses dynamic programming on vertex_normals to calculate the vertex normal at the
+specified polygon index in `polygons`.
+==================================================*/
+double *get_vertex_normal(double **vertex_normals,
+                          double **polygon_normals,
+                          double **polygons,
+                          int num_vertices,
+                          int current_polygon_index);
 #endif
 // vim: ts=4:et:sts:sw=4:sr
