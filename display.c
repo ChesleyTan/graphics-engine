@@ -119,7 +119,7 @@ void save_ppm(screen s, char *file) {
     for (y=0; y < YRES; ++y) {
         for (x=0; x < XRES; ++x) {
             c = s[x][y];
-            fprintf(f, "%d %d %d ", c.red, c.green, c.blue);
+            fprintf(f, "%d %d %d ", (int)c.red, (int)c.green, (int)c.blue);
         }
         fprintf(f, "\n");
     }
@@ -144,7 +144,7 @@ void save_extension(screen s, char *file) {
     for (y=0; y < YRES; ++y) {
         for (x=0; x < XRES; ++x) {
             c = s[x][y];
-            fprintf(f, "%d %d %d ", c.red, c.green, c.blue);
+            fprintf(f, "%d %d %d ", (int)c.red, (int)c.green, (int)c.blue);
         }
         fprintf(f, "\n");
     }
@@ -166,7 +166,7 @@ void display(screen s) {
     for (y=0; y < YRES; ++y) {
         for (x=0; x < XRES; ++x) {
             c = s[x][y];
-            fprintf(f, "%d %d %d ", c.red, c.green, c.blue);
+            fprintf(f, "%d %d %d ", (int)c.red, (int)c.green, (int)c.blue);
         }
         fprintf(f, "\n");
     }
@@ -224,12 +224,31 @@ color subtract_color(color c1, color c2) {
 }
 
 color divide_color(color c, int n) {
-    if (n == 0) n = 1;
     color new_c;
-    new_c.red = c.red / n;
-    new_c.green = c.green / n;
-    new_c.blue = c.blue / n;
+    if (n == 0) {
+        new_c.red = 0;
+        new_c.green = 0;
+        new_c.blue = 0;
+    }
+    else {
+        new_c.red = c.red / n;
+        new_c.green = c.green / n;
+        new_c.blue = c.blue / n;
+    }
     return new_c;
+}
+
+color constrain_color(color c) {
+    if (c.red > MAX_COLOR) c.red = MAX_COLOR;
+    else if (c.red < 0) c.red = 0;
+    else if (c.red != c.red) c.red = 0; // NaN check
+    if (c.green > MAX_COLOR) c.green = MAX_COLOR;
+    else if (c.green < 0) c.green = 0;
+    else if (c.green != c.green) c.green = 0;
+    if (c.blue > MAX_COLOR) c.blue = MAX_COLOR;
+    else if (c.blue < 0) c.blue = 0;
+    else if (c.blue != c.blue) c.blue = 0;
+    return c;
 }
 
 // vim: ts=4:et:sts:sw=4:sr

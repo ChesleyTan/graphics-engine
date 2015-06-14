@@ -296,7 +296,8 @@ void generate_torus(struct matrix *points,
 
 /*======== void draw_line() ==========
 Inputs:     screen s
-            color c
+            color c0
+            color c1
             double x0
             double y0
             double z0
@@ -309,7 +310,7 @@ Plots all the points necessary to draw line (x0, y0) - (x1, y1) onto
 screen c using color c.
 The plotting mode determines the coordinate system to be used when plotting points.
 ====================================*/
-void draw_line(screen s, color c,
+void draw_line(screen s, color c0, color c1,
                double x0, double y0, double z0,
                double x1, double y1, double z1,
                plotting_mode plot_mode);

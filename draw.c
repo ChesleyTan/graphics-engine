@@ -566,7 +566,7 @@ void generate_torus(struct matrix *points,
     */
 }
 
-void draw_line(screen s, color c,
+void draw_line(screen s, color c0, color c1,
                double x0, double y0, double z0,
                double x1, double y1, double z1,
                plotting_mode plot_mode) {
@@ -583,6 +583,9 @@ void draw_line(screen s, color c,
         tmp = z0;
         z0 = z1;
         z1 = tmp;
+        color tmp_color = c0;
+        c0 = c1;
+        c1 = tmp_color;
     }
     double a = 2 * (y1 - y0);
     double b = -2 * (x1 - x0);
@@ -596,11 +599,14 @@ void draw_line(screen s, color c,
         //   = A + B/2
         double d = a + b / 2;
         double dz_dx = (z1 - z0) / (x1 - x0); // dz/dx
+        color dc_dx = divide_color(subtract_color(c1, c0), x1 - x0);
         double x = x0;
         double y = y0;
         double z = z0;
+        color c = c0;
         int end_x = (int)x1;
         while ((int)x <= end_x) {
+            c = constrain_color(c);
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y, z);
@@ -626,6 +632,7 @@ void draw_line(screen s, color c,
             ++x;
             d += a;
             z += dz_dx;
+            c = add_color(c, dc_dx);
         }
     }
     // 2nd and 6th octants of the 2D plane
@@ -638,11 +645,14 @@ void draw_line(screen s, color c,
         //   = A/2 + B
         double d = a / 2 + b;
         double dz_dy = (z1 - z0) / (y1 - y0); // dz/dy
+        color dc_dy = divide_color(subtract_color(c1, c0), y1 - y0);
         double x = x0;
         double y = y0;
         double z = z0;
+        color c = c0;
         int end_y = (int)y1;
         while ((int)y <= end_y) {
+            c = constrain_color(c);
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y, z);
@@ -668,6 +678,7 @@ void draw_line(screen s, color c,
             ++y;
             d += b;
             z += dz_dy;
+            c = add_color(c, dc_dy);
         }
     }
     // 3rd and 7th octants of the 2D plane
@@ -680,11 +691,14 @@ void draw_line(screen s, color c,
         //   = A/2 - B
         double d = a / 2 - b;
         double dz_dy = (z1 - z0) / (y1 - y0); // dz/dy
+        color dc_dy = divide_color(subtract_color(c1, c0), y1 - y0);
         double x = x0;
         double y = y0;
         double z = z0;
+        color c = c0;
         int end_y = (int)y1;
         while ((int)y >= end_y) {
+            c = constrain_color(c);
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y, z);
@@ -710,6 +724,7 @@ void draw_line(screen s, color c,
             --y;
             d -= b;
             z += dz_dy;
+            c = add_color(c, dc_dy);
         }
     }
     // 4th and 8th octants of the 2D plane
@@ -722,11 +737,14 @@ void draw_line(screen s, color c,
         //   = A - B/2
         double d = a - b / 2;
         double dz_dx = (z1 - z0) / (x1 - x0); // dz/dx
+        color dc_dx = divide_color(subtract_color(c1, c0), x1 - x0);
         double x = x0;
         double y = y0;
         double z = z0;
+        color c = c0;
         int end_x = (int)x1;
         while ((int)x <= end_x) {
+            c = constrain_color(c);
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y, z);
@@ -752,6 +770,7 @@ void draw_line(screen s, color c,
             ++x;
             d += a;
             z += dz_dx;
+            c = add_color(c, dc_dx);
         }
     }
 }
@@ -764,7 +783,7 @@ void draw_lines(screen s, color c, struct matrix *edges,
     }
     int i;
     for (i = 0; i < edges->lastcol - 1; i+=2) {
-        draw_line(s, c,
+        draw_line(s, c, c,
                   edges->m[0][i], edges->m[1][i], edges->m[2][i],
                   edges->m[0][i+1], edges->m[1][i+1], edges->m[2][i+1],
                   plot_mode);
@@ -844,9 +863,9 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
 
             // Wireframe
             if (global_render_mode == RENDER_WIREFRAME) {
-                draw_line(s, c, x0, y0, z0, x1, y1, z1, plot_mode);
-                draw_line(s, c, x1, y1, z1, x2, y2, z2, plot_mode);
-                draw_line(s, c, x2, y2, z2, x0, y0, z0, plot_mode);
+                draw_line(s, c, c, x0, y0, z0, x1, y1, z1, plot_mode);
+                draw_line(s, c, c, x1, y1, z1, x2, y2, z2, plot_mode);
+                draw_line(s, c, c, x2, y2, z2, x0, y0, z0, plot_mode);
             }
             // Perform scanline conversion
             else if (global_render_mode == RENDER_SURFACE) {
@@ -931,6 +950,11 @@ void scanline_convert(screen s,
     double end_y;
     double dx0, dx1, dz0, dz1;
     // Case 1 - If no vertices have the same y value
+    /*      |\ x1
+     *   x0 | \
+     *      | / x1
+     *      |/
+     */
     if (y0 != y1 && y1 != y2 && y0 != y2) {
         _case = 1;
         // Set the bottom, middle, and top vertices
@@ -1118,6 +1142,12 @@ void scanline_convert(screen s,
     else if (y0 == y1) {
         // Case 2 - if the two vertices are on the bottom (i.e two vertices are equal
         // and have lower y values than the other vertex)
+        /*      T
+         *      /\
+         *  x0 /  \ x1
+         *    /    \
+         * B --—-—--- M
+         */
         if (y0 < y2) {
             _case = 2;
             // Set the bottom, middle, and top vertices
@@ -1125,29 +1155,62 @@ void scanline_convert(screen s,
             y_t = y2;
             z_t = z2;
             polygon_index_t = 2;
-            x_m = x1;
-            y_m = y1;
-            z_m = z1;
-            polygon_index_m = 1;
-            x_b = x0;
-            y_b = y0;
-            z_b = z0;
-            polygon_index_b = 0;
+            if (x1 < x0) {
+                x_b = x1;
+                y_b = y1;
+                z_b = z1;
+                polygon_index_b = 1;
+                x_m = x0;
+                y_m = y0;
+                z_m = z0;
+                polygon_index_m = 0;
+            }
+            else {
+                x_b = x0;
+                y_b = y0;
+                z_b = z0;
+                polygon_index_b = 0;
+                x_m = x1;
+                y_m = y1;
+                z_m = z1;
+                polygon_index_m = 1;
+            }
         }
         // Case 3 - if the two vertices are on the top (i.e. two vertices are equal and
         // have higher y values than the other vertex)
-
+        /* M  ————————  T
+         *    \      |
+         *     \     |
+         *  x0  \    |  x1
+         *       \   |
+         *        \  |
+         *         \ |
+         *          \|
+         *           B
+         */
         else {
             _case = 3;
             // Set the bottom, middle, and top vertices
-            x_t = x0;
-            y_t = y0;
-            z_t = z0;
-            polygon_index_t = 0;
-            x_m = x1;
-            y_m = y1;
-            z_m = z1;
-            polygon_index_m = 1;
+            if (x0 < x1) {
+                x_t = x1;
+                y_t = y1;
+                z_t = z1;
+                polygon_index_t = 1;
+                x_m = x0;
+                y_m = y0;
+                z_m = z0;
+                polygon_index_m = 0;
+            }
+            else {
+                x_t = x0;
+                y_t = y0;
+                z_t = z0;
+                polygon_index_t = 0;
+                x_m = x1;
+                y_m = y1;
+                z_m = z1;
+                polygon_index_m = 1;
+            }
             x_b = x2;
             y_b = y2;
             z_b = z2;
@@ -1161,25 +1224,49 @@ void scanline_convert(screen s,
             y_t = y0;
             z_t = z0;
             polygon_index_t = 0;
-            x_m = x1;
-            y_m = y1;
-            z_m = z1;
-            polygon_index_m = 1;
-            x_b = x2;
-            y_b = y2;
-            z_b = z2;
-            polygon_index_b = 2;
+            if (x1 < x2) {
+                x_m = x2;
+                y_m = y2;
+                z_m = z2;
+                polygon_index_m = 2;
+                x_b = x1;
+                y_b = y1;
+                z_b = z1;
+                polygon_index_b = 1;
+            }
+            else {
+                x_m = x1;
+                y_m = y1;
+                z_m = z1;
+                polygon_index_m = 1;
+                x_b = x2;
+                y_b = y2;
+                z_b = z2;
+                polygon_index_b = 2;
+            }
         }
         else {
             _case = 3;
-            x_t = x2;
-            y_t = y2;
-            z_t = z2;
-            polygon_index_t = 2;
-            x_m = x1;
-            y_m = y1;
-            z_m = z1;
-            polygon_index_m = 1;
+            if (x1 < x2) {
+                x_t = x2;
+                y_t = y2;
+                z_t = z2;
+                polygon_index_t = 2;
+                x_m = x1;
+                y_m = y1;
+                z_m = z1;
+                polygon_index_m = 1;
+            }
+            else {
+                x_t = x1;
+                y_t = y1;
+                z_t = z1;
+                polygon_index_t = 1;
+                x_m = x2;
+                y_m = y2;
+                z_m = z2;
+                polygon_index_m = 2;
+            }
             x_b = x0;
             y_b = y0;
             z_b = z0;
@@ -1193,25 +1280,49 @@ void scanline_convert(screen s,
             y_t = y1;
             z_t = z1;
             polygon_index_t = 1;
-            x_m = x2;
-            y_m = y2;
-            z_m = z2;
-            polygon_index_m = 2;
-            x_b = x0;
-            y_b = y0;
-            z_b = z0;
-            polygon_index_b = 0;
+            if (x0 < x2) {
+                x_m = x2;
+                y_m = y2;
+                z_m = z2;
+                polygon_index_m = 2;
+                x_b = x0;
+                y_b = y0;
+                z_b = z0;
+                polygon_index_b = 0;
+            }
+            else {
+                x_m = x0;
+                y_m = y0;
+                z_m = z0;
+                polygon_index_m = 0;
+                x_b = x2;
+                y_b = y2;
+                z_b = z2;
+                polygon_index_b = 2;
+            }
         }
         else {
             _case = 3;
-            x_t = x0;
-            y_t = y0;
-            z_t = z0;
-            polygon_index_t = 0;
-            x_m = x2;
-            y_m = y2;
-            z_m = z2;
-            polygon_index_m = 2;
+            if (x0 < x2) {
+                x_t = x2;
+                y_t = y2;
+                z_t = z2;
+                polygon_index_t = 2;
+                x_m = x0;
+                y_m = y0;
+                z_m = z0;
+                polygon_index_m = 0;
+            }
+            else {
+                x_t = x0;
+                y_t = y0;
+                z_t = z0;
+                polygon_index_t = 0;
+                x_m = x2;
+                y_m = y2;
+                z_m = z2;
+                polygon_index_m = 2;
+            }
             x_b = x1;
             y_b = y1;
             z_b = z1;
@@ -1220,7 +1331,7 @@ void scanline_convert(screen s,
     }
 
     /* Lighting */
-    char use_flat_shading = 1;
+    char use_flat_shading = FALSE;
     // Flat shading
     if (use_flat_shading) {
         double *normal = get_polygon_normal(polygon_normals, polygons,
@@ -1275,13 +1386,18 @@ void scanline_convert(screen s,
             }
             end_y = floor(y_m);
             while (curr_y < end_y) {
-                if (use_gouraud_shading) {
-                    c = avg_color(curr_c0, curr_c1);
+                if (use_flat_shading) {
+                    draw_line(s, c, c,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            plot_mode);
                 }
-                draw_line(s, c,
-                        curr_x0, curr_y, curr_z0,
-                        curr_x1, curr_y, curr_z1,
-                        plot_mode);
+                else if (use_gouraud_shading) {
+                    draw_line(s, curr_c0, curr_c1,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            plot_mode);
+                }
                 curr_x0 += dx0;
                 curr_x1 += dx1;
                 curr_z0 += dz0;
@@ -1305,13 +1421,18 @@ void scanline_convert(screen s,
             }
             end_y = y_t;
             while (curr_y <= end_y) {
-                if (use_gouraud_shading) {
-                    c = avg_color(curr_c0, curr_c1);
+                if (use_flat_shading) {
+                    draw_line(s, c, c,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            plot_mode);
                 }
-                draw_line(s, c,
-                          curr_x0, curr_y, curr_z0,
-                          curr_x1, curr_y, curr_z1,
-                          plot_mode);
+                else {
+                    draw_line(s, curr_c0, curr_c1,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            plot_mode);
+                }
                 curr_x0 += dx0;
                 curr_x1 += dx1;
                 curr_z0 += dz0;
@@ -1343,13 +1464,18 @@ void scanline_convert(screen s,
             }
             end_y = y_t;
             while (curr_y <= end_y) {
-                if (use_gouraud_shading) {
-                    c = avg_color(curr_c0, curr_c1);
+                if (use_flat_shading) {
+                    draw_line(s, c, c,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            plot_mode);
                 }
-                draw_line(s, c,
-                          curr_x0, curr_y, curr_z0,
-                          curr_x1, curr_y, curr_z1,
-                          plot_mode);
+                else {
+                    draw_line(s, curr_c0, curr_c1,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            plot_mode);
+                }
                 curr_x0 += dx0;
                 curr_x1 += dx1;
                 curr_z0 += dz0;
@@ -1362,13 +1488,13 @@ void scanline_convert(screen s,
             }
             break;
         case 3:
-            dx0 = (x_t - x_b) / (y_t - y_b);
-            dx1 = (x_m - x_b) / (y_m - y_b);
-            dz0 = (z_t - z_b) / (y_t - y_b);
-            dz1 = (z_m - z_b) / (y_m - y_b);
+            dx0 = (x_m - x_b) / (y_m - y_b);
+            dx1 = (x_t - x_b) / (y_t - y_b);
+            dz0 = (z_m - z_b) / (y_m - y_b);
+            dz1 = (z_t - z_b) / (y_t - y_b);
             if (use_gouraud_shading) {
-                dc0 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
-                dc1 = divide_color(subtract_color(c_m, c_b), (y_m - y_b));
+                dc0 = divide_color(subtract_color(c_m, c_b), (y_m - y_b));
+                dc1 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
             }
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
@@ -1378,13 +1504,18 @@ void scanline_convert(screen s,
             }
             end_y = y_t;
             while (curr_y <= end_y) {
-                if (use_gouraud_shading) {
-                    c = avg_color(curr_c0, curr_c1);
+                if (use_flat_shading) {
+                    draw_line(s, c, c,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            plot_mode);
                 }
-                draw_line(s, c,
-                          curr_x0, curr_y, curr_z0,
-                          curr_x1, curr_y, curr_z1,
-                          plot_mode);
+                else if (use_gouraud_shading) {
+                    draw_line(s, curr_c0, curr_c1,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            plot_mode);
+                }
                 curr_x0 += dx0;
                 curr_x1 += dx1;
                 curr_z0 += dz0;
@@ -1423,12 +1554,7 @@ color calc_lighting(double *normal, color c) {
         c.blue  += i_specular_b * k_specular_b * specular_mult;
     }
 
-    if (c.red > MAX_COLOR) c.red = MAX_COLOR;
-    else if (c.red < 0) c.red = 0;
-    if (c.green > MAX_COLOR) c.green = MAX_COLOR;
-    else if (c.green < 0) c.green = 0;
-    if (c.blue > MAX_COLOR) c.blue = MAX_COLOR;
-    else if (c.blue < 0) c.blue = 0;
+    c = constrain_color(c);
 
     free(normal);
     return c;

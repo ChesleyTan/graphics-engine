@@ -5,7 +5,7 @@
   Contains functions for basic manipulation of a screen
   represented as a 2 dimensional array of colors.
 
-  A color is an ordered triple of ints, with each value standing
+  A color is an ordered triple of double, with each value standing
   for red, green and blue respectively.
 =========================================================*/
 
@@ -31,9 +31,9 @@ extern double **z_buffer;
   each color value
 */
 struct point_t {
-    int red;
-    int green;
-    int blue;
+    double red;
+    double green;
+    double blue;
 } point_t;
 
 /*
@@ -173,5 +173,6 @@ color avg_color(color c1, color c2);
 color add_color(color c1, color c2);
 color subtract_color(color c1, color c2);
 color divide_color(color c, int n);
+color constrain_color(color c);
 #endif
 // vim: ts=4:et:sts:sw=4:sr
