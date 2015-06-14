@@ -827,43 +827,7 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
             double z2 = m[2][i+2];
 
             /* Lighting */
-            // Ambient
-            c.red   = i_ambient_r * k_ambient_r;
-            c.green = i_ambient_g * k_ambient_g;
-            c.blue  = i_ambient_b * k_ambient_b;
-
-            // Diffuse
-            double *normal = normalize(cross_prod(x1 - x0,
-                                                  y1 - y0,
-                                                  z1 - z0,
-                                                  x2 - x0,
-                                                  y2 - y0,
-                                                  z2 - z0));
-            double dot = -1 * dot_prod(light_vector, normal);
-            c.red   += i_diffuse_r * k_diffuse_r * dot;
-            c.green += i_diffuse_g * k_diffuse_g * dot;
-            c.blue  += i_diffuse_b * k_diffuse_b * dot;
-
-            // Specular
-            double *reflection_vector = normalize(vect_add(scalar_mult(normal, 2 * dot),
-                                                 light_vector));
-            double inv_cos_angle = -1 * dot_prod(reflection_vector, view_vector);
-            if (inv_cos_angle > 0) { // 90° < α < 270°
-                double specular_mult = pow(inv_cos_angle, specular_expt);
-                c.red   += i_specular_r * k_specular_r * specular_mult;
-                c.green += i_specular_g * k_specular_g * specular_mult;
-                c.blue  += i_specular_b * k_specular_b * specular_mult;
-            }
-
-            free(reflection_vector);
-            free(normal);
-
-            if (c.red > MAX_COLOR) c.red = MAX_COLOR;
-            else if (c.red < 0) c.red = 0;
-            if (c.green > MAX_COLOR) c.green = MAX_COLOR;
-            else if (c.green < 0) c.green = 0;
-            if (c.blue > MAX_COLOR) c.blue = MAX_COLOR;
-            else if (c.blue < 0) c.blue = 0;
+            c = calc_lighting(x0, y0, z0, x1, y1, z1, x2, y2, z2, c);
 
             // Wireframe
             if (global_render_mode == RENDER_WIREFRAME) {
@@ -1247,6 +1211,50 @@ void scanline_convert(screen s,
             }
             break;
     }
+}
+
+color calc_lighting(double x0, double y0, double z0,
+                    double x1, double y1, double z1,
+                    double x2, double y2, double z2,
+                    color c) {
+    // Ambient
+    c.red   = i_ambient_r * k_ambient_r;
+    c.green = i_ambient_g * k_ambient_g;
+    c.blue  = i_ambient_b * k_ambient_b;
+
+    // Diffuse
+    double *normal = normalize(cross_prod(x1 - x0,
+                                            y1 - y0,
+                                            z1 - z0,
+                                            x2 - x0,
+                                            y2 - y0,
+                                            z2 - z0));
+    double dot = -1 * dot_prod(light_vector, normal);
+    c.red   += i_diffuse_r * k_diffuse_r * dot;
+    c.green += i_diffuse_g * k_diffuse_g * dot;
+    c.blue  += i_diffuse_b * k_diffuse_b * dot;
+
+    // Specular
+    double *reflection_vector = normalize(vect_add(scalar_mult(normal, 2 * dot),
+                                            light_vector));
+    double inv_cos_angle = -1 * dot_prod(reflection_vector, view_vector);
+    if (inv_cos_angle > 0) { // 90° < α < 270°
+        double specular_mult = pow(inv_cos_angle, specular_expt);
+        c.red   += i_specular_r * k_specular_r * specular_mult;
+        c.green += i_specular_g * k_specular_g * specular_mult;
+        c.blue  += i_specular_b * k_specular_b * specular_mult;
+    }
+
+    free(reflection_vector);
+    free(normal);
+
+    if (c.red > MAX_COLOR) c.red = MAX_COLOR;
+    else if (c.red < 0) c.red = 0;
+    if (c.green > MAX_COLOR) c.green = MAX_COLOR;
+    else if (c.green < 0) c.green = 0;
+    if (c.blue > MAX_COLOR) c.blue = MAX_COLOR;
+    else if (c.blue < 0) c.blue = 0;
+    return c;
 }
 
 // vim: ts=4:et:sts:sw=4:sr

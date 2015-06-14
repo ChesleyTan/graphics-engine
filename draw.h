@@ -415,5 +415,25 @@ void scanline_convert(screen s,
                       double x0, double y0, double z0,
                       double x1, double y1, double z1,
                       double x2, double y2, double z2);
+
+/*======== void calc_lighting() =============
+Inputs:     double x0
+            double y0
+            double z0
+            double x1
+            double y1
+            double z1
+            double x2
+            double y2
+            double z2
+            color c
+Returns:
+Calculates the lighting at a vertex (x0, y0, z0) in the polygon bounded by
+(x0, y0, z0), (x1, y1, z1), and (x2, y2, z2).
+============================================*/
+color calc_lighting(double x0, double y0, double z0,
+                    double x1, double y1, double z1,
+                    double x2, double y2, double z2,
+                    color c);
 #endif
 // vim: ts=4:et:sts:sw=4:sr
