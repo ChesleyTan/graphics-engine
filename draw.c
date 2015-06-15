@@ -576,11 +576,13 @@ void draw_line(screen s, color c0, color c1,
         print_error("phong_cons is NULL!");
         exit(EXIT_FAILURE);
     }
-    // TODO make this more elegant
-    char swap_made = FALSE;
+    double *n, *n0, *n1;
+    if (global_shade_mode == SHADE_PHONG) {
+        n0 = clone_vect(phong_cons->normal0);
+        n1 = clone_vect(phong_cons->normal1);
+    }
     // Ensure that x values are increasing (or equal), for simplification
     if (x0 > x1) {
-        swap_made = TRUE;
         // Swap points if necessary
         double tmp;
         tmp = x0;
@@ -596,16 +598,15 @@ void draw_line(screen s, color c0, color c1,
             swap_colors(&c0, &c1);
         }
         if (global_shade_mode == SHADE_PHONG) {
-            double *tmp = phong_cons->normal0;
-            phong_cons->normal0 = phong_cons->normal1;
-            phong_cons->normal1 = tmp;
+            double *tmp2 = n0;
+            n0 = n1;
+            n1 = tmp2;
         }
     }
     double a = 2 * (y1 - y0);
     double b = -2 * (x1 - x0);
     double d, x, y, z;
     color c = c0;
-    double *n;
     // 1st and 5th octants of the 2D plane
     if (a >= 0 && a <= (-1*b)) {
         // Shortcut for the first round of calculations of Ax + By + C
@@ -622,10 +623,8 @@ void draw_line(screen s, color c0, color c1,
             dc_dx = divide_color(subtract_color(c1, c0), x1 - x0);
         }
         else if (global_shade_mode == SHADE_PHONG) {
-            dn_dx = scalar_mult(vect_subtract(phong_cons->normal1,
-                                              phong_cons->normal0),
-                                1.0 / (x1 - x0));
-            n = clone_vect(phong_cons->normal0);
+            dn_dx = scalar_mult(vect_subtract(n1, n0), 1.0 / (x1 - x0));
+            n = clone_vect(n0);
             c = calc_lighting(n, c);
         }
         x = x0;
@@ -670,6 +669,8 @@ void draw_line(screen s, color c0, color c1,
         if (global_shade_mode == SHADE_PHONG) {
             free(dn_dx);
             free(n);
+            free(n0);
+            free(n1);
         }
     }
     // 2nd and 6th octants of the 2D plane
@@ -688,10 +689,8 @@ void draw_line(screen s, color c0, color c1,
             dc_dy = divide_color(subtract_color(c1, c0), y1 - y0);
         }
         else if (global_shade_mode == SHADE_PHONG) {
-            dn_dy = scalar_mult(vect_subtract(phong_cons->normal1,
-                                              phong_cons->normal0),
-                                1.0 / (y1 - y0));
-            n = clone_vect(phong_cons->normal0);
+            dn_dy = scalar_mult(vect_subtract(n1, n0), 1.0 / (y1 - y0));
+            n = clone_vect(n0);
             c = calc_lighting(n, c);
         }
         x = x0;
@@ -736,6 +735,9 @@ void draw_line(screen s, color c0, color c1,
         }
         if (global_shade_mode == SHADE_PHONG) {
             free(dn_dy);
+            free(n);
+            free(n0);
+            free(n1);
         }
     }
     // 3rd and 7th octants of the 2D plane
@@ -754,10 +756,8 @@ void draw_line(screen s, color c0, color c1,
             dc_dy = divide_color(subtract_color(c1, c0), y1 - y0);
         }
         else if (global_shade_mode == SHADE_PHONG) {
-            dn_dy = scalar_mult(vect_subtract(phong_cons->normal1,
-                                              phong_cons->normal0),
-                                1.0 / (y1 - y0));
-            n = clone_vect(phong_cons->normal0);
+            dn_dy = scalar_mult(vect_subtract(n1, n0), 1.0 / (y1 - y0));
+            n = clone_vect(n0);
             c = calc_lighting(n, c);
         }
         x = x0;
@@ -802,6 +802,9 @@ void draw_line(screen s, color c0, color c1,
         }
         if (global_shade_mode == SHADE_PHONG) {
             free(dn_dy);
+            free(n);
+            free(n0);
+            free(n1);
         }
     }
     // 4th and 8th octants of the 2D plane
@@ -820,10 +823,8 @@ void draw_line(screen s, color c0, color c1,
             dc_dx = divide_color(subtract_color(c1, c0), x1 - x0);
         }
         else if (global_shade_mode == SHADE_PHONG) {
-            dn_dx = scalar_mult(vect_subtract(phong_cons->normal1,
-                                              phong_cons->normal0),
-                                1.0 / (x1 - x0));
-            n = clone_vect(phong_cons->normal0);
+            dn_dx = scalar_mult(vect_subtract(n1, n0), 1.0 / (x1 - x0));
+            n = clone_vect(n0);
             c = calc_lighting(n, c);
         }
         x = x0;
@@ -868,13 +869,9 @@ void draw_line(screen s, color c0, color c1,
         }
         if (global_shade_mode == SHADE_PHONG) {
             free(dn_dx);
-        }
-    }
-    if (swap_made) {
-        if (global_shade_mode == SHADE_PHONG) {
-            double *tmp = phong_cons->normal0;
-            phong_cons->normal0 = phong_cons->normal1;
-            phong_cons->normal1 = tmp;
+            free(n);
+            free(n0);
+            free(n1);
         }
     }
 }
