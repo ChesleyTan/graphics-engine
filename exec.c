@@ -273,6 +273,19 @@ screen exec(char return_screen) {
                                         current_op.op.resize.x,
                                         current_op.op.resize.y);
                 break;
+            case LIGHT:
+                #ifdef DEBUG
+                print_debug("Got light command");
+                #endif
+                set_light_vector(current_op.op.light.coord[0],
+                                current_op.op.light.coord[1],
+                                current_op.op.light.coord[2]);
+                break;
+            case CONSTANTS:
+                #ifdef DEBUG
+                print_debug("Got constants command");
+                #endif
+                set_lighting_constants(current_op.op.constants.p->s.c);
 
             default:
                 break;

@@ -46,6 +46,9 @@ struct point_t {
 */
 typedef struct point_t color;
 
+// Used for initializing new color structs to zero
+static const color init_color;
+
 /*
   Likewise, we can use screen as a data type representing
   an XRES x YRES array of colors.
@@ -173,7 +176,7 @@ color avg_color(color c1, color c2);
 color add_color(color c1, color c2);
 color subtract_color(color c1, color c2);
 color divide_color(color c, int n);
-color constrain_color(color c);
+void constrain_color(color *c);
 void swap_colors(color *c1, color *c2);
 #endif
 // vim: ts=4:et:sts:sw=4:sr

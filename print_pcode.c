@@ -20,11 +20,10 @@ void print_pcode() {
         struct command current_op = op[i];
         switch (current_op.opcode) {
             case LIGHT:
-                printf("%s%sLight%s: %s at: %6.2f %6.2f %6.2f",
+                printf("%s%sLight%s: at %6.2f %6.2f %6.2f",
                         bold_prefix, fg_blue_30, reset,
-                        current_op.op.light.p->name,
-                        current_op.op.light.c[0], current_op.op.light.c[1],
-                        current_op.op.light.c[2]);
+                        current_op.op.light.coord[0], current_op.op.light.coord[1],
+                        current_op.op.light.coord[2]);
                 break;
             case AMBIENT:
                 printf("%s%sAmbient%s: %6.2f %6.2f %6.2f",
@@ -35,9 +34,10 @@ void print_pcode() {
                 break;
 
             case CONSTANTS:
-                printf("%s%sConstants%s: %s",
+                printf("%s%sConstants%s: %s\n",
                         bold_prefix, fg_blue_30, reset,
                         current_op.op.constants.p->name);
+                print_constants(current_op.op.constants.p->s.c);
                 break;
             case SAVE_COORDS:
                 printf("%s%sSave Coords%s: %s",

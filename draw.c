@@ -632,7 +632,7 @@ void draw_line(screen s, color c0, color c1,
         z = z0;
         int end_x = (int)x1;
         while ((int)x <= end_x) {
-            c = constrain_color(c);
+            constrain_color(&c);
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y, z);
@@ -699,7 +699,7 @@ void draw_line(screen s, color c0, color c1,
         c = c0;
         int end_y = (int)y1;
         while ((int)y <= end_y) {
-            c = constrain_color(c);
+            constrain_color(&c);
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y, z);
@@ -766,7 +766,7 @@ void draw_line(screen s, color c0, color c1,
         c = c0;
         int end_y = (int)y1;
         while ((int)y >= end_y) {
-            c = constrain_color(c);
+            constrain_color(&c);
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y, z);
@@ -833,7 +833,7 @@ void draw_line(screen s, color c0, color c1,
         c = c0;
         int end_x = (int)x1;
         while ((int)x <= end_x) {
-            c = constrain_color(c);
+            constrain_color(&c);
             switch (plot_mode) {
                 case PLOT_CARTESIAN:
                     plot_cartesian(s, c, x, y, z);
@@ -1434,6 +1434,7 @@ void scanline_convert(screen s,
 
     /* Lighting */
     color c_b, c_m, c_t, dc0, dc1, curr_c0, curr_c1;
+    c_b = c_m = c_t = init_color;
     double *vertex_normal_b, *vertex_normal_m, *vertex_normal_t;
     struct phong_constants phong_cons;
     double *dn0, *dn1;
@@ -1765,7 +1766,7 @@ color calc_lighting(double *normal, color c) {
         c.blue  += i_specular_b * k_specular_b * specular_mult;
     }
 
-    c = constrain_color(c);
+    constrain_color(&c);
 
     free(normal);
     return c;
@@ -1834,4 +1835,39 @@ double *get_vertex_normal(double **vertex_normals,
     return vertex_normal;
 }
 
+void set_view_vector(double x, double y, double z) {
+    view_vector[0] = x;
+    view_vector[1] = y;
+    view_vector[2] = z;
+    normalize(view_vector);
+}
+
+void set_light_vector(double x, double y, double z) {
+    light_vector[0] = x;
+    light_vector[1] = y;
+    light_vector[2] = z;
+    normalize(light_vector);
+}
+
+void set_lighting_constants(struct constants *c) {
+    i_ambient_r = c->iar;
+    i_ambient_g = c->iag;
+    i_ambient_b = c->iab;
+    k_ambient_r = c->kar;
+    k_ambient_g = c->kag;
+    k_ambient_b = c->kab;
+    i_diffuse_r = c->idr;
+    i_diffuse_g = c->idg;
+    i_diffuse_b = c->idb;
+    k_diffuse_r = c->kdr;
+    k_diffuse_g = c->kdg;
+    k_diffuse_b = c->kdb;
+    i_specular_r = c->isr;
+    i_specular_g = c->isg;
+    i_specular_b = c->isb;
+    k_specular_r = c->ksr;
+    k_specular_g = c->ksg;
+    k_specular_b = c->ksb;
+    specular_expt = c->spec_expt;
+}
 // vim: ts=4:et:sts:sw=4:sr

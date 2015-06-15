@@ -9,6 +9,7 @@
 #include "display.h"
 #include "gmath.h"
 #include "matrix.h"
+#include "symtab.h"
 #include "utils.h"
 
 /* Step size for drawing circles and curves */
@@ -487,5 +488,33 @@ double *get_vertex_normal(double **vertex_normals,
                           double **polygons,
                           int num_vertices,
                           int current_polygon_index);
+
+/*======== double *set_view_vector() =============
+Inputs:     double x
+            double y
+            double z
+Returns:
+Sets the view vector coordinates to those given.
+Automatically normalizes the view vector.
+================================================*/
+void set_view_vector(double x, double y, double z);
+
+/*======== double *set_light_vector() =============
+Inputs:     double x
+            double y
+            double z
+Returns:
+Sets the light vector coordinates to those given.
+Automatically normalizes the light vector.
+=================================================*/
+void set_light_vector(double x, double y, double z);
+
+/*======== double *set_lighting_constants() =============
+Inputs:     struct constants *
+
+Returns:
+Sets the lighting constants to those specified in struct constants.
+=======================================================*/
+void set_lighting_constants(struct constants *c);
 #endif
 // vim: ts=4:et:sts:sw=4:sr

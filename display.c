@@ -238,17 +238,16 @@ color divide_color(color c, int n) {
     return new_c;
 }
 
-color constrain_color(color c) {
-    if (c.red > MAX_COLOR) c.red = MAX_COLOR;
-    else if (c.red < 0) c.red = 0;
-    else if (c.red != c.red) c.red = 0; // NaN check
-    if (c.green > MAX_COLOR) c.green = MAX_COLOR;
-    else if (c.green < 0) c.green = 0;
-    else if (c.green != c.green) c.green = 0;
-    if (c.blue > MAX_COLOR) c.blue = MAX_COLOR;
-    else if (c.blue < 0) c.blue = 0;
-    else if (c.blue != c.blue) c.blue = 0;
-    return c;
+void constrain_color(color *c) {
+    if (c->red > MAX_COLOR) c->red = MAX_COLOR;
+    else if (c->red < 0) c->red = 0;
+    else if (c->red != c->red) c->red = 0; // NaN check
+    if (c->green > MAX_COLOR) c->green = MAX_COLOR;
+    else if (c->green < 0) c->green = 0;
+    else if (c->green != c->green) c->green = 0;
+    if (c->blue > MAX_COLOR) c->blue = MAX_COLOR;
+    else if (c->blue < 0) c->blue = 0;
+    else if (c->blue != c->blue) c->blue = 0;
 }
 
 void swap_colors(color *c1, color *c2) {

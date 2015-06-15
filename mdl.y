@@ -89,22 +89,13 @@ command:
   ++lastop;
 }
 
-| LIGHT STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+    /* TODO allow knobs to set light position */
+| LIGHT NUMBER NUMBER NUMBER {
   ++lineno;
-  l = (struct light *)malloc(sizeof(struct light));
-  l->l[0]= $3;
-  l->l[1]= $4;
-  l->l[2]= $5;
-  l->l[3]= 0;
-  l->c[0]= $6;
-  l->c[1]= $7;
-  l->c[2]= $8;
   op[lastop].opcode=LIGHT;
-  op[lastop].op.light.c[0] = $6; 
-  op[lastop].op.light.c[1] = $7;
-  op[lastop].op.light.c[2] = $8;
-  op[lastop].op.light.c[3] = 0;
-  op[lastop].op.light.p = add_symbol($2,SYM_LIGHT,l);
+  op[lastop].op.light.coord[0] = $2;
+  op[lastop].op.light.coord[1] = $3;
+  op[lastop].op.light.coord[2] = $4;
   ++lastop;
 }
 
@@ -130,54 +121,28 @@ command:
   ++lastop;
 }
 
-| CONSTANTS STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
+| CONSTANTS STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
   ++lineno;
   c = (struct constants *)malloc(sizeof(struct constants));
-  c->r[0]=$3;
-  c->r[1]=$4;
-  c->r[2]=$5;
-  c->r[3]=0;
-
-  c->g[0]=$6;
-  c->g[1]=$7;
-  c->g[2]=$8;
-  c->g[3]=0;
-
-  c->b[0]=$9;
-  c->b[1]=$10;
-  c->b[2]=$11;
-  c->b[3]=0;
-
-  c->red = 0;
-  c->green = 0;
-  c->blue = 0;
-
-  op[lastop].op.constants.p =  add_symbol($2,SYM_CONSTANTS,c);
-  op[lastop].opcode=CONSTANTS;
-  ++lastop;
-}
-
-| CONSTANTS STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
-  c = (struct constants *)malloc(sizeof(struct constants));
-  c->r[0]=$3;
-  c->r[1]=$4;
-  c->r[2]=$5;
-  c->r[3]=0;
-
-  c->g[0]=$6;
-  c->g[1]=$7;
-  c->g[2]=$8;
-  c->g[3]=0;
-
-  c->b[0]=$9;
-  c->b[1]=$10;
-  c->b[2]=$11;
-  c->b[3]=0;
-
-  c->red = $12;
-  c->green = $13;
-  c->blue = $14;
+  c->iar = (int) $3;
+  c->iag = (int) $4;
+  c->iab = (int) $5;
+  c->kar = $6;
+  c->kag = $7;
+  c->kab = $8;
+  c->idr = (int) $9;
+  c->idg = (int) $10;
+  c->idb = (int) $11;
+  c->kdr = $12;
+  c->kdg = $13;
+  c->kdb = $14;
+  c->isr = (int) $15;
+  c->isg = (int) $16;
+  c->isb = (int) $17;
+  c->ksr = $18;
+  c->ksg = $19;
+  c->ksb = $20;
+  c->spec_expt = (int) $21;
   op[lastop].op.constants.p =  add_symbol($2,SYM_CONSTANTS,c);
   op[lastop].opcode=CONSTANTS;
   ++lastop;
@@ -571,7 +536,6 @@ command:
   ++lastop;
 }
 
-/* first do cs0, then cs1, then both - BUT NO CONSTANTS */
 | LINE NUMBER NUMBER NUMBER STRING NUMBER NUMBER NUMBER {
   ++lineno;
   op[lastop].opcode = LINE;

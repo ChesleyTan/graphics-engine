@@ -15,16 +15,13 @@ struct command {
     int opcode;
     union {
         struct {
-            SYMTAB *p;
-            double c[4];
+            double coord[3];
         } light;
         struct {
             double c[4];
         } ambient;
         struct {
             SYMTAB *p;
-            /* each triple holds ka kd and ks for red green and blue
-               respectively */
         } constants;
         struct {
             SYMTAB *p;
