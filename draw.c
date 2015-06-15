@@ -1629,8 +1629,8 @@ void scanline_convert(screen s,
                 curr_c1 = c_m;
             }
             else if (global_shade_mode == SHADE_PHONG) {
-                phong_cons.normal0 = vertex_normal_b;
-                phong_cons.normal1 = vertex_normal_m;
+                phong_cons.normal0 = clone_vect(vertex_normal_b);
+                phong_cons.normal1 = clone_vect(vertex_normal_m);
             }
             end_y = y_t;
             while (curr_y <= end_y) {
@@ -1694,7 +1694,8 @@ void scanline_convert(screen s,
                 curr_c0 = curr_c1 = c_b;
             }
             else if (global_shade_mode == SHADE_PHONG) {
-                phong_cons.normal0 = phong_cons.normal1 = vertex_normal_b;
+                phong_cons.normal0 = clone_vect(vertex_normal_b);
+                phong_cons.normal1 = clone_vect(vertex_normal_b);
             }
             end_y = y_t;
             while (curr_y <= end_y) {
@@ -1735,9 +1736,11 @@ void scanline_convert(screen s,
             }
             break;
     }
-    if (_case == 1 && global_shade_mode == SHADE_PHONG) {
+    if (global_shade_mode == SHADE_PHONG) {
         free(dn0);
         free(dn1);
+        free(phong_cons.normal0);
+        free(phong_cons.normal1);
     }
 }
 
