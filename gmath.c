@@ -27,16 +27,25 @@ double *normalize(double* vector) {
     double mag = sqrt(vector[0] * vector[0]
                     + vector[1] * vector[1]
                     + vector[2] * vector[2]);
-    vector[0] /= mag;
-    vector[1] /= mag;
-    vector[2] /= mag;
+    if (mag != 0) {
+        vector[0] /= mag;
+        vector[1] /= mag;
+        vector[2] /= mag;
+    }
     return vector;
 }
 
 double *scalar_mult(double *vector, double scalar) {
-    vector[0] *= scalar;
-    vector[1] *= scalar;
-    vector[2] *= scalar;
+    if (isfinite(scalar)) {
+        vector[0] *= scalar;
+        vector[1] *= scalar;
+        vector[2] *= scalar;
+    }
+    else {
+        vector[0] = DBL_MAX;
+        vector[1] = DBL_MAX;
+        vector[2] = DBL_MAX;
+    }
     return vector;
 }
 
@@ -53,10 +62,23 @@ double *vect_add(double *u, double *v) {
     return sum;
 }
 
+double *vect_subtract(double *u, double *v) {
+    double *difference;
+    difference = (double *) malloc(3 * sizeof(double));
+    if (difference == NULL) {
+        print_error("Memory allocation error.");
+        exit(EXIT_FAILURE);
+    }
+    difference[0] = u[0] - v[0];
+    difference[1] = u[1] - v[1];
+    difference[2] = u[2] - v[2];
+    return difference;
+}
+
 double *vect_add_in_place(double *u, double *v) {
-    u[0] = u[0] + v[0];
-    u[1] = u[1] + v[1];
-    u[2] = u[2] + v[2];
+    u[0] += v[0];
+    u[1] += v[1];
+    u[2] += v[2];
     return u;
 }
 

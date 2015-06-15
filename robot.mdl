@@ -1,6 +1,4 @@
 draw-mode lines
-render-mode surface
-shade-mode gouraud
 resize 500 700
 push
 /* body */
@@ -13,6 +11,8 @@ box -75 100 40 150 200 80
 push
 move 0 151 0
 draw-mode polygons
+render-mode surface
+shade-mode phong
 sphere 0 0 0 50
 /* left arm */
 pop

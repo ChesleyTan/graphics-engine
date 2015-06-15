@@ -258,6 +258,9 @@ screen exec(char return_screen) {
                 else if (strcmp(shade_mode, "gouraud") == 0) {
                     global_shade_mode = SHADE_GOURAUD;
                 }
+                else if (strcmp(shade_mode, "phong") == 0) {
+                    global_shade_mode = SHADE_PHONG;
+                }
                 else {
                     print_error("Invalid argument for shade-mode command: \"%s\"", shade_mode);
                 }

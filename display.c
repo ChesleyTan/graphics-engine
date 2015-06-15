@@ -251,4 +251,17 @@ color constrain_color(color c) {
     return c;
 }
 
+void swap_colors(color *c1, color *c2) {
+    double tmp;
+    tmp = c1->red;
+    c1->red = c2->red;
+    c2->red = tmp;
+    tmp = c1->green;
+    c1->green = c2->green;
+    c2->green = tmp;
+    tmp = c1->blue;
+    c1->blue = c2->blue;
+    c2->blue = tmp;
+}
+
 // vim: ts=4:et:sts:sw=4:sr

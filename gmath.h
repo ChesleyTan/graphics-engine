@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 
 #include "matrix.h"
 
@@ -66,19 +67,27 @@ Returns a new vector that equals the sum of vectors u and v.
 ================================================*/
 double *vect_add(double* u, double *v);
 
-/*============== double *vect_add() ==============
+/*============== double *vect_subtract() ==============
+Inputs:     double *u
+            double *v
+Returns:
+Returns a new vector that equals the difference of vectors u and v.
+=====================================================*/
+double *vect_subtract(double* u, double *v);
+
+/*============== double *vect_add_in_place() ==============
 Inputs:     double *u
             double *v
 Returns:
 Performs an in-place addition of vector v to vector u.
 Returns vector u.
-================================================*/
+=========================================================*/
 double *vect_add_in_place(double *u, double *v);
 
-/*============== double *vect_add() ==============
+/*============== double *clone_vect() ==============
 Inputs:     double *vector
 Returns:
 Creates an identical copy of the given vector.
-================================================*/
+==================================================*/
 double *clone_vect(double *vector);
 #endif

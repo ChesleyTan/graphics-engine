@@ -570,9 +570,17 @@ void generate_torus(struct matrix *points,
 void draw_line(screen s, color c0, color c1,
                double x0, double y0, double z0,
                double x1, double y1, double z1,
+               struct phong_constants *phong_cons,
                plotting_mode plot_mode) {
+    if (global_shade_mode == SHADE_PHONG && phong_cons == NULL) {
+        print_error("phong_cons is NULL!");
+        exit(EXIT_FAILURE);
+    }
+    // TODO make this more elegant
+    char swap_made = FALSE;
     // Ensure that x values are increasing (or equal), for simplification
     if (x0 > x1) {
+        swap_made = TRUE;
         // Swap points if necessary
         double tmp;
         tmp = x0;
@@ -584,12 +592,20 @@ void draw_line(screen s, color c0, color c1,
         tmp = z0;
         z0 = z1;
         z1 = tmp;
-        color tmp_color = c0;
-        c0 = c1;
-        c1 = tmp_color;
+        if (global_shade_mode == SHADE_GOURAUD) {
+            swap_colors(&c0, &c1);
+        }
+        if (global_shade_mode == SHADE_PHONG) {
+            double *tmp = phong_cons->normal0;
+            phong_cons->normal0 = phong_cons->normal1;
+            phong_cons->normal1 = tmp;
+        }
     }
     double a = 2 * (y1 - y0);
     double b = -2 * (x1 - x0);
+    double d, x, y, z;
+    color c = c0;
+    double *n;
     // 1st and 5th octants of the 2D plane
     if (a >= 0 && a <= (-1*b)) {
         // Shortcut for the first round of calculations of Ax + By + C
@@ -598,13 +614,23 @@ void draw_line(screen s, color c0, color c1,
         //   = A(x0+1) + B(y+1/2) + C
         //   = Ax0 + By0 + C + A + B/2
         //   = A + B/2
-        double d = a + b / 2;
+        d = a + b / 2;
         double dz_dx = (z1 - z0) / (x1 - x0); // dz/dx
-        color dc_dx = divide_color(subtract_color(c1, c0), x1 - x0);
-        double x = x0;
-        double y = y0;
-        double z = z0;
-        color c = c0;
+        color dc_dx;
+        double *dn_dx;
+        if (global_shade_mode == SHADE_GOURAUD) {
+            dc_dx = divide_color(subtract_color(c1, c0), x1 - x0);
+        }
+        else if (global_shade_mode == SHADE_PHONG) {
+            dn_dx = scalar_mult(vect_subtract(phong_cons->normal1,
+                                              phong_cons->normal0),
+                                1.0 / (x1 - x0));
+            n = clone_vect(phong_cons->normal0);
+            c = calc_lighting(n, c);
+        }
+        x = x0;
+        y = y0;
+        z = z0;
         int end_x = (int)x1;
         while ((int)x <= end_x) {
             c = constrain_color(c);
@@ -633,7 +659,17 @@ void draw_line(screen s, color c0, color c1,
             ++x;
             d += a;
             z += dz_dx;
-            c = add_color(c, dc_dx);
+            if (global_shade_mode == SHADE_GOURAUD) {
+                c = add_color(c, dc_dx);
+            }
+            else if (global_shade_mode == SHADE_PHONG) {
+                vect_add_in_place(n, dn_dx);
+                c = calc_lighting(n, c);
+            }
+        }
+        if (global_shade_mode == SHADE_PHONG) {
+            free(dn_dx);
+            free(n);
         }
     }
     // 2nd and 6th octants of the 2D plane
@@ -644,13 +680,24 @@ void draw_line(screen s, color c0, color c1,
         //   = A(x0+1/2) + B(y+1) + C
         //   = Ax0 + By0 + C + A/2 + B
         //   = A/2 + B
-        double d = a / 2 + b;
+        d = a / 2 + b;
         double dz_dy = (z1 - z0) / (y1 - y0); // dz/dy
-        color dc_dy = divide_color(subtract_color(c1, c0), y1 - y0);
-        double x = x0;
-        double y = y0;
-        double z = z0;
-        color c = c0;
+        color dc_dy;
+        double *dn_dy;
+        if (global_shade_mode == SHADE_GOURAUD) {
+            dc_dy = divide_color(subtract_color(c1, c0), y1 - y0);
+        }
+        else if (global_shade_mode == SHADE_PHONG) {
+            dn_dy = scalar_mult(vect_subtract(phong_cons->normal1,
+                                              phong_cons->normal0),
+                                1.0 / (y1 - y0));
+            n = clone_vect(phong_cons->normal0);
+            c = calc_lighting(n, c);
+        }
+        x = x0;
+        y = y0;
+        z = z0;
+        c = c0;
         int end_y = (int)y1;
         while ((int)y <= end_y) {
             c = constrain_color(c);
@@ -679,7 +726,16 @@ void draw_line(screen s, color c0, color c1,
             ++y;
             d += b;
             z += dz_dy;
-            c = add_color(c, dc_dy);
+            if (global_shade_mode == SHADE_GOURAUD) {
+                c = add_color(c, dc_dy);
+            }
+            else if (global_shade_mode == SHADE_PHONG) {
+                vect_add_in_place(n, dn_dy);
+                c = calc_lighting(n, c);
+            }
+        }
+        if (global_shade_mode == SHADE_PHONG) {
+            free(dn_dy);
         }
     }
     // 3rd and 7th octants of the 2D plane
@@ -690,13 +746,24 @@ void draw_line(screen s, color c0, color c1,
         //   = A(x0+1/2) + B(y0-1) + C
         //   = Ax0 + By0 + C + A/2 - B
         //   = A/2 - B
-        double d = a / 2 - b;
+        d = a / 2 - b;
         double dz_dy = (z1 - z0) / (y1 - y0); // dz/dy
-        color dc_dy = divide_color(subtract_color(c1, c0), y1 - y0);
-        double x = x0;
-        double y = y0;
-        double z = z0;
-        color c = c0;
+        color dc_dy;
+        double *dn_dy;
+        if (global_shade_mode == SHADE_GOURAUD) {
+            dc_dy = divide_color(subtract_color(c1, c0), y1 - y0);
+        }
+        else if (global_shade_mode == SHADE_PHONG) {
+            dn_dy = scalar_mult(vect_subtract(phong_cons->normal1,
+                                              phong_cons->normal0),
+                                1.0 / (y1 - y0));
+            n = clone_vect(phong_cons->normal0);
+            c = calc_lighting(n, c);
+        }
+        x = x0;
+        y = y0;
+        z = z0;
+        c = c0;
         int end_y = (int)y1;
         while ((int)y >= end_y) {
             c = constrain_color(c);
@@ -725,7 +792,16 @@ void draw_line(screen s, color c0, color c1,
             --y;
             d -= b;
             z += dz_dy;
-            c = add_color(c, dc_dy);
+            if (global_shade_mode == SHADE_GOURAUD) {
+                c = add_color(c, dc_dy);
+            }
+            else if (global_shade_mode == SHADE_PHONG) {
+                vect_add_in_place(n, dn_dy);
+                c = calc_lighting(n, c);
+            }
+        }
+        if (global_shade_mode == SHADE_PHONG) {
+            free(dn_dy);
         }
     }
     // 4th and 8th octants of the 2D plane
@@ -736,13 +812,24 @@ void draw_line(screen s, color c0, color c1,
         //   = A(x0+1) + B(y0-1/2) + C
         //   = Ax0 + By0 + C + A - B/2
         //   = A - B/2
-        double d = a - b / 2;
+        d = a - b / 2;
         double dz_dx = (z1 - z0) / (x1 - x0); // dz/dx
-        color dc_dx = divide_color(subtract_color(c1, c0), x1 - x0);
-        double x = x0;
-        double y = y0;
-        double z = z0;
-        color c = c0;
+        color dc_dx;
+        double *dn_dx;
+        if (global_shade_mode == SHADE_GOURAUD) {
+            dc_dx = divide_color(subtract_color(c1, c0), x1 - x0);
+        }
+        else if (global_shade_mode == SHADE_PHONG) {
+            dn_dx = scalar_mult(vect_subtract(phong_cons->normal1,
+                                              phong_cons->normal0),
+                                1.0 / (x1 - x0));
+            n = clone_vect(phong_cons->normal0);
+            c = calc_lighting(n, c);
+        }
+        x = x0;
+        y = y0;
+        z = z0;
+        c = c0;
         int end_x = (int)x1;
         while ((int)x <= end_x) {
             c = constrain_color(c);
@@ -771,7 +858,23 @@ void draw_line(screen s, color c0, color c1,
             ++x;
             d += a;
             z += dz_dx;
-            c = add_color(c, dc_dx);
+            if (global_shade_mode == SHADE_GOURAUD) {
+                c = add_color(c, dc_dx);
+            }
+            else if (global_shade_mode == SHADE_PHONG) {
+                vect_add_in_place(n, dn_dx);
+                c = calc_lighting(n, c);
+            }
+        }
+        if (global_shade_mode == SHADE_PHONG) {
+            free(dn_dx);
+        }
+    }
+    if (swap_made) {
+        if (global_shade_mode == SHADE_PHONG) {
+            double *tmp = phong_cons->normal0;
+            phong_cons->normal0 = phong_cons->normal1;
+            phong_cons->normal1 = tmp;
         }
     }
 }
@@ -787,6 +890,7 @@ void draw_lines(screen s, color c, struct matrix *edges,
         draw_line(s, c, c,
                   edges->m[0][i], edges->m[1][i], edges->m[2][i],
                   edges->m[0][i+1], edges->m[1][i+1], edges->m[2][i+1],
+                  NULL,
                   plot_mode);
     }
 }
@@ -864,9 +968,9 @@ void draw_polygons(screen s, color c, struct matrix *polygons,
 
             // Wireframe
             if (global_render_mode == RENDER_WIREFRAME) {
-                draw_line(s, c, c, x0, y0, z0, x1, y1, z1, plot_mode);
-                draw_line(s, c, c, x1, y1, z1, x2, y2, z2, plot_mode);
-                draw_line(s, c, c, x2, y2, z2, x0, y0, z0, plot_mode);
+                draw_line(s, c, c, x0, y0, z0, x1, y1, z1, NULL, plot_mode);
+                draw_line(s, c, c, x1, y1, z1, x2, y2, z2, NULL, plot_mode);
+                draw_line(s, c, c, x2, y2, z2, x0, y0, z0, NULL, plot_mode);
             }
             // Perform scanline conversion
             else if (global_render_mode == RENDER_SURFACE) {
@@ -1334,14 +1438,17 @@ void scanline_convert(screen s,
     /* Lighting */
     color c_b, c_m, c_t, dc0, dc1, curr_c0, curr_c1;
     double *vertex_normal_b, *vertex_normal_m, *vertex_normal_t;
+    struct phong_constants phong_cons;
+    double *dn0, *dn1;
     // Flat shading
     if (global_shade_mode == SHADE_FLAT) {
         double *normal = get_polygon_normal(polygon_normals, polygons,
                                             current_polygon_index);
         c = calc_lighting(normal, c);
     }
-    // Gouraud shading
-    else if (global_shade_mode == SHADE_GOURAUD) {
+    // Gouraud shading/Phong shading
+    else if (global_shade_mode == SHADE_GOURAUD ||
+             global_shade_mode == SHADE_PHONG) {
         vertex_normal_b = get_vertex_normal(vertex_normals,
                                             polygon_normals,
                                             polygons,
@@ -1360,20 +1467,33 @@ void scanline_convert(screen s,
                                             num_vertices,
                                             current_polygon_index
                                             + polygon_index_t);
+    }
+    if (global_shade_mode == SHADE_GOURAUD) {
         c_b = calc_lighting(vertex_normal_b, c_b);
         c_m = calc_lighting(vertex_normal_m, c_m);
         c_t = calc_lighting(vertex_normal_t, c_t);
     }
-
     switch (_case) {
         case 1:
+            // Perform linear coordinate interpolation
             dx0 = (x_t - x_b) / (y_t - y_b);
             dx1 = (x_m - x_b) / (y_m - y_b);
             dz0 = (z_t - z_b) / (y_t - y_b);
             dz1 = (z_m - z_b) / (y_t - y_b);
+            // Part 1/2
             if (global_shade_mode == SHADE_GOURAUD) {
+                // Perform color interpolation
                 dc0 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
                 dc1 = divide_color(subtract_color(c_m, c_b), (y_m - y_b));
+            }
+            else if (global_shade_mode == SHADE_PHONG) {
+                // Perform normal vector interpolation
+                dn0 = scalar_mult(vect_subtract(vertex_normal_t,
+                                                vertex_normal_b),
+                                  1.0 / (y_t - y_b));
+                dn1 = scalar_mult(vect_subtract(vertex_normal_m,
+                                                vertex_normal_b),
+                                  1.0 / (y_m - y_b));
             }
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
@@ -1381,18 +1501,31 @@ void scanline_convert(screen s,
             if (global_shade_mode == SHADE_GOURAUD) {
                 curr_c0 = curr_c1 = c_b;
             }
+            else if (global_shade_mode == SHADE_PHONG) {
+                phong_cons.normal0 = clone_vect(vertex_normal_b);
+                phong_cons.normal1 = clone_vect(vertex_normal_b);
+            }
             end_y = floor(y_m);
             while (curr_y < end_y) {
                 if (global_shade_mode == SHADE_FLAT) {
                     draw_line(s, c, c,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
+                            NULL,
                             plot_mode);
                 }
                 else if (global_shade_mode == SHADE_GOURAUD) {
                     draw_line(s, curr_c0, curr_c1,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
+                            NULL,
+                            plot_mode);
+                }
+                else if (global_shade_mode == SHADE_PHONG) {
+                    draw_line(s, c, c,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            &phong_cons,
                             plot_mode);
                 }
                 curr_x0 += dx0;
@@ -1403,12 +1536,23 @@ void scanline_convert(screen s,
                     curr_c0 = add_color(curr_c0, dc0);
                     curr_c1 = add_color(curr_c1, dc1);
                 }
+                else if (global_shade_mode == SHADE_PHONG) {
+                    vect_add_in_place(phong_cons.normal0, dn0);
+                    vect_add_in_place(phong_cons.normal1, dn1);
+                }
                 ++curr_y;
             }
+            // Part 2/2
             dx1 = (x_t - x_m) / (y_t - y_m);
             dz1 = (z_t - z_m) / (y_t - y_m);
             if (global_shade_mode == SHADE_GOURAUD) {
                 dc1 = divide_color(subtract_color(c_t, c_m), (y_t - y_m));
+            }
+            else if (global_shade_mode == SHADE_PHONG) {
+                free(dn1);
+                dn1 = scalar_mult(vect_subtract(vertex_normal_t,
+                                                vertex_normal_m),
+                                  1.0 / (y_t - y_m));
             }
             curr_y = y_m;
             curr_x1 = x_m;
@@ -1416,18 +1560,31 @@ void scanline_convert(screen s,
             if (global_shade_mode == SHADE_GOURAUD) {
                 curr_c1 = c_m;
             }
+            else if (global_shade_mode == SHADE_PHONG) {
+                free(phong_cons.normal1);
+                phong_cons.normal1 = clone_vect(vertex_normal_m);
+            }
             end_y = y_t;
             while (curr_y <= end_y) {
                 if (global_shade_mode == SHADE_FLAT) {
                     draw_line(s, c, c,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
+                            NULL,
                             plot_mode);
                 }
-                else {
+                else if (global_shade_mode == SHADE_GOURAUD) {
                     draw_line(s, curr_c0, curr_c1,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
+                            NULL,
+                            plot_mode);
+                }
+                else if (global_shade_mode == SHADE_PHONG) {
+                    draw_line(s, c, c,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            &phong_cons,
                             plot_mode);
                 }
                 curr_x0 += dx0;
@@ -1437,6 +1594,10 @@ void scanline_convert(screen s,
                 if (global_shade_mode == SHADE_GOURAUD) {
                     curr_c0 = add_color(curr_c0, dc0);
                     curr_c1 = add_color(curr_c1, dc1);
+                }
+                else if (global_shade_mode == SHADE_PHONG) {
+                    vect_add_in_place(phong_cons.normal0, dn0);
+                    vect_add_in_place(phong_cons.normal1, dn1);
                 }
                 ++curr_y;
             }
@@ -1450,6 +1611,14 @@ void scanline_convert(screen s,
                 dc0 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
                 dc1 = divide_color(subtract_color(c_t, c_m), (y_t - y_m));
             }
+            else if (global_shade_mode == SHADE_PHONG) {
+                dn0 = scalar_mult(vect_subtract(vertex_normal_t,
+                                                vertex_normal_b),
+                                  1.0 / (y_t - y_b));
+                dn1 = scalar_mult(vect_subtract(vertex_normal_t,
+                                                vertex_normal_m),
+                                  1.0 / (y_t - y_m));
+            }
             curr_y = y_b;
             curr_x0 = x_b;
             curr_x1 = x_m;
@@ -1459,18 +1628,31 @@ void scanline_convert(screen s,
                 curr_c0 = c_b;
                 curr_c1 = c_m;
             }
+            else if (global_shade_mode == SHADE_PHONG) {
+                phong_cons.normal0 = vertex_normal_b;
+                phong_cons.normal1 = vertex_normal_m;
+            }
             end_y = y_t;
             while (curr_y <= end_y) {
                 if (global_shade_mode == SHADE_FLAT) {
                     draw_line(s, c, c,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
+                            NULL,
                             plot_mode);
                 }
-                else {
+                else if (global_shade_mode == SHADE_GOURAUD) {
                     draw_line(s, curr_c0, curr_c1,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
+                            NULL,
+                            plot_mode);
+                }
+                else if (global_shade_mode == SHADE_PHONG) {
+                    draw_line(s, c, c,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            &phong_cons,
                             plot_mode);
                 }
                 curr_x0 += dx0;
@@ -1480,6 +1662,10 @@ void scanline_convert(screen s,
                 if (global_shade_mode == SHADE_GOURAUD) {
                     curr_c0 = add_color(curr_c0, dc0);
                     curr_c1 = add_color(curr_c1, dc1);
+                }
+                else if (global_shade_mode == SHADE_PHONG) {
+                    vect_add_in_place(phong_cons.normal0, dn0);
+                    vect_add_in_place(phong_cons.normal1, dn1);
                 }
                 ++curr_y;
             }
@@ -1493,11 +1679,22 @@ void scanline_convert(screen s,
                 dc0 = divide_color(subtract_color(c_m, c_b), (y_m - y_b));
                 dc1 = divide_color(subtract_color(c_t, c_b), (y_t - y_b));
             }
+            else if (global_shade_mode == SHADE_PHONG) {
+                dn0 = scalar_mult(vect_subtract(vertex_normal_m,
+                                                vertex_normal_b),
+                                  1.0 / (y_m - y_b));
+                dn1 = scalar_mult(vect_subtract(vertex_normal_t,
+                                                vertex_normal_b),
+                                  1.0 / (y_t - y_b));
+            }
             curr_y = y_b;
             curr_x0 = curr_x1 = x_b;
             curr_z0 = curr_z1 = z_b;
             if (global_shade_mode == SHADE_GOURAUD) {
                 curr_c0 = curr_c1 = c_b;
+            }
+            else if (global_shade_mode == SHADE_PHONG) {
+                phong_cons.normal0 = phong_cons.normal1 = vertex_normal_b;
             }
             end_y = y_t;
             while (curr_y <= end_y) {
@@ -1505,12 +1702,21 @@ void scanline_convert(screen s,
                     draw_line(s, c, c,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
+                            NULL,
                             plot_mode);
                 }
                 else if (global_shade_mode == SHADE_GOURAUD) {
                     draw_line(s, curr_c0, curr_c1,
                             curr_x0, curr_y, curr_z0,
                             curr_x1, curr_y, curr_z1,
+                            NULL,
+                            plot_mode);
+                }
+                else if (global_shade_mode == SHADE_PHONG) {
+                    draw_line(s, c, c,
+                            curr_x0, curr_y, curr_z0,
+                            curr_x1, curr_y, curr_z1,
+                            &phong_cons,
                             plot_mode);
                 }
                 curr_x0 += dx0;
@@ -1521,9 +1727,17 @@ void scanline_convert(screen s,
                     curr_c0 = add_color(curr_c0, dc0);
                     curr_c1 = add_color(curr_c1, dc1);
                 }
+                else if (global_shade_mode == SHADE_PHONG) {
+                    vect_add_in_place(phong_cons.normal0, dn0);
+                    vect_add_in_place(phong_cons.normal1, dn1);
+                }
                 ++curr_y;
             }
             break;
+    }
+    if (_case == 1 && global_shade_mode == SHADE_PHONG) {
+        free(dn0);
+        free(dn1);
     }
 }
 

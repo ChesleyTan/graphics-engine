@@ -75,10 +75,12 @@ typedef enum {
  * Its value can be one of SHADE_FLAT or SHADE_GOURAUD.
  * If SHADE_FLAT is selected, flat shading will be used.
  * If SHADE_GOURAUD is selected, Gouraud shading will be used.
+ * If SHADE_PHONG is selected, Phong shading will be used.
  */
 typedef enum {
     SHADE_FLAT,
-    SHADE_GOURAUD
+    SHADE_GOURAUD,
+    SHADE_PHONG
 } shading_mode;
 
 /* enum for curve types passed into add_curve() */
@@ -102,6 +104,11 @@ extern rendering_mode global_render_mode;
 /* Shading mode to be used by default globally.
  * This value may be set programmatically. */
 extern shading_mode global_shade_mode;
+
+struct phong_constants {
+    double *normal0;
+    double *normal1;
+};
 
 /*======== void add_point() ==========
 Inputs:     struct matrix *points
@@ -310,23 +317,27 @@ void generate_torus(struct matrix *points,
 
 /*======== void draw_line() ==========
 Inputs:     screen s
-            color c0
-            color c1
+            color *c0
+            color *c1
             double x0
             double y0
             double z0
             double x1
             double y1
             double z1
+            struct phong_constants phong_cons
             plotting_mode plot_mode
 Returns:
 Plots all the points necessary to draw line (x0, y0) - (x1, y1) onto
 screen c using color c.
 The plotting mode determines the coordinate system to be used when plotting points.
+The phong_cons struct contains the normal vectors at the endpoints of the line
+for use with the normal vector interpolation of the Phong shading method.
 ====================================*/
 void draw_line(screen s, color c0, color c1,
                double x0, double y0, double z0,
                double x1, double y1, double z1,
+               struct phong_constants *phong_cons,
                plotting_mode plot_mode);
 
 /*======== void draw_lines() ==========

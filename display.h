@@ -174,5 +174,6 @@ color add_color(color c1, color c2);
 color subtract_color(color c1, color c2);
 color divide_color(color c, int n);
 color constrain_color(color c);
+void swap_colors(color *c1, color *c2);
 #endif
 // vim: ts=4:et:sts:sw=4:sr
