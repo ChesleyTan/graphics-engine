@@ -919,13 +919,13 @@ int yywrap() {
 
 static void sighandler(int signo) {
     if (signo == SIGINT) {
-        // TODO free vary_nodes and others
-        free_table();
+        free_all();
         exit(EXIT_SUCCESS);
     }
 }
 
 int main(int argc, char *argv[]) {
+    signal(SIGINT, sighandler);
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
 

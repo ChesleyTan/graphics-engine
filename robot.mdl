@@ -1,9 +1,12 @@
+/* initial setup */
 draw-mode polygons
 render-mode surface
 shade-mode phong
 constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
 light 0.0 0.0 -1.0
 resize 500 700
+
+/* script */
 push
 /* body */
 push

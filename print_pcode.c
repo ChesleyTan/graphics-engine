@@ -34,10 +34,11 @@ void print_pcode() {
                 break;
 
             case CONSTANTS:
-                printf("%s%sConstants%s: %s\n",
+                printf("%s%sConstants%s: %s\n~~~~~~~~~~~~~~~~~~~~~~~~~\n",
                         bold_prefix, fg_blue_30, reset,
                         current_op.op.constants.p->name);
                 print_constants(current_op.op.constants.p->s.c);
+                printf("~~~~~~~~~~~~~~~~~~~~~~~~~");
                 break;
             case SAVE_COORDS:
                 printf("%s%sSave Coords%s: %s",

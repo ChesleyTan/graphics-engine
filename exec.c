@@ -1,5 +1,6 @@
 #include "exec.h"
 
+screen _screen;
 int num_frames = 0;
 char *default_basename = "frame";
 char *basename = NULL;
@@ -7,7 +8,6 @@ struct vary_node **vary_knobs;
 
 screen exec(char return_screen) {
     int i;
-    screen _screen;
     struct stack *s;
     struct matrix *trans_mat;
     struct matrix *pts;
@@ -314,16 +314,7 @@ void parse_animation_cmds() {
                 #ifdef DEBUG
                 print_debug("num_frames: %d", num_frames);
                 #endif
-                // Allocate memory for vary_knobs array
-                vary_knobs = (struct vary_node **) malloc(
-                              num_frames * sizeof(struct vary_node *));
-                // Initialize all pointers of the array with a dummy node
-                for (u = 0; u < num_frames; ++u) {
-                    vary_knobs[u] = (struct vary_node *) malloc(sizeof(struct vary_node));
-                    vary_knobs[u]->knob = NULL;
-                    vary_knobs[u]->next_value = 0;
-                    vary_knobs[u]->next = NULL;
-                }
+                allocate_vary_knobs();
                 break;
             case BASENAME:
                 basename = current_op.op.basename.p->name;
@@ -450,7 +441,7 @@ struct vary_node *get_vary_knobs_tail(int frame) {
     return curr;
 }
 
-int vary_node_uniq(int frame, SYMTAB *knob) {
+char vary_node_uniq(int frame, SYMTAB *knob) {
     struct vary_node *curr = vary_knobs[frame];
     while (curr->next) {
         curr = curr->next;
@@ -461,26 +452,57 @@ int vary_node_uniq(int frame, SYMTAB *knob) {
     return TRUE;
 }
 
-void free_vary_knobs() {
+void allocate_vary_knobs() {
+    // Allocate memory for vary_knobs array
     int i;
+    vary_knobs = (struct vary_node **) malloc(
+                    num_frames * sizeof(struct vary_node *));
+    // Initialize all pointers of the array with a dummy node
     for (i = 0; i < num_frames; ++i) {
-        struct vary_node *curr = vary_knobs[i];
-        struct vary_node *next = curr->next;
-        while (next) {
-            free(curr);
-            curr = next;
-            next = curr->next;
-        }
-        free(curr);
+        vary_knobs[i] = (struct vary_node *) malloc(sizeof(struct vary_node));
+        vary_knobs[i]->knob = NULL;
+        vary_knobs[i]->next_value = 0;
+        vary_knobs[i]->next = NULL;
     }
-    free(vary_knobs);
-    #ifdef DEBUG
-    print_debug("Freeing vary_knobs");
-    #endif
+}
+
+void free_exec_screen() {
+    if (_screen != NULL) {
+        free_screen(_screen);
+        _screen = NULL;
+    }
+}
+
+void free_vary_knobs() {
+    if (vary_knobs != NULL) {
+        #ifdef DEBUG
+        print_debug("Freeing vary_knobs");
+        #endif
+        int i;
+        for (i = 0; i < num_frames; ++i) {
+            struct vary_node *curr = vary_knobs[i];
+            struct vary_node *next = curr->next;
+            while (next) {
+                free(curr);
+                curr = next;
+                next = curr->next;
+            }
+            free(curr);
+        }
+        free(vary_knobs);
+        vary_knobs = NULL;
+    }
     return;
 }
 
 void free_all() {
+    // TODO update this when new global dynamically allocated blocks are
+    // added
+    #ifdef DEBUG
+    print_debug("Calling free_all()");
+    #endif
     free_vary_knobs();
+    free_exec_screen();
+    free_z_buffer();
     free_table();
 }

@@ -5,7 +5,7 @@
   Contains functions for basic manipulation of a screen
   represented as a 2 dimensional array of colors.
 
-  A color is an ordered triple of double, with each value standing
+  A color is an ordered triple of doubles, with each value standing
   for red, green and blue respectively.
 =========================================================*/
 
@@ -19,44 +19,29 @@
 
 static int XRES = 500;
 static int YRES = 500;
-// XRES_CARTESIAN and YRES_CARTESIAN should be half of XRES AND YRES
-// respectively.
+/*
+ * XRES_CARTESIAN and YRES_CARTESIAN should be half of XRES AND YRES
+ * respectively.
+ */
 static int XRES_CARTESIAN = 250;
 static int YRES_CARTESIAN = 250;
 
 extern double **z_buffer;
 
 /*
-  Every point has an individual int for
-  each color value
-*/
+ * Every point has an individual int for each color value
+ */
 struct point_t {
     double red;
     double green;
     double blue;
 } point_t;
 
-/*
-  We can now use color as a data type representing a point.
-  eg:
-  color c;
-  c.red = 0;
-  c.green = 45;
-  c.blue = 187;
-*/
 typedef struct point_t color;
 
 // Used for initializing new color structs to zero
 static const color init_color;
 
-/*
-  Likewise, we can use screen as a data type representing
-  an XRES x YRES array of colors.
-  eg:
-  screen s;
-  s = new_screen();
-  s[0][0] = c;
-*/
 typedef struct point_t **screen;
 
 /*======== screen resize_screen() ==========
@@ -138,9 +123,6 @@ Inputs:     screen s
 Returns:
 Saves screen s as a valid ppm file using the
 settings in display.h.
-
-jdyrlandweaver
-chesleytan
 ===================================*/
 void save_ppm(screen s, char *file);
 
@@ -153,9 +135,6 @@ by file.
 If the extension for file is an image format supported
 by the "convert" command, the image will be saved in
 that format.
-
-jdyrlandweaver
-chesleytan
 =========================================*/
 void save_extension(screen s, char *file);
 
@@ -163,20 +142,70 @@ void save_extension(screen s, char *file);
 Inputs:     screen s
 Returns:
 Displays the screen s.
-
-jdyrlandweaver
-chesleytan
 ==================================*/
 void display(screen s);
 
-// TODO doc
+/*======== void allocate_z_buffer() ==========
+Inputs:
+Returns:
+Allocates memory for the Z buffer.
+============================================*/
 void allocate_z_buffer();
+
+/*======== void free_z_buffer() ==========
+Inputs:
+Returns:
+Frees memory allocated for the Z buffer.
+========================================*/
 void free_z_buffer();
+
+/*======== color avg_color() ==========
+Inputs:     color c1
+            color c2
+Returns:
+The average color between c1 and c2 (arithmetic mean of individual color
+components).
+======================================*/
 color avg_color(color c1, color c2);
+
+/*======== color add_color() ==========
+Inputs:     color c1
+            color c2
+Returns:
+The sum of colors c1 and c2.
+=====================================*/
 color add_color(color c1, color c2);
+
+/*======== color subtract_colors() ==========
+Inputs:     color c1
+            color c2
+Returns:
+The difference of colors c1 and c2.
+===========================================*/
 color subtract_color(color c1, color c2);
+
+/*======== color divide_color() ==========
+Inputs:     color c
+            int n
+Returns:
+Divides each color component of c by n.
+========================================*/
 color divide_color(color c, int n);
+
+/*======== void constrain_color() ==========
+Inputs:     color *c
+Returns:
+Limits the given color to values between 0 and MAX_COLOR, inclusive.
+This is performed in-place.
+==========================================*/
 void constrain_color(color *c);
+
+/*======== void swap_colors() ==========
+Inputs:     color *c1
+            color *c2
+Returns:
+Swaps the corresponding color components for c1 and c2.
+==========================================*/
 void swap_colors(color *c1, color *c2);
 #endif
 // vim: ts=4:et:sts:sw=4:sr
