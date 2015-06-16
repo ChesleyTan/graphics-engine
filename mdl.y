@@ -22,6 +22,8 @@ int lastop = 0;
 int lineno = 0; // keeps track of line number in file
 int logical_lineno = 0; // keeps track of line number for logical operations
 char is_animation = FALSE;
+static void sighandler(int signo);
+void main_logic();
 
 // Bison headers and variables
 void yyerror(const char *);
@@ -933,9 +935,19 @@ int main(int argc, char *argv[]) {
             print_error("Unable to open input stream.");
             exit(EXIT_FAILURE);
         }
-
+        main_logic();
     }
+    else { // reading from stdin
+        while (TRUE) {
+            main_logic();
+        }
+    }
+    free_table();
+    fclose(yyin);
+    return 0;
+}
 
+void main_logic() {
     int ret = yyparse();
     if (ret == 1) { // Syntax error
         print_error("Fatal error.");
@@ -952,14 +964,11 @@ int main(int argc, char *argv[]) {
     else {
         exec(FALSE);
     }
-
-    free_table();
-    fclose(yyin);
-    return 0;    
 }
 
 // FIXME white pixels glitchiness in phong shading
 // TODO dynamically allocated op array size
+// TODO readline repl
 // TODO allow objects (e.g. spheres) be drawn using specified constants
 // TODO allow knobs to set light position
 // TODO implement reading a mesh from a file
