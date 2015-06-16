@@ -368,8 +368,8 @@ void add_sphere(struct matrix *points,
             break;
         case DRAW_LINE:
             // Line-wise version
-            for (latitude = 0; latitude < num_steps; ++latitude) {
-                for (longitude = 0; longitude < num_steps; ++longitude) {
+            for (latitude = 0; latitude < end_latitude; ++latitude) {
+                for (longitude = 0; longitude < end_longitude; ++longitude) {
                     int index = latitude * num_steps + longitude;
                     add_edge(points, m[0][index], m[1][index], m[2][index],
                                      m[0][index], m[1][index], m[2][index]);
