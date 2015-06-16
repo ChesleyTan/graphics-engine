@@ -12,6 +12,8 @@ all: build clean
 
 cli: build-repl clean
 
+fast: build-fast clean
+
 build: $(OBJECTS) lex.yy.c y.tab.c y.tab.h
 	$(CC) $(DEBUG) -o mdl $(OBJECTS) lex.yy.c y.tab.c y.tab.h $(LIBS)
 
