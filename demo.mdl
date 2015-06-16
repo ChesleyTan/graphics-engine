@@ -1,0 +1,523 @@
+// vim: ft=c
+/* initial setup */
+frames 30
+basename frame
+light 0.0 0.0 -1.0
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+resize 1400 900
+
+/* script */
+push
+scale 0.9 0.9 0.9
+
+/* body */
+draw-mode lines
+render-mode wireframe
+shade-mode flat
+push
+move 150 250 0
+rotate y 30
+rotate x 20
+box -75 100 40 150 200 80
+/* head */
+push
+move 0 151 0
+sphere 0 0 0 50
+/* left arm */
+pop
+push
+move 75 100 0
+rotate z -30
+rotate x 180
+box 0 0 20 40 180 40
+/* ball */
+constants ball 120 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+sphere 20 -190 0 20 0.08
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
+/* crown */
+pop
+push
+constants crown 20 20 120 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+torus 0 200 0 20 60 0.05
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
+/* misc background boxes */
+pop
+push
+rotate x 30
+rotate y 30
+rotate z 10
+box 150 -100 0 40 40 40
+pop
+push
+rotate x 20
+rotate y 20
+rotate z -10
+box -200 -100 0 40 40 40
+pop
+pop
+
+/* body */
+push
+draw-mode lines
+render-mode wireframe
+shade-mode flat
+move 450 250 0
+rotate y 30
+rotate x 20
+box -75 100 40 150 200 80
+/* head */
+push
+move 0 151 0
+draw-mode polygons
+sphere 0 0 0 50
+/* left arm */
+pop
+push
+move 75 100 0
+rotate z -30
+rotate x 180
+box 0 0 20 40 180 40
+/* ball */
+constants ball 120 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+sphere 20 -190 0 20 0.08
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
+/* crown */
+pop
+push
+constants crown 20 20 120 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+torus 0 200 0 20 60 0.05
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
+/* misc background boxes */
+pop
+push
+rotate x 30
+rotate y 30
+rotate z 10
+box 150 -100 0 40 40 40
+pop
+push
+rotate x 20
+rotate y 20
+rotate z -10
+box -200 -100 0 40 40 40
+pop
+pop
+
+/* body */
+draw-mode polygons
+render-mode surface
+shade-mode flat
+push
+move 750 250 0
+rotate y 30
+rotate x 20
+box -75 100 40 150 200 80
+/* head */
+push
+move 0 151 0
+draw-mode polygons
+sphere 0 0 0 50
+/* left arm */
+pop
+push
+move 75 100 0
+rotate z -30
+rotate x 180
+box 0 0 20 40 180 40
+/* ball */
+constants ball 120 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+sphere 20 -190 0 20 0.08
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
+/* crown */
+pop
+push
+constants crown 20 20 120 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+torus 0 200 0 20 60 0.05
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
+/* misc background boxes */
+pop
+push
+rotate x 30
+rotate y 30
+rotate z 10
+box 150 -100 0 40 40 40
+pop
+push
+rotate x 20
+rotate y 20
+rotate z -10
+box -200 -100 0 40 40 40
+pop
+pop
+
+/* body */
+draw-mode polygons
+render-mode surface
+shade-mode gouraud
+push
+move 1050 250 0
+rotate y 30
+rotate x 20
+box -75 100 40 150 200 80
+/* head */
+push
+move 0 151 0
+draw-mode polygons
+sphere 0 0 0 50
+/* left arm */
+pop
+push
+move 75 100 0
+rotate z -30
+rotate x 180
+box 0 0 20 40 180 40
+/* ball */
+constants ball 120 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+sphere 20 -190 0 20 0.08
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
+/* crown */
+pop
+push
+constants crown 20 20 120 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+torus 0 200 0 20 60 0.05
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
+/* misc background boxes */
+pop
+push
+rotate x 30
+rotate y 30
+rotate z 10
+box 150 -100 0 40 40 40
+pop
+push
+rotate x 20
+rotate y 20
+rotate z -10
+box -200 -100 0 40 40 40
+pop
+pop
+
+/* body */
+draw-mode polygons
+render-mode surface
+shade-mode phong
+push
+move 1350 250 0
+rotate y 30
+rotate x 20
+box -75 100 40 150 200 80
+/* head */
+push
+move 0 151 0
+draw-mode polygons
+sphere 0 0 0 50
+/* left arm */
+pop
+push
+move 75 100 0
+rotate z -30
+rotate x 180
+box 0 0 20 40 180 40
+/* ball */
+constants ball 120 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+sphere 20 -190 0 20 0.08
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
+/* crown */
+pop
+push
+constants crown 20 20 120 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+torus 0 200 0 20 60 0.05
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
+/* misc background boxes */
+pop
+push
+rotate x 30
+rotate y 30
+rotate z 10
+box 150 -100 0 40 40 40
+pop
+push
+rotate x 20
+rotate y 20
+rotate z -10
+box -200 -100 0 40 40 40
+pop
+pop
+
+/* animated rings */
+draw-mode lines
+render-mode wireframe
+shade-mode flat
+push
+move 150 650 0
+rotate x 50
+rotate y 50
+push
+rotate x 0 spinny
+rotate y 0 spinny2
+scale 1 1 1 bigenator
+torus 0 0 0 25 100 0.05
+pop
+push
+rotate x 0 spinny1
+rotate y 0 spinny1
+scale 1 1 1 bigenator1
+sphere 0 0 0 50 0.04
+pop
+pop
+
+draw-mode polygons
+render-mode wireframe
+shade-mode flat
+push
+move 450 650 0
+rotate x 50
+rotate y 50
+push
+rotate x 0 spinny
+rotate y 0 spinny2
+scale 1 1 1 bigenator
+torus 0 0 0 25 100 0.05
+pop
+push
+rotate x 0 spinny1
+rotate y 0 spinny1
+scale 1 1 1 bigenator1
+sphere 0 0 0 50 0.04
+pop
+pop
+
+draw-mode polygons
+render-mode surface
+shade-mode flat
+push
+move 750 650 0
+rotate x 50
+rotate y 50
+push
+rotate x 0 spinny
+rotate y 0 spinny2
+scale 1 1 1 bigenator
+torus 0 0 0 25 100 0.05
+pop
+push
+rotate x 0 spinny1
+rotate y 0 spinny1
+scale 1 1 1 bigenator1
+sphere 0 0 0 50 0.04
+pop
+pop
+
+draw-mode polygons
+render-mode surface
+shade-mode gouraud
+push
+move 1050 650 0
+rotate x 50
+rotate y 50
+push
+rotate x 0 spinny
+rotate y 0 spinny2
+scale 1 1 1 bigenator
+torus 0 0 0 25 100 0.05
+pop
+push
+rotate x 0 spinny1
+rotate y 0 spinny1
+scale 1 1 1 bigenator1
+sphere 0 0 0 50 0.04
+pop
+pop
+
+draw-mode polygons
+render-mode surface
+shade-mode phong
+push
+move 1350 650 0
+rotate x 50
+rotate y 50
+push
+rotate x 0 spinny
+rotate y 0 spinny2
+scale 1 1 1 bigenator
+torus 0 0 0 25 100 0.05
+pop
+push
+rotate x 0 spinny1
+rotate y 0 spinny1
+scale 1 1 1 bigenator1
+sphere 0 0 0 50 0.04
+pop
+pop
+
+/* common varies for animated rings */
+vary spinny 0 29 0 360
+vary spinny1 0 29 0 -360
+vary spinny2 0 9 0 90
+vary spinny2 10 20 90 260
+vary spinny2 20 29 260 360
+vary bigenator 0 14 1 1.5
+vary bigenator 15 29 1.5 1
+vary bigenator1 0 14 1 0.9
+vary bigenator1 15 29 0.9 1
+//display

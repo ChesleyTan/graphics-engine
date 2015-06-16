@@ -1,3 +1,4 @@
+// vim: ft=c
 /* initial setup */
 draw-mode polygons
 render-mode surface
@@ -26,7 +27,10 @@ move 75 100 0
 rotate z -30
 rotate x 180
 box 0 0 20 40 180 40
+/* ball */
+constants ball 120 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
 sphere 20 -190 0 20 0.08
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
 /* right arm */
 pop
 push
@@ -46,7 +50,25 @@ box 0 0 0 40 140 40
 /* crown */
 pop
 push
+constants crown 20 20 120 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
 torus 0 200 0 20 60 0.05
+constants global 20 20 20 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+/* right arm */
+pop
+push
+move -75 100 0
+rotate x -30
+box 0 0 0 -40 180 40
+/* right leg */
+pop
+push
+move -70 -100 0
+box 0 0 0 40 140 40
+/* left leg */
+pop
+push
+move 30 -100 0
+box 0 0 0 40 140 40
 /* misc background boxes */
 pop
 push
@@ -62,4 +84,3 @@ rotate z -10
 box -200 -100 0 40 40 40
 display
 //save robot.png
-// vim: ft=c

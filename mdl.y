@@ -958,6 +958,7 @@ int main(int argc, char *argv[]) {
     return 0;    
 }
 
+// FIXME white pixels glitchiness in phong shading
 // TODO dynamically allocated op array size
 // TODO allow objects (e.g. spheres) be drawn using specified constants
 // TODO allow knobs to set light position
