@@ -341,15 +341,17 @@ void add_sphere(struct matrix *points,
                     */
 
                     // Polygon-wise version
-                    add_polygon(points,
-                                m[0][index], m[1][index], m[2][index],
-                                m[0][index_next_lat_plus_one],
-                                m[1][index_next_lat_plus_one],
-                                m[2][index_next_lat_plus_one],
-                                m[0][index_next_lat],
-                                m[1][index_next_lat],
-                                m[2][index_next_lat]
-                    );
+                    if (longitude != 0) {
+                        add_polygon(points,
+                                    m[0][index], m[1][index], m[2][index],
+                                    m[0][index_next_lat_plus_one],
+                                    m[1][index_next_lat_plus_one],
+                                    m[2][index_next_lat_plus_one],
+                                    m[0][index_next_lat],
+                                    m[1][index_next_lat],
+                                    m[2][index_next_lat]
+                        );
+                    }
                     // Don't draw the second triangle for the edge case at the
                     // end pole of the sphere
                     if (longitude != penultimate_longitude) {
@@ -573,7 +575,8 @@ void draw_line(screen s, color c0, color c1,
                struct phong_constants *phong_cons,
                plotting_mode plot_mode) {
     if (global_shade_mode == SHADE_PHONG && phong_cons == NULL) {
-        print_error("phong_cons is NULL!");
+        print_error("phong_cons is NULL! Phong shading is currently enabled."
+                    " Is surface rendering also enabled?");
         exit(EXIT_FAILURE);
     }
     double *n, *n0, *n1;

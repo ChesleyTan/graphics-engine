@@ -1,5 +1,6 @@
 OBJECTS= draw.o display.o matrix.o utils.o parser-old.o gmath.o symtab.o print_pcode.o stack.o exec.o
-DEBUG= -DDEBUG -g
+# Comment the two lines below to disable debug
+DEBUG= -DDEBUG -g -Og
 BISON_DEBUG= --debug
 WARNINGS_QUIET= -Wall -Wno-unused-variable -Wno-unused-function
 WARNINGS_ALL= -Wall -Wpadded
@@ -13,6 +14,9 @@ cli: build-repl clean
 
 build: $(OBJECTS) lex.yy.c y.tab.c y.tab.h
 	$(CC) $(DEBUG) -o mdl $(OBJECTS) lex.yy.c y.tab.c y.tab.h $(LIBS)
+
+build-fast: $(OBJECTS) lex.yy.c y.tab.c y.tab.h
+	$(CC) -Ofast -o mdl $(OBJECTS) lex.yy.c y.tab.c y.tab.h $(LIBS)
 
 build-parser: $(OBJECTS) main.o
 	$(CC) $(DEBUG) -o main $(OBJECTS) main.o $(LIBS)
