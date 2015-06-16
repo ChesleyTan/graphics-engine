@@ -287,6 +287,12 @@ screen exec(char return_screen) {
                 #endif
                 set_lighting_constants(current_op.op.constants.p->s.c);
                 break;
+            case FRAMES: // handled by parse_animation_cmds()
+                break;
+            case BASENAME: // handled by parse_animation_cmds()
+                break;
+            case VARY: // handled by parse_animation_cmds()
+                break;
             default:
                 print_error("This command has not been implemented yet.");
                 free_stack(s);

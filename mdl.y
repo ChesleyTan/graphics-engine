@@ -19,7 +19,8 @@ struct constants *c;
 struct command op[MAX_COMMANDS];
 struct matrix *m;
 int lastop = 0;
-int lineno = 0;
+int lineno = 0; // keeps track of line number in file
+int logical_lineno = 0; // keeps track of line number for logical operations
 char is_animation = FALSE;
 
 // Bison headers and variables
@@ -61,28 +62,28 @@ command:
   }
 
 | DRAW_MODE DRAW_TYPE {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode=DRAW_MODE;
   op[lastop].op.drawmode.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 
 | RENDER_MODE RENDER_TYPE {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode=RENDER_MODE;
   op[lastop].op.rendermode.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 
 | SHADE_MODE SHADING_TYPE {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SHADE_MODE;
   op[lastop].op.shading.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 
 | RESIZE NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode=RESIZE;
   op[lastop].op.resize.x = round($2);
   op[lastop].op.resize.y = round($3);
@@ -90,7 +91,7 @@ command:
 }
 
 | LIGHT NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode=LIGHT;
   op[lastop].op.light.coord[0] = $2;
   op[lastop].op.light.coord[1] = $3;
@@ -99,7 +100,7 @@ command:
 }
 
 | MOVE NUMBER NUMBER NUMBER STRING { 
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = MOVE;
   op[lastop].op.move.d[0] = $2;
   op[lastop].op.move.d[1] = $3;
@@ -110,7 +111,7 @@ command:
 }
 
 | MOVE NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = MOVE;
   op[lastop].op.move.d[0] = $2;
   op[lastop].op.move.d[1] = $3;
@@ -121,7 +122,7 @@ command:
 }
 
 | CONSTANTS STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   c = (struct constants *)malloc(sizeof(struct constants));
   c->iar = (int) $3;
   c->iag = (int) $4;
@@ -148,7 +149,7 @@ command:
 }
 
 | SAVE_COORDS STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SAVE_COORDS;
   m = new_matrix(4,4);
   op[lastop].op.save_coordinate_system.p = add_symbol($2,SYM_MATRIX,m);
@@ -156,7 +157,7 @@ command:
 }
 
 | CAMERA NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = CAMERA;
   op[lastop].op.camera.eye[0] = $2;
   op[lastop].op.camera.eye[1] = $3;
@@ -170,7 +171,7 @@ command:
 }
 
 | TEXTURE STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = TEXTURE;
   c = (struct constants *)malloc(sizeof(struct constants));
   op[lastop].op.texture.d0[0] = $3;
@@ -192,7 +193,7 @@ command:
 }
 
 | SPHERE NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $2;
   op[lastop].op.sphere.d[1] = $3;
@@ -206,7 +207,7 @@ command:
 }
 
 | SPHERE NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $2;
   op[lastop].op.sphere.d[1] = $3;
@@ -220,7 +221,7 @@ command:
 }
 
 | SPHERE NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $2;
   op[lastop].op.sphere.d[1] = $3;
@@ -235,7 +236,7 @@ command:
 }
 
 | SPHERE NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $2;
   op[lastop].op.sphere.d[1] = $3;
@@ -250,7 +251,7 @@ command:
 }
 
 | SPHERE STRING NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $3;
   op[lastop].op.sphere.d[1] = $4;
@@ -265,7 +266,7 @@ command:
 }
 
 | SPHERE STRING NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $3;
   op[lastop].op.sphere.d[1] = $4;
@@ -280,7 +281,7 @@ command:
 }
 
 | SPHERE STRING NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $3;
   op[lastop].op.sphere.d[1] = $4;
@@ -297,7 +298,7 @@ command:
 }
 
 | SPHERE STRING NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SPHERE;
   op[lastop].op.sphere.d[0] = $3;
   op[lastop].op.sphere.d[1] = $4;
@@ -314,7 +315,7 @@ command:
 }
 
 | TORUS NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $2;
   op[lastop].op.torus.d[1] = $3;
@@ -330,7 +331,7 @@ command:
 }
 
 | TORUS NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $2;
   op[lastop].op.torus.d[1] = $3;
@@ -346,7 +347,7 @@ command:
 }
 
 | TORUS NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $2;
   op[lastop].op.torus.d[1] = $3;
@@ -362,7 +363,7 @@ command:
 }
 
 | TORUS NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $2;
   op[lastop].op.torus.d[1] = $3;
@@ -378,7 +379,7 @@ command:
 }
 
 | TORUS STRING NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $3;
   op[lastop].op.torus.d[1] = $4;
@@ -395,7 +396,7 @@ command:
 }
 
 | TORUS STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $3;
   op[lastop].op.torus.d[1] = $4;
@@ -412,7 +413,7 @@ command:
 }
 
 | TORUS STRING NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $3;
   op[lastop].op.torus.d[1] = $4;
@@ -430,7 +431,7 @@ command:
 }
 
 | TORUS STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = TORUS;
   op[lastop].op.torus.d[0] = $3;
   op[lastop].op.torus.d[1] = $4;
@@ -448,7 +449,7 @@ command:
 }
 
 | BOX NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = BOX;
   op[lastop].op.box.d0[0] = $2;
   op[lastop].op.box.d0[1] = $3;
@@ -465,7 +466,7 @@ command:
 }
 
 | BOX NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = BOX;
   op[lastop].op.box.d0[0] = $2;
   op[lastop].op.box.d0[1] = $3;
@@ -483,7 +484,7 @@ command:
 }
 
 | BOX STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = BOX;
   op[lastop].op.box.d0[0] = $3;
   op[lastop].op.box.d0[1] = $4;
@@ -500,7 +501,7 @@ command:
 }
 
 | BOX STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = BOX;
   op[lastop].op.box.d0[0] = $3;
   op[lastop].op.box.d0[1] = $4;
@@ -519,7 +520,7 @@ command:
 }
 
 | LINE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $2;
   op[lastop].op.line.p0[1] = $3;
@@ -536,7 +537,7 @@ command:
 }
 
 | LINE NUMBER NUMBER NUMBER STRING NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $2;
   op[lastop].op.line.p0[1] = $3;
@@ -554,7 +555,7 @@ command:
 }
 
 | LINE NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $2;
   op[lastop].op.line.p0[1] = $3;
@@ -572,7 +573,7 @@ command:
 }
 
 | LINE NUMBER NUMBER NUMBER STRING NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $2;
   op[lastop].op.line.p0[1] = $3;
@@ -592,7 +593,7 @@ command:
 
 /* now do constants, and constants with the cs stuff */
 | LINE STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $3;
   op[lastop].op.line.p0[1] = $4;
@@ -610,7 +611,7 @@ command:
 }
 
 | LINE STRING NUMBER NUMBER NUMBER STRING NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $3;
   op[lastop].op.line.p0[1] = $4;
@@ -629,7 +630,7 @@ command:
 }
 
 | LINE STRING NUMBER NUMBER NUMBER NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $3;
   op[lastop].op.line.p0[1] = $4;
@@ -649,7 +650,7 @@ command:
 }
 
 | LINE STRING NUMBER NUMBER NUMBER STRING NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = LINE;
   op[lastop].op.line.p0[0] = $3;
   op[lastop].op.line.p0[1] = $4;
@@ -669,7 +670,7 @@ command:
 }
 
 | MESH CO STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = MESH;
   strcpy(op[lastop].op.mesh.name,$3);
   op[lastop].op.mesh.constants = NULL;
@@ -678,7 +679,7 @@ command:
 }
 
 | MESH STRING CO STRING { /* name and constants */
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = MESH;
   strcpy(op[lastop].op.mesh.name,$4);
   c = (struct constants *)malloc(sizeof(struct constants));
@@ -688,7 +689,7 @@ command:
 }
 
 | MESH STRING CO STRING STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = MESH;
   strcpy(op[lastop].op.mesh.name,$4);
   c = (struct constants *)malloc(sizeof(struct constants));
@@ -699,7 +700,7 @@ command:
 }
 
 | SET STRING NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SET;
   op[lastop].op.set.p = add_symbol($2,SYM_STRING,NULL);
   set_value(op[lastop].op.set.p,$3);
@@ -708,7 +709,7 @@ command:
 }
 
 | SCALE NUMBER NUMBER NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SCALE;
   op[lastop].op.scale.d[0] = $2;
   op[lastop].op.scale.d[1] = $3;
@@ -719,7 +720,7 @@ command:
 }
 
 | SCALE NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SCALE;
   op[lastop].op.scale.d[0] = $2;
   op[lastop].op.scale.d[1] = $3;
@@ -730,7 +731,7 @@ command:
 }
 
 | ROTATE STRING NUMBER STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = ROTATE;
   switch (*$2) {
     case 'x':
@@ -754,7 +755,7 @@ command:
 }
 
 | ROTATE STRING NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = ROTATE;
   switch (*$2)
     {
@@ -777,14 +778,14 @@ command:
 }
 
 | BASENAME STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   if (!is_animation) {
     print_error("Basename can only be set in an animation script. "
                 "The frames command must be the first command in the script!");
     free_table();
     exit(EXIT_FAILURE);
   }
-  else if (lineno != 2) {
+  else if (logical_lineno != 2) {
     print_error("Basename must be the second command in an animation script! ");
     free_table();
     exit(EXIT_FAILURE);
@@ -795,14 +796,14 @@ command:
 }
 
 | SAVE_KNOBS STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SAVE_KNOBS;
   op[lastop].op.save_knobs.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 
 | TWEEN NUMBER NUMBER STRING STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = TWEEN;
   op[lastop].op.tween.start_frame = $2;
   op[lastop].op.tween.end_frame = $3;
@@ -812,8 +813,8 @@ command:
 }
 
 | FRAMES NUMBER {
-  ++lineno;
-  if (lineno == 1) {
+  ++lineno; ++logical_lineno;
+  if (logical_lineno == 1) {
     is_animation = TRUE;
   }
   else {
@@ -833,7 +834,7 @@ command:
     free_table();
     exit(EXIT_FAILURE);
   }
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = VARY;
   op[lastop].op.vary.p = add_symbol($2,SYM_STRING,NULL);
   op[lastop].op.vary.start_frame = (int) $3;
@@ -844,58 +845,58 @@ command:
 }
 
 | PUSH {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = PUSH;
   ++lastop;
 }
 
 | GENERATE_RAYFILES {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = GENERATE_RAYFILES;
   ++lastop;
 }
 
 | POP {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = POP;
   ++lastop;
 }
 
 | SAVE STRING {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SAVE;
   op[lastop].op.save.p = add_symbol($2,SYM_STRING,NULL);
   ++lastop;
 }
 
 | SETKNOBS NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = SETKNOBS;
   op[lastop].op.setknobs.value = $2;
   ++lastop;
 }
 
 | FOCAL NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = FOCAL;
   op[lastop].op.focal.value = $2;
   ++lastop;
 }
 
 | DISPLAY {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = DISPLAY;
   ++lastop;
 }
 
 | WEB {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = WEB;
   ++lastop;
 }
 
 | AMBIENT NUMBER NUMBER NUMBER {
-  ++lineno;
+  ++lineno; ++logical_lineno;
   op[lastop].opcode = AMBIENT;
   op[lastop].op.ambient.c[0] = $2;
   op[lastop].op.ambient.c[1] = $3;
