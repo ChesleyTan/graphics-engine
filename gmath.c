@@ -42,9 +42,16 @@ double *scalar_mult(double *vector, double scalar) {
         vector[2] *= scalar;
     }
     else {
-        vector[0] = DBL_MAX;
-        vector[1] = DBL_MAX;
-        vector[2] = DBL_MAX;
+        if (vector[0] == 0 && vector[1] == 0 && vector[2] == 0) {
+            vector[0] = 0;
+            vector[1] = 0;
+            vector[2] = 0;
+        }
+        else {
+            vector[0] = DBL_MAX;
+            vector[1] = DBL_MAX;
+            vector[2] = DBL_MAX;
+        }
     }
     return vector;
 }
