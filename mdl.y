@@ -89,7 +89,6 @@ command:
   ++lastop;
 }
 
-    /* TODO allow knobs to set light position */
 | LIGHT NUMBER NUMBER NUMBER {
   ++lineno;
   op[lastop].opcode=LIGHT;
@@ -954,8 +953,12 @@ int main(int argc, char *argv[]) {
     }
 
     free_table();
+    fclose(yyin);
     return 0;    
 }
 
 // TODO dynamically allocated op array size
+// TODO allow objects (e.g. spheres) be drawn using specified constants
+// TODO allow knobs to set light position
+// TODO implement reading a mesh from a file
 /* ============= END SUBROUTINES ============= */

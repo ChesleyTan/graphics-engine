@@ -286,8 +286,14 @@ screen exec(char return_screen) {
                 print_debug("Got constants command");
                 #endif
                 set_lighting_constants(current_op.op.constants.p->s.c);
-
+                break;
             default:
+                print_error("This command has not been implemented yet.");
+                free_stack(s);
+                free_matrix(trans_mat);
+                free_matrix(pts);
+                free_all();
+                exit(EXIT_FAILURE);
                 break;
         }
     }

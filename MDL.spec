@@ -4,17 +4,8 @@ General Notes:
 Items seperated by | means you must choose one of them in an input line.
 Items enclosed in [] are optional.
 
-For example, rotate is specified as:
-rotate x|y|z degress [knob]
-
-The following would be valid rotations:
-rotate x 20
-rotate y 23 k1
-
-While the following would be invalid:
-rotate x|y 20
-rotate x y 33
-rotate x 33 [k1]
+You may also want (or need) to reference exec.c and mdl.y for available commands
+and their syntax.
 ==============================
 
 Stack Commands
@@ -35,9 +26,7 @@ All transformations will operate as follows:
 
 move x y z [knob]           - translate
 scale x y z [knob]          - scale
-rotate x|y|z degrees [knob] - rotate (NOTE: you can only
-                              specify one axis, x, y, or z per
-                              rotation instruction)
+rotate x|y|z degrees [knob] - rotate
 
 Image creation
 --------------
@@ -70,11 +59,7 @@ mesh [constants] :filename [coord_system]
 Knobs/Animation
 ---------------
 basename name  
-	- sets the base filename to save under.
-	  This should be used in conjunction with
-	  either vary or tween. For example,
-	  if "name" is R, then tween or vary might
-	  save the images r01.miff, r02.miff etc.
+	- sets the base filename for animation frame filenames.
 
 set knobname value
 	- sets a knobs value (in the symbol table).
@@ -88,36 +73,32 @@ tween start_frame end_frame knoblist0 knoblist1
 	  as the base filename. It will start from
 	  start_frame and end at end_frame and
 	  interpolate the image using knoblist0 as
-	  the starting configuration and knoblist 2
+	  the starting configuration and knoblist2
 	  as the ending configuration.
 
 frames num_frames 
-	- How many frames to generate all together.
+	- specifies how many frames to generate altogether.
 
 vary knob start_frame end_frame start_val end_val
     - vary a knob from start_val to end_val over
       the course of start_frame to end_frame
 
-setknobs value 
+setknobs value
 	- set all the knobs to value
 
 Lighting
 --------
-light r g b x y z
-	- creates a "light" data structure with rgb values
-	  r,g,b at location x,y,z.
-	  This is inserted into the symbol table.
+light x y z
+    - sets the location of the light source to (x, y, z)
+    - only one light source is currently supported
 
 ambient r g b
 	- specifies how much ambient light is in the scene
 
-constants name kar kdr ksr kag kdg ksg kab kdb ksb [r] [g] [b]
-	- saves a set of lighting components in the
-	  symbol table under "name."
-	- r g b intensities can be specified. If not specified, they 
-	  default to 0.
+constants name iar iag iab kar kag kab idr idg idb kdr kdg kdb isr isg isb ksr ksg ksb spec_expt
+	- saves a set of lighting components in the symbol table under "name."
 
-shading wireframe|flat|goroud|phong|raytrace
+shade-mode flat|goroud|phong|raytrace
     - set the shading mode
 
 Miscellaneous
@@ -149,7 +130,11 @@ display
 	- display the current image on the screen
 
 draw-mode lines|polygons
-	- Set the rendering mode to either draw the points as lines or as polygons
+	- Set the drawing mode to either draw the points as lines or as polygons
+
+render-mode wireframe|surface
+	- Set the rendering mode to either render the points as a wireframe or as
+	  filled surfaces
 
 resize x y
 	- Resize the screen that points are drawn on to x by y pixels
