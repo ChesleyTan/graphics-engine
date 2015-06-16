@@ -57,6 +57,23 @@ resulting frames to a `frames/` folder in the current directory.
 =========================================*/
 void exec_animation();
 
+/*======== void apply_trans_and_draw() ==========
+Inputs:     struct matrix **tmp
+            struct stack *s
+            screen *_screen
+            color *c
+            struct matrix **pts
+Returns:
+Applies the topmost transformation matrix in the stack to the `pts` matrix and
+draws the resulting points to the screen. Automatically handles freeing and
+reallocating the `pts` matrix.
+===============================================*/
+void apply_trans_and_draw(struct matrix **tmp,
+                          struct stack *s,
+                          screen *_screen,
+                          color *c,
+                          struct matrix **pts);
+
 /*======== void get_vary_knobs_tail() ==========
 Inputs:     int frame
 Returns:

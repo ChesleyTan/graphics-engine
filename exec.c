@@ -147,11 +147,7 @@ screen exec(char return_screen) {
                         current_op.op.box.d1[1],
                         current_op.op.box.d1[2],
                         global_draw_mode);
-                tmp = matrix_mult(s->data[s->top], pts);
-                draw(_screen, tmp, c);
-                free_matrix(tmp);
-                free_matrix(pts);
-                pts = new_matrix(4, 4);
+                apply_trans_and_draw(&tmp, s, &_screen, &c, &pts);
                 break;
             case SPHERE:
                 #ifdef DEBUG
@@ -164,11 +160,7 @@ screen exec(char return_screen) {
                            current_op.op.sphere.d[2],
                            current_op.op.sphere.r,
                            global_draw_mode);
-                tmp = matrix_mult(s->data[s->top], pts);
-                draw(_screen, tmp, c);
-                free_matrix(tmp);
-                free_matrix(pts);
-                pts = new_matrix(4, 4);
+                apply_trans_and_draw(&tmp, s, &_screen, &c, &pts);
                 break;
             case TORUS:
                 #ifdef DEBUG
@@ -182,11 +174,7 @@ screen exec(char return_screen) {
                           current_op.op.torus.circle_radius,
                           current_op.op.torus.torus_radius,
                           global_draw_mode);
-                tmp = matrix_mult(s->data[s->top], pts);
-                draw(_screen, tmp, c);
-                free_matrix(tmp);
-                free_matrix(pts);
-                pts = new_matrix(4, 4);
+                apply_trans_and_draw(&tmp, s, &_screen, &c, &pts);
                 break;
             case LINE:
                 #ifdef DEBUG
@@ -199,11 +187,7 @@ screen exec(char return_screen) {
                          current_op.op.line.p1[0],
                          current_op.op.line.p1[1],
                          current_op.op.line.p1[2]);
-                tmp = matrix_mult(s->data[s->top], pts);
-                draw(_screen, tmp, c);
-                free_matrix(tmp);
-                free_matrix(pts);
-                pts = new_matrix(4, 4);
+                apply_trans_and_draw(&tmp, s, &_screen, &c, &pts);
                 break;
             case SAVE:
                 #ifdef DEBUG
@@ -288,10 +272,43 @@ screen exec(char return_screen) {
                 set_lighting_constants(current_op.op.constants.p->s.c);
                 break;
             case FRAMES: // handled by parse_animation_cmds()
+                #ifdef DEBUG
+                print_debug("Got frames command");
+                #endif
                 break;
             case BASENAME: // handled by parse_animation_cmds()
+                #ifdef DEBUG
+                print_debug("Got basename command");
+                #endif
                 break;
             case VARY: // handled by parse_animation_cmds()
+                #ifdef DEBUG
+                print_debug("Got vary command");
+                #endif
+                break;
+            case MESH: ; // Obligatory empty statement
+                #ifdef DEBUG
+                print_debug("Got mesh command");
+                #endif
+                char line[255];
+                FILE *mesh_fd = fopen(current_op.op.mesh.name, "r");
+                if (mesh_fd == NULL) {
+                    print_error("Mesh file not found.");
+                    free_stack(s);
+                    free_matrix(trans_mat);
+                    free_matrix(pts);
+                    free_all();
+                    exit(EXIT_FAILURE);
+                }
+                char *ret;
+                while ((ret = fgets(line, sizeof(char) * sizeof(line), mesh_fd))) {
+                    double x, y, z;
+                    int ret = sscanf(line, "vertex %lf %lf %lf", &x, &y, &z);
+                    if (ret == 3) {
+                        add_point(pts, x, y, z);
+                    }
+                }
+                apply_trans_and_draw(&tmp, s, &_screen, &c, &pts);
                 break;
             default:
                 print_error("This command has not been implemented yet.");
@@ -443,6 +460,14 @@ void exec_animation() {
     }
     free_vary_knobs();
     return;
+}
+
+void apply_trans_and_draw(struct matrix **tmp, struct stack *s, screen *_screen, color *c, struct matrix **pts) {
+    *tmp = matrix_mult(s->data[s->top], *pts);
+    draw(*_screen, *tmp, *c);
+    free_matrix(*tmp);
+    free_matrix(*pts);
+    *pts = new_matrix(4, 4);
 }
 
 struct vary_node *get_vary_knobs_tail(int frame) {

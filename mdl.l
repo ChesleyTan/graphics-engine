@@ -90,7 +90,7 @@ WHITESPACE [ \t\n]
 
 ":" { return CO; }
 
-[a-zA-Z][\.a-zA-Z0-9_]* {
+[a-zA-Z][-\.a-zA-Z0-9_]* {
     strncpy(yylval.string, yytext, sizeof(yylval.string) - 1);
     yylval.string[sizeof(yylval.string) - 1] = '\0';
     return STRING;

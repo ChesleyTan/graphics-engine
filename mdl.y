@@ -671,6 +671,16 @@ command:
   ++lastop;
 }
 
+| MESH STRING {
+  ++lineno; ++logical_lineno;
+  op[lastop].opcode = MESH;
+  strncpy(op[lastop].op.mesh.name, $2, sizeof(op[lastop].op.mesh.name));
+  op[lastop].op.mesh.name[sizeof(op[lastop].op.mesh.name)] = '\0';
+  op[lastop].op.mesh.constants = NULL;
+  op[lastop].op.mesh.cs = NULL;
+  ++lastop;
+}
+
 | MESH CO STRING {
   ++lineno; ++logical_lineno;
   op[lastop].opcode = MESH;
