@@ -1,0 +1,22 @@
+// vim: ft=c
+/* initial setup */
+//frames 30
+//basename frame
+draw-mode polygons
+render-mode surface
+shade-mode phong
+constants global 80 80 80 1.0 1.0 1.0 50 50 50 1.0 1.0 1.0 100 100 100 1.0 1.0 1.0 3
+light 0.0 0.0 -1.0
+resize 500 700
+
+/* script */
+push
+/* body */
+push
+move 250 50 0
+rotate x -90
+rotate z 0 rknob
+scale 5 5 5
+mesh Onix-ascii.stl
+//vary rknob 0 29 0 360
+display
