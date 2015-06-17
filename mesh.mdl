@@ -1,7 +1,7 @@
 // vim: ft=c
 /* initial setup */
-//frames 30
-//basename frame
+frames 120
+basename frame
 draw-mode polygons
 render-mode surface
 shade-mode phong
@@ -13,10 +13,10 @@ resize 500 700
 push
 /* body */
 push
-move 250 50 0
-rotate x -90
+move 250 150 0
+rotate x -70
 rotate z 0 rknob
 scale 5 5 5
 mesh Onix-ascii.stl
-//vary rknob 0 29 0 360
-display
+vary rknob 0 119 0 360
+//display
