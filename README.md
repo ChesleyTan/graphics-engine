@@ -7,3 +7,8 @@
 ## Authors
 This was written by Chesley Tan, with some base code provided by Jon Alf
 Dyrland-Weaver, computer science teacher at Stuyvesant High School.
+
+## Examples
+![Demo](https://raw.githubusercontent.com/ChesleyTan/graphics-engine/master/frames/anim-demo.gif)
+![Demo](https://raw.githubusercontent.com/ChesleyTan/graphics-engine/master/frames/darunia.gif)
+![Demo](https://raw.githubusercontent.com/ChesleyTan/graphics-engine/master/frames/onix.gif)
